@@ -1,0 +1,210 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L power:+12V #PWR0101
+U 1 1 5EF50BBD
+P 1050 1900
+F 0 "#PWR0101" H 1050 1750 50  0001 C CNN
+F 1 "+12V" H 1065 2073 50  0000 C CNN
+F 2 "" H 1050 1900 50  0001 C CNN
+F 3 "" H 1050 1900 50  0001 C CNN
+	1    1050 1900
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0102
+U 1 1 5EF514FE
+P 1050 2850
+F 0 "#PWR0102" H 1050 2600 50  0001 C CNN
+F 1 "GND" H 1055 2677 50  0000 C CNN
+F 2 "" H 1050 2850 50  0001 C CNN
+F 3 "" H 1050 2850 50  0001 C CNN
+	1    1050 2850
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R2
+U 1 1 5EF4FF77
+P 1650 2600
+F 0 "R2" H 1720 2646 50  0000 L CNN
+F 1 "4.8K" H 1720 2555 50  0000 L CNN
+F 2 "" V 1580 2600 50  0001 C CNN
+F 3 "~" H 1650 2600 50  0001 C CNN
+	1    1650 2600
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R1
+U 1 1 5EF4F75C
+P 1650 2200
+F 0 "R1" H 1720 2246 50  0000 L CNN
+F 1 "30K" H 1720 2155 50  0000 L CNN
+F 2 "" V 1580 2200 50  0001 C CNN
+F 3 "~" H 1650 2200 50  0001 C CNN
+	1    1650 2200
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1650 2750 1050 2750
+Wire Wire Line
+	1050 2750 1050 2850
+Wire Wire Line
+	1650 2050 1650 1950
+Wire Wire Line
+	1650 1950 1050 1950
+Wire Wire Line
+	1050 1950 1050 1900
+$Comp
+L Connector:Conn_01x04_Male J0
+U 1 1 5EF52D26
+P 3700 3700
+F 0 "J0" V 3854 3412 50  0000 R CNN
+F 1 "Conn_01x04_Male" V 3763 3412 50  0000 R CNN
+F 2 "" H 3700 3700 50  0001 C CNN
+F 3 "~" H 3700 3700 50  0001 C CNN
+	1    3700 3700
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Connector:Conn_01x10_Female J1
+U 1 1 5EF599ED
+P 2500 1450
+F 0 "J1" V 2665 1380 50  0000 C CNN
+F 1 "Out_To_ADS1115" V 2574 1380 50  0000 C CNN
+F 2 "" H 2500 1450 50  0001 C CNN
+F 3 "~" H 2500 1450 50  0001 C CNN
+	1    2500 1450
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Connector:Conn_01x10_Female J2
+U 1 1 5EF51474
+P 3700 1450
+F 0 "J2" V 3865 1380 50  0000 C CNN
+F 1 "Out_To_MPU9250" V 3774 1380 50  0000 C CNN
+F 2 "" H 3700 1450 50  0001 C CNN
+F 3 "~" H 3700 1450 50  0001 C CNN
+	1    3700 1450
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	1650 2350 1650 2400
+Wire Wire Line
+	2200 1650 2200 2750
+Wire Wire Line
+	2200 2750 1650 2750
+Connection ~ 1650 2750
+Wire Wire Line
+	3400 1650 3400 1800
+Wire Wire Line
+	3400 2750 2200 2750
+Connection ~ 2200 2750
+Wire Wire Line
+	3600 3200 3600 3500
+Wire Wire Line
+	2100 1650 2100 3200
+Wire Wire Line
+	2100 3200 3300 3200
+Connection ~ 3300 3200
+Wire Wire Line
+	3300 3200 3600 3200
+Wire Wire Line
+	2300 1650 2300 3100
+Wire Wire Line
+	2300 3100 3500 3100
+Wire Wire Line
+	3800 3100 3800 3500
+Wire Wire Line
+	3700 3500 3700 2750
+Wire Wire Line
+	3700 2750 3400 2750
+Connection ~ 3400 2750
+Connection ~ 3500 3100
+Wire Wire Line
+	3500 3100 3800 3100
+Wire Wire Line
+	2400 3000 3600 3000
+Wire Wire Line
+	3900 3000 3900 3500
+Connection ~ 3600 3000
+Wire Wire Line
+	3600 3000 3900 3000
+Wire Wire Line
+	3900 1650 3900 1800
+Wire Wire Line
+	3900 1800 3400 1800
+Connection ~ 3400 1800
+Wire Wire Line
+	4200 1650 4200 1800
+Wire Wire Line
+	4200 1800 3900 1800
+Connection ~ 3900 1800
+Wire Wire Line
+	2400 1650 2400 1900
+Wire Wire Line
+	2500 1650 2500 1900
+Wire Wire Line
+	2500 1900 2400 1900
+Connection ~ 2400 1900
+Wire Wire Line
+	2400 1900 2400 3000
+Wire Wire Line
+	2700 1650 2700 2400
+Wire Wire Line
+	2700 2400 1650 2400
+Connection ~ 1650 2400
+Wire Wire Line
+	1650 2400 1650 2450
+Wire Wire Line
+	3400 1800 3400 2750
+Wire Wire Line
+	3500 1650 3500 3100
+Wire Wire Line
+	3600 1650 3600 3000
+Wire Wire Line
+	3300 1650 3300 3200
+$Comp
+L Connector:Conn_01x04_Male J3
+U 1 1 5EF5E73A
+P 4600 1400
+F 0 "J3" V 4662 1544 50  0000 L CNN
+F 1 "Conn_01x04_Male" V 4753 1544 50  0000 L CNN
+F 2 "" H 4600 1400 50  0001 C CNN
+F 3 "~" H 4600 1400 50  0001 C CNN
+	1    4600 1400
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	4400 1600 4400 3200
+Wire Wire Line
+	4400 3200 3600 3200
+Connection ~ 3600 3200
+Wire Wire Line
+	3800 3100 4500 3100
+Wire Wire Line
+	4500 3100 4500 1600
+Connection ~ 3800 3100
+Wire Wire Line
+	3900 3000 4700 3000
+Wire Wire Line
+	4700 3000 4700 1600
+Connection ~ 3900 3000
+Wire Wire Line
+	4600 1600 4600 2750
+Wire Wire Line
+	4600 2750 3700 2750
+Connection ~ 3700 2750
+$EndSCHEMATC

@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name Adafruit_ADS1115_16Bit_I2C_ADC)(type KiCad)(uri "$(KIPRJMOD)/Adafruit_ADS1115_16Bit_I2C_ADC.pretty")(options "")(descr ""))
+)
