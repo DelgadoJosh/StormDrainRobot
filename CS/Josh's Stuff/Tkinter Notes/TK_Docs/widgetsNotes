@@ -1,0 +1,17 @@
+Tkinter Widgets
+
+Frame = Container
+Label = Text box
+Button = Button
+CheckButton = Checkbox. Can be checked on or off (boolean)
+RadioButton = One of a range will be selected
+Entry = text entry for a single line
+ComboBox = dropdown for many items
+
+ListBox = 
+ScrollBar = 
+SizeGrip = 
+Text = 
+Progressbar = 
+Scale = scroller for selecting numerical value
+Spinbox = 
