@@ -108,9 +108,13 @@ def create_shape_file_dialog():
 
 
 
-
+# Dummy file for testing.
 # Opens up a window
 root = tk.Tk() 
+
+lbl_dud = tk.Label(text="UCF Team Black.\nPlaceholder GUI goes here", 
+  width=50, height=20, fg="white", bg="black")
+lbl_dud.pack()
 
 btn_test = tk.Button(text="Create Shape File", command=create_shape_file_dialog)
 btn_test.pack() 
