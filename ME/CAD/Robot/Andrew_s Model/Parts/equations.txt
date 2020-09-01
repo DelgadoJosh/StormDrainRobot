@@ -1,0 +1,7 @@
+﻿"L"= 500
+"W"= 260
+"H"= 110
+"Compartment Width"= 100
+"T"= 4.7625 * 2 / 3
+"Inside Fillet Radius"= 10
+"Hole"=15
