@@ -101,6 +101,25 @@ https://github.com/dusty-nv/jetson-inference/blob/master/docs/building-repo-2.md
 
 
 
+=== Git ===
+git add -i   // makes interactive prompt
+a    // for adding untracked
+*    // for all
+q    // to quit
+
+git commit
+Type in the stuff
+Esc
+:wq   // save (write), then quit
+
+
+
+Weird Pip error
+https://stackoverflow.com/questions/53204916/what-is-the-meaning-of-failed-building-wheel-for-x-in-pip-install
+
+
+
+
 TODO: 
 Possibly try to undo the .bashrc script to not add the PATH
 Reinstall pip
