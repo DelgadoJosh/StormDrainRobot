@@ -1,0 +1,131 @@
+Random dependencies
+
+
+
+=== Installing pip ===
+
+https://pip.pypa.io/en/stable/installing/
+
+Download get-pip.py from the website
+
+Run "python get-pip.py"
+
+
+Or:
+sudo apt-get install python-pip
+
+
+Now you have to add it to path
+
+https://www.howtogeek.com/658904/how-to-add-a-directory-to-your-path-in-linux/
+
+/home/teamblack/.local/bin
+
+export PATH=/home/teamblack/.local/bin:$PATH
+
+export PATH=/usr/.local/bin:$PATH
+
+
+Actually: Go to the root directory (open new terminal)
+gedit .bashrc
+
+Add to the end:
+# Add python pip scripts to the path
+export PATH=/home/teamblack/.local/bin:$PATH
+
+Then run ". .bashrc" or open new terminal
+echo $PATH // checks it
+
+or just run pip
+
+
+
+
+=== INSTALLING TKINTER ===
+https://tkdocs.com/tutorial/install.html
+
+sudo apt-get install python3-tk
+
+
+
+ln -s ~/Desktop/TeamBlack/Github\ Repo/StormDrainRobot ~/Name_Of_Symbolic_Link
+
+ln -s PathToFile pathSymbolic
+
+
+
+
+
+To test:
+python3
+import tkinter
+tkinter._test()
+
+
+
+What linux version?
+uname -a
+lsb_release -a
+
+
+
+Install .deb
+sudo dpkg -i package_file.deb
+
+
+Pre-req for .deb
+https://askubuntu.com/questions/276700/error-package-architecture-amd64-does-not-match-system-i386
+sudo dpkg --add-architecture amd64
+
+dpkg --print-architecture
+dpkg --print-foreign-architectures
+
+
+
+GNOME desktop vs xfce4
+
+Use "top" to run the task manager to check how resources are being used
+
+
+Jetson Nano wifi
+https://www.jetsonhacks.com/2019/04/08/jetson-nano-intel-wifi-and-bluetooth/
+
+
+
+=== Tutorial ===
+
+Github - Jetson nano
+https://github.com/dusty-nv/jetson-inference
+Tutorial
+https://github.com/dusty-nv/jetson-inference/blob/master/docs/building-repo-2.md
+
+
+
+=== Git ===
+git add -i   // makes interactive prompt
+a    // for adding untracked
+*    // for all
+q    // to quit
+
+git commit
+Type in the stuff
+Esc
+:wq   // save (write), then quit
+
+
+
+Weird Pip error
+https://stackoverflow.com/questions/53204916/what-is-the-meaning-of-failed-building-wheel-for-x-in-pip-install
+
+
+
+
+TODO: 
+Possibly try to undo the .bashrc script to not add the PATH
+Reinstall pip
+Possibly check if that fixes pip
+
+
+
+
+

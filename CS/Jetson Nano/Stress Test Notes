@@ -1,0 +1,78 @@
+Stress Testing Notes
+
+Password for TeamBlack: password
+	No, I'm not kidding.
+
+https://www.cnx-software.com/2019/12/09/testing-nvidia-jetson-nano-developer-kit-with-and-without-fan/
+
+Nvidia account
+team email
+NvidiaJetson123
+
+
+To paste into terminal, do shift+control+v
+
+
+Check Temp:
+sudo ./sbc-bench.sh -m
+
+
+CPU Test: Low Power
+sudo nvpmodel -m 1
+sudo ./sbc-bench.sh
+
+
+CPU Test: High Power
+sudo nvpmodel -m 0
+sudo nvpmodel -q
+sudo ./sbc-bench.sh
+
+
+CPU Test - FFT (Raspberry Pi Foundation Method)
+stress-ng --cpu 0 --cpu-method fft
+
+GPU Test - Glxgears
+glxgears -fullscreen
+
+
+
+Turn on camera
+nvgstcapture-1.0 --orientation 2
+
+
+Install GStreamer
+https://docs.nvidia.com/jetson/l4t/index.html#page/Tegra%20Linux%20Driver%20Package%20Development%20Guide/accelerated_gstreamer.html
+
+sudo add-apt-repository universe
+sudo add-apt-repository multiverse
+sudo apt-get update
+sudo apt-get install gstreamer1.0-tools gstreamer1.0-alsa \
+  gstreamer1.0-plugins-base gstreamer1.0-plugins-good \
+  gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly \
+  gstreamer1.0-libav
+sudo apt-get install libgstreamer1.0-dev \
+  libgstreamer-plugins-base1.0-dev \
+  libgstreamer-plugins-good1.0-dev \
+  libgstreamer-plugins-bad1.0-dev
+
+
+If camera not detected:
+Make sure you reboot with it connected (not hot-swappable)
+the blue tape should be pointing towards the edge of the jetson, not towards the center
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
