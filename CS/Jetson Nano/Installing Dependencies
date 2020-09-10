@@ -114,6 +114,28 @@ Esc
 
 
 
+
+=== Jetson Tutorial ===
+cd jetson-inference/build/aarch64/bin
+
+./imagenet-console.py --network=googlenet images/orange_0.jpg output_0.jpg
+./imagenet.py images/strawberry_0.jpg output_1.jpg
+./imagenet.py --network=resnet-18 jellyfish.mkv jellyfish_resnet18.mkv
+
+./imagenet.py images/AsphaltCrack.jpeg output_crack_googlenet.jpg
+./imagenet.py --network=resnet-18 images/AsphaltCrack.jpeg output_crack.jpg
+
+To display the video feed:
+./imagenet.py csi://0
+
+
+Output images are typically in
+jetson-inference/build/aarch64/bin
+or that /images.
+
+
+
+
 Weird Pip error
 https://stackoverflow.com/questions/53204916/what-is-the-meaning-of-failed-building-wheel-for-x-in-pip-install
 
