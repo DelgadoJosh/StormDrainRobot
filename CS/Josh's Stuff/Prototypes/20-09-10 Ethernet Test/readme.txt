@@ -15,3 +15,8 @@ In another terminal:
     Then the server will send it back
   
   To exit the script, type "quit" into the client.
+
+
+Useful links:
+https://realpython.com/python-sockets/
+
