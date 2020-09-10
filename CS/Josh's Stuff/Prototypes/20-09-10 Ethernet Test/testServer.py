@@ -18,4 +18,14 @@ s = Server()
 print("Server initiated. Waiting for connection.")
 s.WaitForConnection()
 
+# Wait for the data, and print it.
+while True:
+  data = s.Client.recv(1024) # Receive the data from the client
+  print(data)
+  
+  if not data:
+    break 
+
+  s.Client.sendall(data) # Ping back the received data
+
 

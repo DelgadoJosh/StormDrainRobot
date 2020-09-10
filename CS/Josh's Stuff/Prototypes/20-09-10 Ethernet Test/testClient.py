@@ -7,6 +7,26 @@ class Client():
     self.s = socket.socket() 
     self.s.connect(Address)
 
+  def send(self, message):
+    self.s.send(message)
+
 print("Initiating Client")
 c = Client()
-print("Client Initiated")
+print("Client Connected")
+
+# Continually attempt to send messages to the server
+# If "quit" is sent, then it will send an empty string
+#   which turns off the server.
+while True:
+  command = input()
+
+  if (command == "quit"):
+    break
+
+  c.send(command.encode('utf-8')) # Note how it must be a byte stream.
+
+  data = c.s.recv(1024)
+  print("Received:", repr(data))
+
+
+
