@@ -4,6 +4,6 @@
 "H"= 110
 "Compartment Width"= 90
 "T"= 4.7625 * 2 / 3
-"Inside Fillet Radius"= 10
+"Inside Fillet Radius"= 5.55625
 "Hole"=15
 "Wheel to Wall"= 40
