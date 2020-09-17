@@ -1,29 +1,11 @@
 import socket
 import cv2 
-# import base64
 import struct
 import pickle
-# import numpy as np
 
 
 # Create the client to receive video
 
-# class Viewer():
-#   port = 5000
-#   def __init__(self, Address=('', port), MaxClient=1):
-#     self.s = socket.socket()
-#     self.s.bind(Address)
-#     self.s.listen(MaxClient)
-  
-#   def WaitForConnection(self):
-#     self.Client, self.Adr = (self.s.accept())
-#     print(f"Got a connection from: {str(self.Client)}.")
-
-# v = Viewer()
-# print ("Viewer Initiated. Waiting for connection.")
-# v.WaitForConnection()
-
-# size_of_data = 4096
 payload_size = struct.calcsize("L")
 
 class Client_Viewer():
@@ -65,15 +47,6 @@ while True:
   cv2.imshow("Frame", frame)
   cv2.waitKey(1)
 
-  # data = c.s.recv(size_of_data)
-
-  # img = base64.b64decode(data) 
-
-  # # npimg = np.fromstring(img, dtype=np.uint8) 
-  # npimg = np.frombuffer(img, dtype=np.uint8)
-  # source = cv2.imdecode(npimg, 1)
-  # cv2.imshow("Stream", source) 
-  # cv2.waitKey(1)
 
 
 

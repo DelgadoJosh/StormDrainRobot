@@ -14,25 +14,8 @@ import cv2
 import socket
 import pickle
 import struct
-# import base64
 
 port = 5000
-
-
-# class Video_Sender():
-#   ip_address = "localhost"
-#   port = 5000
-#   def __init__(self, Address=(ip_address, port)):
-#     self.s = socket.socket()
-#     self.s.connect(Address) 
-  
-#   def send(self, message):
-#     self.s.send(message)
-
-# print("Initiating Video Sender")
-# vs = Video_Sender()
-# print("Video Sender connected")
-
 
 class Video_Sender():
   ip_address = ""
@@ -56,13 +39,6 @@ camera = cv2.VideoCapture(0)
 # Loop to send the video, frame by frame.
 while True: 
   grabbed, frame = camera.read()  # Grab the current frame
-  # frame = cv2.resize(frame, (640, 480)) # Resize the frame
-  # encoded, buffer = cv2.imencode('.jpg', frame) 
-
-  # jpg_as_text = base64.b64encode(buffer) # This may not be necessary
-
-  # # Send the data. Use sendAll to guarantee it's sent at the same time
-  # s.Client.sendall(jpg_as_text)
 
   # Serialize frame
   data = pickle.dumps(frame) 
