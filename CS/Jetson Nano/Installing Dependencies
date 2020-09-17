@@ -140,12 +140,26 @@ Weird Pip error
 https://stackoverflow.com/questions/53204916/what-is-the-meaning-of-failed-building-wheel-for-x-in-pip-install
 
 
+Dependency error libnss3 (vs code install)
+https://superuser.com/questions/709524/google-chrome-dependency-error-libnss3
+
+
+
+sudo apt install path_to_deb_file
+sudo dpkg -i path_to_deb_file
+
+
+sudo dpkg -i anydesk_6.0.1-1_amd64.deb
+
+
 
 
 TODO: 
 Possibly try to undo the .bashrc script to not add the PATH
 Reinstall pip
 Possibly check if that fixes pip
+Fix installing .deb files
+
 
 
 
