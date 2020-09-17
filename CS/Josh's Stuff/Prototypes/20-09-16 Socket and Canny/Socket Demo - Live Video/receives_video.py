@@ -3,7 +3,6 @@ import cv2
 import struct
 import pickle
 
-
 # Create the client to receive video
 
 payload_size = struct.calcsize("L")
