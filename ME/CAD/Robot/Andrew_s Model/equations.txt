@@ -1,0 +1,9 @@
+﻿"W"= 255
+"L"= 385
+"Offset"= 30
+"H"= 110
+"Compartment Width"= 80
+"T"= 4.7625 * 2 / 3
+"Inside Fillet Radius"= 5.55625
+"Hole"=15
+"Wheel to Wall"= 50
