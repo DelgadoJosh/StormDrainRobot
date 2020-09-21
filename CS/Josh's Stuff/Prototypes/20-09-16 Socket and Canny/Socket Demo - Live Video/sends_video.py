@@ -38,14 +38,20 @@ camera = cv2.VideoCapture(0)
 
 # Loop to send the video, frame by frame.
 while True: 
-  grabbed, frame = camera.read()  # Grab the current frame
+  try:
+    grabbed, frame = camera.read()  # Grab the current frame
 
-  # Serialize frame
-  data = pickle.dumps(frame) 
+    # Serialize frame
+    data = pickle.dumps(frame) 
 
-  # Send message length first
-  message_size = struct.pack("L", len(data))
+    # Send message length first
+    message_size = struct.pack("L", len(data))
 
-  # Then data
-  s.Client.sendall(message_size + data)
+    # Then data
+    s.Client.sendall(message_size + data)
+  
+  except KeyboardInterrupt:
+    camera.release()
+    cv2.destroyAllWindows()
+    break
 
