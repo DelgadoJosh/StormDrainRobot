@@ -1,5 +1,5 @@
 ﻿"W"= 255
-"L"= 385
+"L"= 400
 "Offset"= 30
 "H"= 110
 "Compartment Width"= 80
