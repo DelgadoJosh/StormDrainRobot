@@ -1,4 +1,5 @@
-﻿"W"= 255
+﻿"lk"= 
+"W"= 255
 "L"= 400
 "Offset"= 30
 "H"= 110
@@ -6,4 +7,4 @@
 "T"= 4.7625 * 2 / 3
 "Inside Fillet Radius"= 5.55625
 "Hole"=15
-"Wheel to Wall"= 50
+"Wheel to Wall"= 43
