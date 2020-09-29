@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/home/teamblack/Desktop/TeamBlack/Github Repo/StormDrainRobot/CS/Ruman's Stuff/servos.py", line 10, in <module>
+    servo1 = GPIO.PWM(11,50) # pin 11 for servo1, pulse 50Hz
+  File "/usr/lib/python2.7/dist-packages/Jetson/GPIO/gpio.py", line 587, in __init__
+    self._ch_info = _channel_to_info(channel, need_pwm=True)
+  File "/usr/lib/python2.7/dist-packages/Jetson/GPIO/gpio.py", line 115, in _channel_to_info
+    return _channel_to_info_lookup(channel, need_gpio, need_pwm)
+  File "/usr/lib/python2.7/dist-packages/Jetson/GPIO/gpio.py", line 109, in _channel_to_info_lookup
+    raise ValueError("Channel %s is not a PWM" % str(channel))
+ValueError: Channel 11 is not a PWM
+Exception AttributeError: "'PWM' object has no attribute '_ch_info'" in <bound method PWM.__del__ of <Jetson.GPIO.gpio.PWM object at 0x7fa1b755d0>> ignored
