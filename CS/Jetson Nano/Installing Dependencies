@@ -153,6 +153,32 @@ sudo dpkg -i anydesk_6.0.1-1_amd64.deb
 
 
 
+Funky error:
+dpkg: dependency problems prevent configuration of anydesk:amd64:
+ anydesk:amd64 depends on libc6 (>= 2.7).
+ anydesk:amd64 depends on libgcc1 (>= 1:4.1.1).
+ anydesk:amd64 depends on libglib2.0-0 (>= 2.16.0).
+ anydesk:amd64 depends on libgtk2.0-0 (>= 2.20.1).
+ anydesk:amd64 depends on libstdc++6 (>= 4.1.1).
+ anydesk:amd64 depends on libx11-6.
+ anydesk:amd64 depends on libxcb-shm0.
+ anydesk:amd64 depends on libxcb1.
+ anydesk:amd64 depends on libpango-1.0-0.
+ anydesk:amd64 depends on libcairo2.
+ anydesk:amd64 depends on libxrandr2 (>= 1.3).
+ anydesk:amd64 depends on libx11-xcb1.
+ anydesk:amd64 depends on libxtst6.
+ anydesk:amd64 depends on libxfixes3.
+ anydesk:amd64 depends on libxdamage1.
+ anydesk:amd64 depends on libxkbfile1.
+ anydesk:amd64 depends on libgtkglext1.
+
+sudo apt-get install libc6
+libc6 is already the newest version (2.27-3ubuntu1.2).
+
+
+
+
 
 TODO: 
 Possibly try to undo the .bashrc script to not add the PATH
