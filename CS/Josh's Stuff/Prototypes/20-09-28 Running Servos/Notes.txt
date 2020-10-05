@@ -9,3 +9,28 @@ Traceback (most recent call last):
     raise ValueError("Channel %s is not a PWM" % str(channel))
 ValueError: Channel 11 is not a PWM
 Exception AttributeError: "'PWM' object has no attribute '_ch_info'" in <bound method PWM.__del__ of <Jetson.GPIO.gpio.PWM object at 0x7fa1b755d0>> ignored
+
+
+https://www.youtube.com/watch?v=8YKAtpPSEOk
+
+sudo apt-get install python3-pip
+sudo pip3 install adafruit-circuitpython-servokit
+sudo pip3 install Jetson.GPIO
+
+// Adding permissions to access gpio folders & pins
+// substitute teamblack for your username
+sudo usermod -aG i2c teamblack
+
+// Make new group
+sudo groupadd -f -r gpio 
+
+// Add myself to the group
+sudo usermod -a -G gpio teamblack
+
+
+sudo cp /opt/nvidia/jetson-gpio/etc/99-gpio.rules /etc/udev/rules.d/
+sudo udevadm control --reload-rules && sudo udevadm trigger
+
+sudo reboot now
+
+
