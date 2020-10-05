@@ -50,3 +50,10 @@ Should output:
 
 Then start scripting
 
+Make sure to use python3 to run the program
+
+
+
+
+https://learn.adafruit.com/16-channel-pwm-servo-driver?view=all
+
