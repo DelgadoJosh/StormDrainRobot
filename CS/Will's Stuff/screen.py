@@ -2,19 +2,30 @@ import numpy as np
 import cv2
 import tkinter as tk
 from PIL import Image, ImageTk
+from datetime import datetime
 
 #Set up GUI
 window = tk.Tk()  #Makes main window
 window.wm_title("Senior Design")
 window.config(background="#FFFFFF")
 
+# Must be defined above Graphics window
+def screenshot():
+    now = str(datetime.now())
+    now = now.replace(" ", "__")
+    now = now.replace(":", "-")
+    now = now.replace(".", "__")
+    now = now + '.png'
+    print("Screenshot taken: "+now)
+    img.save(now)
+
 #Graphics window
 imageFrame = tk.Frame(window, width=600, height=500)
 imageFrame.grid(row=0, column=0, padx=10, pady=2)
 b1 = tk.Button(window, text ="TEST")
 b2 = tk.Button(window, text="QUIT", fg="red", command=quit)
-b3 = tk.Button(window, text="button 3")
-b4 = tk.Button(window, text="button 4")
+b3 = tk.Button(window, text="Screenshot", command=screenshot)
+b4 = tk.Button(window, text="placeholder")
 
 b1.grid(row=1, column=0)
 b2.grid(row=0, column=1)
@@ -64,15 +75,28 @@ lmain = tk.Label(imageFrame)
 lmain.grid(row=0, column=0)
 # cap = cv2.VideoCapture(0)
 cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
+
+# Output Video, file type can be changed in the future
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+out = cv2.VideoWriter('output.avi', fourcc, 20.0, (640, 480))
+
+# Init img for screenshot function
+img = None
+
 def show_frame():
     _, frame = cap.read()
     frame = cv2.flip(frame, 1)
     cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+    # set img to global to capture in screenshot function
+    global img
     img = Image.fromarray(cv2image)
     imgtk = ImageTk.PhotoImage(image=img)
+    # Saves video to directory, unsure as why it is slowed down
+    # more likely an issue with lmain.after(1, show_frame) not sure how to fix
+    out.write(frame)
     lmain.imgtk = imgtk
     lmain.configure(image=imgtk)
-    lmain.after(10, show_frame) 
+    lmain.after(1, show_frame) 
 
 
 
