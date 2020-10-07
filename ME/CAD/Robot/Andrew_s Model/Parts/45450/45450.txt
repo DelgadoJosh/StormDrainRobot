@@ -1,0 +1,13 @@
+﻿"Symbol";"Value";"Unit";
+"TraceParts.PartNumber";"30-13042018-064081";"";
+"REFERENCE";"45450";"";
+"TraceParts.PartTitle";"Cable glands, M25-M63";"";
+"TraceParts.InstanceId";"30-13042018-064081CH7QNTHJ6CCJFFCAR6OC8A0Y8";"";
+"DESIGN";"KVT-ER 25  / Cable gland, split, with locknut, IP68, M25 x 1,5";"";
+"TraceParts.PartStatus";"Published";"";
+"TraceParts.PartStatusId";"";"";
+"SUPPLIER";"icotek GmbH";"";
+"TraceParts.PartVersion";"1.0.7";"";
+"TRACEPARTS";"TRACEPARTS";"";
+"TraceParts.PartLanguage";"en";"";
+"TraceParts.ClassPath";"ICOTEK:/F_ICOTEK/30-13042018-064081";"";
