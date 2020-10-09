@@ -2,27 +2,49 @@ import numpy as np
 import cv2
 import tkinter as tk
 from PIL import Image, ImageTk
+from datetime import datetime
 
 #Set up GUI
 window = tk.Tk()  #Makes main window
+window.geometry("1800x1000")
 window.wm_title("Senior Design")
-window.config(background="#FFFFFF")
+#window.config(background="#FFFFFF")
+
+# Must be defined above Graphics window
+def screenshot():
+    now = datetime.now()
+    now = str(now)
+    now = now.replace(" ", "__")
+    now = now.replace(":", "-")
+    now = now.replace(".", "__")
+    now = now + '.png'
+    print("Screenshot taken: "+now)
+    img.save(f"./screenshots/{now}")
+
+def testFunction():
+    distance = "1000.5"
+    GPS = "1234 Latitude, 4567 Longitude"
+    battery = "79"
+    orientation = "North"
+    return f"Distance: {distance} \n GPS: {GPS} \n Battery: {battery} \n Orientation: {orientation}"
 
 #Graphics window
-imageFrame = tk.Frame(window, width=600, height=500)
-imageFrame.grid(row=0, column=0, padx=10, pady=2)
-b1 = tk.Button(window, text ="TEST")
-b2 = tk.Button(window, text="QUIT", fg="red", command=quit)
-b3 = tk.Button(window, text="button 3")
-b4 = tk.Button(window, text="button 4")
+imageFrame = tk.Frame(window, width=1280, height=720)
+imageFrame.grid(row=1, column=0, columnspan = 5, rowspan = 5, padx=10, pady=10)
 
-b1.grid(row=1, column=0)
-b2.grid(row=0, column=1)
-b3.grid(row=2, column=2)
-b4.grid(row=1, column=1)
+tk_object_height = '5'
+tk_object_width = '30'
 
-
-
+b1 = tk.Button(window, text="stuff", bg='red', height=tk_object_height, width=tk_object_width, font=("Helvetica", 16))
+b2 = tk.Button(window, text="QUIT", fg="red", bg='blue', height=tk_object_height, width=tk_object_width, command=quit, font=("Helvetica", 16))
+b3 = tk.Button(window, text="Screenshot", bg='green', height=tk_object_height, width=tk_object_width, command=screenshot, font=("Helvetica", 16))
+b4 = tk.Button(window, text="placeholder", bg='yellow', height=tk_object_height, width=tk_object_width, font=("Helvetica", 16))
+data = tk.Label(window, bg='cyan', text=testFunction(), font=("Helvetica", 16))
+data.grid(row=1, column=6)
+b1.grid(row=2, column=6)
+b2.grid(row=3, column=6)
+b3.grid(row=4, column=6)
+b4.grid(row=5, column=6)
 
 # Based off of https://github.com/JetsonHacksNano/CSI-Camera/blob/master/simple_camera.py
 # This returns a GStreamer pipeline for capturing from the CSI camera
@@ -62,24 +84,38 @@ def gstreamer_pipeline(
 #   Capture video frames
 lmain = tk.Label(imageFrame)
 lmain.grid(row=0, column=0)
-# cap = cv2.VideoCapture(0)
-cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
+cap = cv2.VideoCapture(0)
+#cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
+# Set to 1280x720
+cap.set(3, 1280)
+cap.set(4, 720)
+
+# Output Video, file type can be changed in future
+fourcc = cv2.VideoWriter_fourcc(*'XVID')
+out = cv2.VideoWriter('./videos/output.avi', fourcc, 20.0, (1280, 720))
+
+# Init img for screenshot function
+img = None
+
 def show_frame():
     _, frame = cap.read()
     frame = cv2.flip(frame, 1)
     cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
-    img = Image.fromarray(cv2image)
+    # set img to global to capture in screenshot function
+    global img
+    #img = Image.fromarray(cv2image)
+    height, width, layers = cv2image.shape
+    resize = cv2.resize(cv2image, (1280, 720))
+    img = Image.fromarray(resize)
     imgtk = ImageTk.PhotoImage(image=img)
+    # Saves video to directory, unsure as why it is sped up
+    # more likely an issue with lmain.after(1, show_frame) not sure how to fix
+    # RECORD
+    out.write(frame)
     lmain.imgtk = imgtk
     lmain.configure(image=imgtk)
-    lmain.after(10, show_frame) 
-
-
-
-
-
-
-
+    lmain.after(1, show_frame) 
+    
 
 
 
