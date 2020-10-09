@@ -1,3 +1,4 @@
+# https://www.youtube.com/watch?v=8YKAtpPSEOk
 from adafruit_servokit import ServoKit 
 import time # For pausing
 
