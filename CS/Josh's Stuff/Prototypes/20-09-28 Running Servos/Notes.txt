@@ -57,3 +57,16 @@ Make sure to use python3 to run the program
 
 https://learn.adafruit.com/16-channel-pwm-servo-driver?view=all
 
+
+
+
+
+Connecting Wires:
+
+Jetson Nano                 |  Servo Board
+6 (3rd row, 2nd col) Ground | GND 
+5 (3rd row, 1st col)        | SCL 
+3 (2nd row, 1st col)        | SDA
+1 (1st col, 1st col) 3V3    | VCC
+2 (1st col, 2nd col) 5V     | V+  // makes jetson nano power the servo
+
