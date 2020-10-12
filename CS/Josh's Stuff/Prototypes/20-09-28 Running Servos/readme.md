@@ -13,3 +13,10 @@ sudo cp /opt/nvidia/jetson-gpio/etc/99-gpio.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules && sudo udevadm trigger
 
 sudo reboot now
+
+
+
+
+sudo i2cdetect -y -r 1
+
+
