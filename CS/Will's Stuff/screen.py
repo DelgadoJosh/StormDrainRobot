@@ -35,16 +35,16 @@ imageFrame.grid(row=1, column=0, columnspan = 5, rowspan = 5, padx=10, pady=10)
 tk_object_height = '5'
 tk_object_width = '30'
 
-b1 = tk.Button(window, text="stuff", bg='red', height=tk_object_height, width=tk_object_width, font=("Helvetica", 16))
-b2 = tk.Button(window, text="QUIT", fg="red", bg='blue', height=tk_object_height, width=tk_object_width, command=quit, font=("Helvetica", 16))
-b3 = tk.Button(window, text="Screenshot", bg='green', height=tk_object_height, width=tk_object_width, command=screenshot, font=("Helvetica", 16))
-b4 = tk.Button(window, text="placeholder", bg='yellow', height=tk_object_height, width=tk_object_width, font=("Helvetica", 16))
-data = tk.Label(window, bg='cyan', text=testFunction(), font=("Helvetica", 16))
+b1 = tk.Button(window, text="Stuff", bg='gray', height=tk_object_height, width=tk_object_width, font=("Helvetica", 16))
+b2 = tk.Button(window, text="Quit", bg='gray', height=tk_object_height, width=tk_object_width, command=quit, font=("Helvetica", 16))
+b3 = tk.Button(window, text="Screenshot", bg='gray', height=tk_object_height, width=tk_object_width, command=screenshot, font=("Helvetica", 16))
+b4 = tk.Button(window, text="placeholder", bg='gray', height=tk_object_height, width=tk_object_width, font=("Helvetica", 16))
+data = tk.Label(window, bg='gray', height=tk_object_height, width=tk_object_width, text=testFunction(), font=("Helvetica", 16))
 data.grid(row=1, column=6)
 b1.grid(row=2, column=6)
-b2.grid(row=3, column=6)
+b4.grid(row=3, column=6)
 b3.grid(row=4, column=6)
-b4.grid(row=5, column=6)
+b2.grid(row=5, column=6)
 
 # Based off of https://github.com/JetsonHacksNano/CSI-Camera/blob/master/simple_camera.py
 # This returns a GStreamer pipeline for capturing from the CSI camera
