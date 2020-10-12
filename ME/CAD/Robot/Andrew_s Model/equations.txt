@@ -4,6 +4,6 @@
 "T"= 4.7625 * 2 / 3mm
 "Inside Fillet Radius"= 5.55625mm
 "Hole"=25mm
-"Offset"= 16mm
+"Offset"= 18mm
 "Compartment Width1"= 90mm
 "Compartment Width2"= 90mm
