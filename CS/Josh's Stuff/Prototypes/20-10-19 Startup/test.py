@@ -23,12 +23,21 @@ Then run it with:
 Or
 ./Desktop/TeamBlack/Github\ Repo/StormDrainRobot/CS/Josh\'s\ Stuff/Prototypes/20-10-19\ Startup/test_script.sh
 
+./~/Desktop/TeamBlack/Github\ Repo/StormDrainRobot/CS/Josh\'s\ Stuff/Prototypes/20-10-19\ Startup/test_script.sh
+
+
+bash ~/Desktop/TeamBlack/Github\ Repo/StormDrainRobot/CS/Josh\'s\ Stuff/Prototypes/20-10-19\ Startup/test_script.sh
+
 
 Use to add startup tasks
 crontab -e
 
 
 @reboot /path/to/script
+
+Rather:
+@reboot bash ~/Desktop/...
+
 
 Change editor:
 select-editor
@@ -45,7 +54,7 @@ Then it'll run command as root
 Then make sure it's runnable
 sudo chmod a+x /etc/rc.local
 
-
+Maybe /etc/rc.d/rc.local
 
 
 
