@@ -26,6 +26,8 @@ while True:
   if not data:
     break 
 
-  s.Client.sendall(data) # Ping back the received data
-
-
+  if (data == b"ping"):
+    s.Client.sendall("Pong!".encode('utf-8'))
+    print("Test")
+  else: 
+    s.Client.sendall(data) # Ping back the received data
