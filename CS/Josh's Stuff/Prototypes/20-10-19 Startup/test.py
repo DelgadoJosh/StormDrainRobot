@@ -35,6 +35,19 @@ select-editor
 
 
 
+Alternatively:
+
+sudo nano /etc/rc.local
+
+Top line = #!/bin/bash
+Then it'll run command as root
+
+Then make sure it's runnable
+sudo chmod a+x /etc/rc.local
+
+
+
+
 
 """
 
