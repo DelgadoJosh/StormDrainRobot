@@ -1,0 +1,34 @@
+Grab packages
+sudo apt install isc-dhcp-server
+
+
+sudo nano /etc/default/isc-dhcp-server 
+
+
+sudo nano /etc/dhcp/dhcpd.conf
+
+Make it authoritative
+
+
+
+
+
+Run server from system boot
+sudo service isc-dhcp-server.service start 
+sudo service isc-dhcp-server.service enable
+
+sudo service isc-dhcp-server start 
+sudo service isc-dhcp-server enable 
+
+
+Rather:  (For SystemD)
+sudo systemctl start isc-dhcp-server.service 
+sudo systemctl enable isc-dhcp-server.service
+
+
+Firewall
+sudo ufw allow 67/udp
+sudo ufw reload
+sudo ufw show
+
+

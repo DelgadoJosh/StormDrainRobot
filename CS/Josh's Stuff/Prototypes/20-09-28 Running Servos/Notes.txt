@@ -28,6 +28,7 @@ sudo groupadd -f -r gpio
 sudo usermod -a -G gpio teamblack
 
 
+// This below step is no longer necessary on Jetpack 4.3+ (aka the version we're using lol)
 sudo cp /opt/nvidia/jetson-gpio/etc/99-gpio.rules /etc/udev/rules.d/
 sudo udevadm control --reload-rules && sudo udevadm trigger
 
