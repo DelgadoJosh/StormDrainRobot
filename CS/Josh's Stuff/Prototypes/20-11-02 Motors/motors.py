@@ -18,9 +18,9 @@ pca.frequency = 100
 GPIO.setwarnings(False)
 
 MAX = 0xFFFF
-motor_pwm_pins = [1, 2]
+motor_pwm_pins = [1, 2, 3, 4]
 # GPIO.TEGRA_SOC = the mode for defining the pins
-motor_dir_pins = ["GPIO_PZ0", "GPIO_PE6"]
+motor_dir_pins = ["GPIO_PZ0", "GPIO_PE6", "SPI1_SCK", "SPI1_MISO"] # 31=GPIO_PZ0,  33=GPIO_PE6, SPI1_SCK=23, SPI1_MISO=21
 
 def setup():
     for i in range(len(motor_dir_pins)):
