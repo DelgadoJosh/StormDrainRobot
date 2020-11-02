@@ -48,25 +48,65 @@ pca = PCA9685(i2c_bus)
 pca.frequency = 60
 
 
-import RPi.GPIO as GPIO  # Yes, that's RPi, as in Raspberry Pi. Jetson doesn't support PWM.
+# import RPi.GPIO as GPIO  # Yes, that's RPi, as in Raspberry Pi. Jetson doesn't support PWM.
 
-print(f"GPIO Mode {GPIO.getmode()}")
-print(f"GPIO.Board = {GPIO.BOARD}")
-print(f"GPIO.BCM = {GPIO.BCM}")
-# Board Numbering Scheme
-# GPIO.setmode(GPIO.BOARD)
-
-
-# Disable warning from GPIO
-GPIO.setwarnings(False)
-
-leftMotor_DIR_pin = 31
-GPIO.setup(leftMotor_DIR_pin, GPIO.OUT)
-GPIO.output(leftMotor_DIR_pin, False)
+# print(f"GPIO Mode {GPIO.getmode()}")
+# print(f"GPIO.Board = {GPIO.BOARD}")
+# print(f"GPIO.BCM = {GPIO.BCM}")
+# # Board Numbering Scheme
+# # GPIO.setmode(GPIO.BOARD)
 
 
-print("Increasing to 50% speed")
+# # Disable warning from GPIO
+# GPIO.setwarnings(False)
+
+# leftMotor_DIR_pin = 31
+# GPIO.setup(leftMotor_DIR_pin, GPIO.OUT)
+# # GPIO.output(leftMotor_DIR_pin, False)
+# GPIO.output(leftMotor_DIR_pin, GPIO.HIGH) 
+
+# Completely on
+# pca.channels[2].duty_cycle = 0xFFFF 
+
+# print("Increasing to 50% speed")
+# pca.channels[1].duty_cycle = 0x7FFF
+# time.sleep(1)
+# print("Setting speed to 0")
+# pca.channels[1].duty_cycle = 0x0
+
+
+# https://circuitpython.readthedocs.io/projects/pca9685/en/latest/api.html
+
+# Locked anti-phase!
+MAX = 0xFFFF
+pca.channels[2].duty_cycle = 0xFFFF # Set the PWM pin to HIGH to activate locked antiphase
+
+print("increasing to 100% speed in one dir")
+pca.channels[1].duty_cycle = 0x0
+time.sleep(3)
+
+print("decreasing to 0% speed (neutral)")
 pca.channels[1].duty_cycle = 0x7FFF
 time.sleep(1)
-print("Setting speed to 0")
+
+print("Resetting to 0")
 pca.channels[1].duty_cycle = 0x0
+pca.channels[2].duty_cycle = 0x0
+
+
+# Sign-magnitude!
+# dir_pin = 2
+# pwm_pin = 1
+# pca.channels[dir_pin].duty_cycle = MAX
+
+# print("increasing speed to 50%")
+# pca.channels[pwm_pin].duty_cycle = int(MAX*0.5)
+# time.sleep(3)
+
+# print("setting speed to 0")
+# pca.channels[pwm_pin].duty_cycle = 0x0
+# time.sleep(2) 
+
+
+
+

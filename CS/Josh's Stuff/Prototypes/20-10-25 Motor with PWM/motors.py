@@ -106,8 +106,9 @@ leftMotor_PWM_pin = 33 #35  # I believe 33, 35 are pwm pins
 GPIO.setup(leftMotor_DIR_pin, GPIO.OUT)
 # io.setup(rightMotor_DIR_pin	, io.OUT)
 
-GPIO.output(leftMotor_DIR_pin, False)
-# GPIO.output(leftMotor_DIR_pin, GPIO.LOW)
+# GPIO.output(leftMotor_DIR_pin, False)
+GPIO.output(leftMotor_DIR_pin, GPIO.LOW)
+# GPIO.output(leftMotor_DIR_pin, GPIO.HIGH)
 
 
 # Here we configure the GPIO settings for the left and right motors spinning speed. 
