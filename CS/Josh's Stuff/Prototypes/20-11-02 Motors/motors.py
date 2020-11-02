@@ -41,22 +41,29 @@ def setSpeed(percentSpeed):
 
 setup()
 
-setSpeed(0.5)
-time.sleep(3)
+# setSpeed(0.5)
+# time.sleep(3)
 
-setSpeed(1)
-time.sleep(3)
+# setSpeed(1)
+# time.sleep(3)
 
-setSpeed(-1)
-time.sleep(3)
+# setSpeed(-1)
+# time.sleep(3)
 
-setSpeed(0)
-time.sleep(3)
+# setSpeed(0)
+# time.sleep(3)
 
-setSpeed(-1)
-time.sleep(3)
+# setSpeed(-1)
+# time.sleep(3)
 
-setSpeed(0)
+# setSpeed(0)
+
+
+# setSpeed(1)
+# time.sleep(15)
+
+# setSpeed(0)
+
 
 print("Cleaning it up")
 
