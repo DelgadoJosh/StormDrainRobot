@@ -46,6 +46,25 @@ import time
 i2c_bus = busio.I2C(SCL, SDA) 
 pca = PCA9685(i2c_bus) 
 pca.frequency = 60
+
+
+import RPi.GPIO as GPIO  # Yes, that's RPi, as in Raspberry Pi. Jetson doesn't support PWM.
+
+print(f"GPIO Mode {GPIO.getmode()}")
+print(f"GPIO.Board = {GPIO.BOARD}")
+print(f"GPIO.BCM = {GPIO.BCM}")
+# Board Numbering Scheme
+# GPIO.setmode(GPIO.BOARD)
+
+
+# Disable warning from GPIO
+GPIO.setwarnings(False)
+
+leftMotor_DIR_pin = 31
+GPIO.setup(leftMotor_DIR_pin, GPIO.OUT)
+GPIO.output(leftMotor_DIR_pin, False)
+
+
 print("Increasing to 50% speed")
 pca.channels[1].duty_cycle = 0x7FFF
 time.sleep(1)
