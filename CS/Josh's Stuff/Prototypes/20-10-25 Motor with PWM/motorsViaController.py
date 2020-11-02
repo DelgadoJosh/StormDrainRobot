@@ -109,4 +109,5 @@ pca.channels[2].duty_cycle = 0x0
 
 
 
-
+# Another useful tutorial that may fix this
+# https://github.com/adafruit/Adafruit_Python_PCA9685/blob/master/examples/simpletest.py
