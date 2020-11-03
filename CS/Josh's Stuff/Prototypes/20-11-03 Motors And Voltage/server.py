@@ -20,7 +20,7 @@ class Server():
 
 s = Server() 
 print("Server initiated. Waiting for connection.") 
-s.waitForConnection() 
+s.WaitForConnection() 
 
 motors.setup()
 
