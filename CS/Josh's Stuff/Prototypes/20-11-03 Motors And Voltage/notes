@@ -1,0 +1,24 @@
+0.1 0.1
+Going right
+
+-0.1 -0.1
+Going right
+
+0.1 -0.1
+Fighting itself Inward
+
+-0.1 0.1
+Fighting itself both going away from robot
+
+UPDATED:
+No longer fighting itself, the GPIO pin for dir was just wrongly wired lol
+Because i did [31, 33, 23, 21] instead of [31, 33, 21, 23] lmao
+So to fix it you either change the code or the pins on the Jetson
+
+TODO:
+Update the GUI to reflect that
+Also work on the fact counter clockwise != clockwise. So for left or right you swap the speed
+Also I had swapped left vs right 
+
+
+
