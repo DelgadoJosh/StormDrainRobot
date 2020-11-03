@@ -19,11 +19,11 @@ GPIO.setwarnings(False)
 
 MAX = 0xFFFF
 motor_pwm_pins = [1, 2, 3, 4]
-motor_dir_pins = ["GPIO_PZ0", "GPIO_PE6", "SPI1_SCK", "SPI1_MISO"] # 31=GPIO_PZ0,  33=GPIO_PE6, SPI1_SCK=23, SPI1_MISO=21
+motor_dir_pins = ["GPIO_PZ0", "GPIO_PE6", "SPI1_MISO", "SPI1_SCK"] # 31=GPIO_PZ0,  33=GPIO_PE6, SPI1_SCK=23, SPI1_MISO=21
     # GPIO.TEGRA_SOC = the mode for defining the pins
 
-left_indices = [0, 2]
-right_indices = [1, 3]
+left_indices = [1, 3]
+right_indices = [0, 2]
 
 def setup():
     for i in range(len(motor_dir_pins)):
@@ -41,6 +41,8 @@ def setSpeed(index, percentSpeed):
     GPIO.output(motor_dir_pins[index], sign)
 
 def setLeftSpeed(percentSpeed):
+     # Because clockwise on the left != forwards, we reverse it
+    percentSpeed = -percentSpeed
     for i in left_indices:
         setSpeed(i, percentSpeed)
 
