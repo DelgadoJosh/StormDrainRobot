@@ -33,7 +33,7 @@ while True:
         break
 
     # Move the motors
-    splitData = utils.parse(data)
+    splitData = utils.parse(utils.cleanup(str(data)))
     if splitData is not None:
         motors.setLeftSpeed(splitData[0])
         motors.setRightSpeed(splitData[1])
