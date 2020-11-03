@@ -21,16 +21,18 @@ def isInMargins(parsedData):
 def parse(data):
     # This will take the data, split it into a pair of elements needed
     # Returns None if it's not properly parsed
-    splitData = data.partition(DELIMITER)
+    splitData = data.split(DELIMITER)
 
-    if (isFormatted(data)):
+    if (isFormatted(splitData)):
         parsedData = []
-        parsedData[0] = float(splitData[0]) 
-        parsedData[1] = float(splitData[1])
+        parsedData.append(float(splitData[0])) 
+        parsedData.append(float(splitData[1]))
         if (isInMargins(parsedData)):
             return parsedData 
         else:
+            # print(f"{data} has bad values")
             return None
     else:
+        # print(f"{data} is not formatted")
         return None
 
