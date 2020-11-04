@@ -7,7 +7,8 @@ from datetime import datetime
 
 #Set up GUI
 window = tk.Tk()  #Makes main window
-window.geometry("1800x1000")
+# window.geometry("1800x1000")
+window.geometry("1700x750")
 window.wm_title("Senior Design")
 window.configure(bg="gray17")
 #window.config(background="#FFFFFF")
