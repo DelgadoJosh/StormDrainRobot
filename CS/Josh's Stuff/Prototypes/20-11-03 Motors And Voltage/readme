@@ -1,0 +1,12 @@
+To run:
+
+On Jetson:
+python3 server.py
+
+
+On Laptop:
+python3 client.py 
+
+To quit from laptop, have to ctrl+c on prompt 
+
+After the client has quit, the jetson has to be rebooted to restart the script
