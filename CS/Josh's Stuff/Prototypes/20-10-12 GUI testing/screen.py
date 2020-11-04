@@ -4,6 +4,7 @@ import cv2
 import tkinter as tk
 from PIL import Image, ImageTk
 from datetime import datetime
+import shapeFile_Frontend
 
 #Set up GUI
 window = tk.Tk()  #Makes main window
@@ -39,7 +40,7 @@ tk_object_height = '2' #'5'
 tk_object_width = '30'
 
 button_bg_color='gray30' # "darkgray"
-b1 = tk.Button(window, text="Export .Shape File", bg=button_bg_color, height=tk_object_height, width=tk_object_width, font=("Helvetica", 16))
+b1 = tk.Button(window, text="Export .Shape File", bg=button_bg_color, height=tk_object_height, width=tk_object_width, font=("Helvetica", 16), command=shapeFile_Frontend.create_shape_file_dialog)
 b2 = tk.Button(window, text="Quit", bg=button_bg_color, height=tk_object_height, width=tk_object_width, command=quit, font=("Helvetica", 16))
 b3 = tk.Button(window, text="Screenshot", bg=button_bg_color, height=tk_object_height, width=tk_object_width, command=screenshot, font=("Helvetica", 16))
 # b4 = tk.Button(window, text="", bg='gray', height=tk_object_height, width=tk_object_width, font=("Helvetica", 16))
