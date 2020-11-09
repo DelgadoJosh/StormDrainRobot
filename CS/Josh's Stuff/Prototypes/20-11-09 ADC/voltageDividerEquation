@@ -1,0 +1,11 @@
+ADC needs common ground with the Jetson & battery
+
+Vout = Vin*R2/(R1 + R2)
+
+Vin = Vout * (R1 + R2)/R2
+
+2.8V is the highest expected
+    -> Use PGA (Gain) of 1
+
+
+
