@@ -22,8 +22,8 @@ ads.gain = 1
 R1 = 30000
 R2 = 7500
 
-print("Initializing Temp/Humidity Sensor")
-sensor = adafruit_si7021.SI7021(i2c)
+# print("Initializing Temp/Humidity Sensor")
+# sensor = adafruit_si7021.SI7021(i2c)
 
 
 
@@ -43,25 +43,18 @@ def setSpeed(percentSpeed):
     speed = abs( int(MAX*percentSpeed) )
     pca.channels[TEST_PIN].duty_cycle = speed
 
-setSpeed(0)
-time.sleep(3)
 
-setSpeed(0.5)
-time.sleep(3)
-
-setSpeed(1)
-time.sleep(3)
-
-setSpeed(0)
-
-
-
+percent = 10
 while(True):
+    # Motor Controller
+    setSpeed((percent%100) / 100.0)
+    percent += 10
+
     # Temperature to Humdiity
-    print(f"Temperature: {sensor.temperature} | Humidity: {sensor.relative_humidity}")
+    # print(f"Temperature: {sensor.temperature} | Humidity: {sensor.relative_humidity}")
 
     # Analog to Digital Converter
-    chan = AnalogIn(ads, ADS.P1)
+    chan = AnalogIn(ads, ADS.P0)
 
     Vout = chan.voltage 
     Vin = Vout * (R1 + R2)/R2 
