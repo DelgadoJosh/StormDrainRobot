@@ -11,9 +11,9 @@ import threading
 payload_size = struct.calcsize("Q")
 
 class Client_Viewer():
-  # ip_address = "10.0.0.2"
-  ip_address = "localhost"
-  port = 4000
+  ip_address = "10.0.0.2"
+#   ip_address = "localhost"
+  port = 5000
   def __init__(self, Address=(ip_address, port)):
     self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     self.s.connect(Address)
@@ -26,19 +26,32 @@ c = Client_Viewer()
 print("Client Connected to the Server")
 
 data = b''
+stopFlag = False
 
 # Loop for receiving input, the input is added to a queue
 def getInput():
+    global stopFlag
     while True:
-        command = input()
+        try:
+            command = input()
 
-        c.send(command.encode('utf-8'))
+            if command == 'quit':
+                stopFlag = True
+                return
+
+            c.send(command.encode('utf-8'))
+        except KeyboardInterrupt:
+            stopFlag = True
+            return
 
 def showVideo():
     # Loop for receiving images
+    global stopFlag
     data = b''
     while True:
         try:
+            if stopFlag:
+                return
             # Retrieve message size
             while len(data) < payload_size:
                 data += c.s.recv(4096)
