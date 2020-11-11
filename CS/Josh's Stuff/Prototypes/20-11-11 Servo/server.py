@@ -8,7 +8,7 @@ import lights
 import utils
 
 class Server():
-    port = 4000
+    port = 5000
     def __init__(self , Address=('', port), MaxClient=1):
         self.s = socket.socket() 
         self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
