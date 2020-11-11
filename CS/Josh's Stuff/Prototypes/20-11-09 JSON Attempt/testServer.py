@@ -77,19 +77,24 @@ def gstreamer_pipeline(
 
 
 # Initialize camera
-camera = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
-# camera = cv2.VideoCapture(4)  
+# camera = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
+camera = cv2.VideoCapture(0)  
 
 # Loop to send the video, frame by frame.
 while True: 
   try:
     grabbed, frame = camera.read()  # Grab the current frame
 
+    grabbed, buffer = cv2.imencode('.jpg', frame)
+
     # Serialize frame
     # data = pickle.dumps(frame) 
     jsonData = {}
-    jsonData['img'] = base64.encodebytes(frame).decode("utf-8")
-    
+    # Encodes the image as a byte, then as a string to store in a json object
+    # jsonData['img'] = base64.b64encode(buffer).decode("utf-8")
+    # Encodes the json as a string, which is then encoded into bytes
+    # data = json.dumps(jsonData).encode('utf-8')
+    data = base64.b64encode(frame)
 
     # Send message length first
     message_size = struct.pack("L", len(data))

@@ -42,7 +42,13 @@ while True:
     data = data[msg_size:]
 
     # Extract frame
-    frame = pickle.loads(frame_data)
+    # frame = pickle.loads(frame_data)
+    # frame = base64.b64decode(frame_data) # If doing the raw encoded data
+
+    # If going the json route
+    jsonData = json.load(data.decode('utc-8'))
+    frame = base64.b64decode(jsonData['img'])
+    
 
     # Display
     cv2.imshow("Frame", frame)
