@@ -4,15 +4,14 @@ import os
 import random 
 
 # Importing custom libraries
-import motors 
-import servo
 import lights
 import utils
 
 class Server():
-    port = 5000
+    port = 4000
     def __init__(self , Address=('', port), MaxClient=1):
         self.s = socket.socket() 
+        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind(Address)
         self.s.listen(MaxClient) 
     
@@ -24,7 +23,7 @@ s = Server()
 print("Server initiated. Waiting for connection.") 
 s.WaitForConnection() 
 
-motors.setup()
+# motors.setup()
 
 # Wait for the data, print it, and send it back
 while True:

@@ -11,6 +11,7 @@ class Server():
     port = 5000
     def __init__(self , Address=('', port), MaxClient=1):
         self.s = socket.socket() 
+        self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.s.bind(Address)
         self.s.listen(MaxClient) 
     
