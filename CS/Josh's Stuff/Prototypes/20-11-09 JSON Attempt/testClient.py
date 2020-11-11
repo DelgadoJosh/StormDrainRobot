@@ -49,7 +49,8 @@ while True:
     # Extract frame
     # frame = pickle.loads(frame_data)
     frameBytes = base64.b64decode(frame_data) # If doing the raw encoded data
-    print(frameBytes)
+    # print(frameBytes)
+    # print(type(frameBytes))
     # frame = Image.open(frameBytes)
     img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
     # frame = cv2.imdecode(img_as_np, cv2.IMREAD_COLOR)

@@ -96,7 +96,7 @@ while True:
     # jsonData['img'] = base64.b64encode(buffer).decode("utf-8")
     # Encodes the json as a string, which is then encoded into bytes
     # data = json.dumps(jsonData).encode('utf-8')
-    data = base64.b64encode(frame)
+    data = base64.b64encode(buffer)
 
     # Send message length first
     message_size = struct.pack("L", len(data))
