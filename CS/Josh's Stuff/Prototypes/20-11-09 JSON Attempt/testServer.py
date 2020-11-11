@@ -82,10 +82,11 @@ camera = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
 # camera = cv2.VideoCapture(0)  
 
 # Loop to send the video, frame by frame.
+time = 0
 while True: 
   try:
     grabbed, frame = camera.read()  # Grab the current frame
-    print(type(frame))
+    # print(type(frame))
 
     grabbed, buffer = cv2.imencode('.jpg', frame)
 
@@ -97,6 +98,10 @@ while True:
     # Encodes the json as a string, which is then encoded into bytes
     # data = json.dumps(jsonData).encode('utf-8')
     data = base64.b64encode(buffer)
+    # data = base64.b64encode(str(time))
+    data = time.to_bytes(10, 'big')
+    print(time)
+    time += 1
 
     # Send message length first
     message_size = struct.pack("L", len(data))
