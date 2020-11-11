@@ -12,7 +12,7 @@ print("Starting up pca")
 pca = PCA9685(i2c_bus) 
 
 print("Setting frequency")
-pca.frequency = 30#2000#100
+pca.frequency = 369#2000#100
 
 # Disable warning from GPIO
 GPIO.setwarnings(False)

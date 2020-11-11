@@ -26,7 +26,7 @@ PINS = [4, 5]
 # PIN2 = 0
 
 print("Starting up")
-myKit = ServoKit(channels=16, frequency=100)
+myKit = ServoKit(channels=16, frequency=369) # 369   370 too high
 # myKit.servo[PIN].angle = 180
 
 lo = 0
