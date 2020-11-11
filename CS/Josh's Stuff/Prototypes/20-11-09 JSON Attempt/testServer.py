@@ -24,6 +24,7 @@ class Video_Sender():
   port = 4000
   def __init__(self, Address=(ip_address, port), MaxClient=1):
     self.s = socket.socket()
+    self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     self.s.bind(Address)
     self.s.listen(MaxClient)
   
@@ -77,19 +78,20 @@ def gstreamer_pipeline(
 
 
 # Initialize camera
-# camera = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
-camera = cv2.VideoCapture(0)  
+camera = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
+# camera = cv2.VideoCapture(0)  
 
 # Loop to send the video, frame by frame.
 while True: 
   try:
     grabbed, frame = camera.read()  # Grab the current frame
+    print(type(frame))
 
     grabbed, buffer = cv2.imencode('.jpg', frame)
 
     # Serialize frame
     # data = pickle.dumps(frame) 
-    jsonData = {}
+    # jsonData = {}
     # Encodes the image as a byte, then as a string to store in a json object
     # jsonData['img'] = base64.b64encode(buffer).decode("utf-8")
     # Encodes the json as a string, which is then encoded into bytes

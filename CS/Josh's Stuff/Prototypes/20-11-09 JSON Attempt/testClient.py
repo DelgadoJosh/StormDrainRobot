@@ -2,6 +2,9 @@ import socket
 import cv2 
 import struct
 import pickle
+import base64
+# import PIL.Image as Image
+import numpy as np
 
 # Create the client to receive video
 
@@ -41,13 +44,21 @@ while True:
     frame_data = data[:msg_size]
     data = data[msg_size:]
 
+    # print(frame_data)
+
     # Extract frame
     # frame = pickle.loads(frame_data)
-    # frame = base64.b64decode(frame_data) # If doing the raw encoded data
+    frameBytes = base64.b64decode(frame_data) # If doing the raw encoded data
+    print(frameBytes)
+    # frame = Image.open(frameBytes)
+    img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
+    # frame = cv2.imdecode(img_as_np, cv2.IMREAD_COLOR)
+    frame = cv2.imdecode(img_as_np, flags=1)
+    cv2.imwrite("./0.jpg", frame)
 
     # If going the json route
-    jsonData = json.load(data.decode('utc-8'))
-    frame = base64.b64decode(jsonData['img'])
+    # jsonData = json.load(data.decode('utc-8'))
+    # frame = base64.b64decode(jsonData['img'])
     
 
     # Display

@@ -23,8 +23,8 @@ def captureFrames():
   global video_frame, thread_lock 
 
   # Video capturing from OpenCV
-  # video_capture = cv2.VideoCapture(GSTREAMER_PIPELINE, cv2.CAP_GSTREAMER)
-  video_capture = cv2.VideoCapture(0) # 4 = usb camera, I think
+  video_capture = cv2.VideoCapture(GSTREAMER_PIPELINE, cv2.CAP_GSTREAMER)
+  # video_capture = cv2.VideoCapture(0) # 4 = usb camera, I think
 
   while True and video_capture.isOpened():
     return_key, frame = video_capture.read()
