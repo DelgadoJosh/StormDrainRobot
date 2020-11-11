@@ -3,7 +3,7 @@
 import rospy
 from geometry_msgs.msg import Twist
 
-import Jetson.GPIO as GPIO
+import rpi.GPIO as GPIO
 
 
 # Set the GPIO modes
