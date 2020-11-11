@@ -42,11 +42,11 @@ def setPWM(percentPower, pin):
     pca.channels[pin].duty_cycle = power
 
 print("Please input x and y range")
-while True:
-    x = float(input())
-    y = float(input())
-    pwm = float(input())
+# while True:
+#     x = float(input())
+#     y = float(input())
+#     pwm = float(input())
 
-    setAngle(x, HORIZONTAL_PIN)
-    setAngle(y, VERTICAL_PIN)
-    setPWM(pwm, PWM_PIN)
+#     setAngle(x, HORIZONTAL_PIN)
+#     setAngle(y, VERTICAL_PIN)
+#     setPWM(pwm, PWM_PIN)
