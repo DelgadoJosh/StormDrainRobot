@@ -20,12 +20,13 @@ import threading
 from multiprocessing import Process
 import lights
 import utils
+import time
 
 port = 5000
 ip_address = ""
 
 class Video_Sender():
-  port = 4000
+  port = 5000
   def __init__(self, Address=(ip_address, port), MaxClient=1):
     self.s = socket.socket()
     self.s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -89,7 +90,8 @@ camera = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
 
 # Loop to send the video, frame by frame.
 def broadcastVideo():
-    time = 0
+    frameIndex = 0
+    prevTime = time.time()
     while True: 
         try:
             grabbed, frame = camera.read()  # Grab the current frame
@@ -107,8 +109,11 @@ def broadcastVideo():
             data = base64.b64encode(buffer)
             # data = base64.b64encode(str(time))
             # data = time.to_bytes(10, 'big')
-            print(time)
-            time += 1
+            curTime = time.time()
+            dTime = curTime - prevTime 
+            prevTime = curTime
+            print(f"Frame {frameIndex} | fps: {1.0/dTime}")
+            frameIndex += 1
 
             # Send message length first
             message_size = struct.pack("L", len(data))
@@ -139,23 +144,24 @@ def awaitInput():
             lights.setPWM(splitData[0])
 
 
-        if (data == b"ping"):
-            s.Client.sendall("Pong!".encode('utf-8'))
-            print("Test")
-        else:
-            s.Client.sendall(data) # Ping back the received data
+        # if (data == b"ping"):
+        #     s.Client.sendall("Pong!".encode('utf-8'))
+        #     print("Test")
+        # else:
+        #     print("Sending back data")
+        #     # s.Client.sendall(data) # Ping back the received data
 
 # Trying using threading
-# send_video = threading.Thread(target=broadcastVideo) 
-# get_input = threading.Thread(target=awaitInput)
-
-# send_video.start()
-# get_input.start()
-
-# Trying using multiprocessing
-send_video = Process(target=broadcastVideo)
-get_input = Process(target=awaitInput)
+send_video = threading.Thread(target=broadcastVideo) 
+get_input = threading.Thread(target=awaitInput)
 
 send_video.start()
 get_input.start()
+
+# Trying using multiprocessing
+# send_video = Process(target=broadcastVideo)
+# get_input = Process(target=awaitInput)
+
+# send_video.start()
+# get_input.start()
 
