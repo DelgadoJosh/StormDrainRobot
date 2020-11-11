@@ -44,16 +44,18 @@ s.WaitForConnection()
 # display_width and display_height determine the size of the window on the screen
 
 def gstreamer_pipeline(
-#    capture_width=1280,
-#    capture_height=720,
-    display_width=1280,
-    display_height=720,
+   capture_width=1280,
+   capture_height=720,
+    # display_width=1280,
+    # display_height=720,
 #    framerate=60,
 #    flip_method=0,
-    capture_width=1280,
-    capture_height=720,
-#    display_width=320,
-#    display_height=180,
+    # capture_width=1280,
+    # capture_height=720,
+  #  display_width=320,
+  #  display_height=180,
+    display_width=1000,
+    display_height=600,
     framerate=60,
     flip_method=0,
 ):
@@ -99,7 +101,7 @@ while True:
     # data = json.dumps(jsonData).encode('utf-8')
     data = base64.b64encode(buffer)
     # data = base64.b64encode(str(time))
-    data = time.to_bytes(10, 'big')
+    # data = time.to_bytes(10, 'big')
     print(time)
     time += 1
 
