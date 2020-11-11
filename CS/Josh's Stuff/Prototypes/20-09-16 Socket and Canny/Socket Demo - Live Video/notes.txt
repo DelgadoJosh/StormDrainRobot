@@ -1,0 +1,4 @@
+Closing a socket left open 
+https://stackoverflow.com/questions/5875177/how-to-close-a-socket-left-open-by-a-killed-program
+
+s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
