@@ -101,7 +101,7 @@ class App(threading.Thread):
     servos_horizontal_label.grid(row=0, column=3)
     servos_horizontal_entry = tk.Entry(width=20)
     # servos_horizontal_entry.grid(row=1, column=3, padx=2) 
-    servos_horizontal_slider = tk.Scale(from_=0, to=180, orient=tk.HORIZONTAL)
+    servos_horizontal_slider = tk.Scale(from_=0, to=180, orient=tk.HORIZONTAL) # Can optionally set tickInterval=10, length=something
     servos_horizontal_slider.set(90)
     servos_horizontal_slider.grid(row=1, column=3, padx=2)
     servos_vertical_label = tk.Label(text="Vertical\n Camera Angle")
