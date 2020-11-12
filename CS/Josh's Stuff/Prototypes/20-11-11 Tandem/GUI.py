@@ -18,16 +18,16 @@ class App(threading.Thread):
   def callback(self):
     self.root.quit()
   
-  queue = Queue(maxsize=100)
+  queue = Queue(maxsize=1000)
 
   ids = ["Foward", "Reverse", "Left turn in place", "Right turn in place"]
   multipliers = [[1, 1], [-1, -1], [-1, 1], [1, -1]]
   vals = [10, 25, 50, 75, 100]
 
-  def setSpeed(self, leftSpeed, rightSpeed):
-    print(f"Changing left to {leftSpeed} and changing right to {rightSpeed}")
-    speedString = f"{leftSpeed} {rightSpeed}"
-    self.queue.put(speedString)
+  # def setSpeed(self, leftSpeed, rightSpeed):
+  #   print(f"Changing left to {leftSpeed} and changing right to {rightSpeed}")
+  #   speedString = f"{leftSpeed} {rightSpeed}"
+  #   self.queue.put(speedString)
 
 
   # def handle_click(self, row, col):
@@ -38,6 +38,16 @@ class App(threading.Thread):
   #   rightSpeed = multipliers[row][1]*vals[col-1]
   #   self.setSpeed(leftSpeed, rightSpeed)
   #   # testLoop.changeSpeed(leftSpeed, rightSpeed)
+
+  # def submitData(self, lights_percent, motor_left_percent, motor_right_percent, servo_horizontal_angle, servo_vertical_angle):
+  #   outputString = f"{lights_percent} {motor_left_percent} {motor_right_percent} {servo_horizontal_angle} {servo_vertical_angle}"
+  #   print(outputString)
+  #   self.queue.put(outputString)
+
+  def submitData(self, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
+    outputString = f"{lights_entry.get()} {motors_left_entry.get()} {motors_right_entry.get()} {servos_horizontal_entry.get()} {servos_vertical_entry.get()}"
+    print(outputString)
+    self.queue.put(outputString)
 
   def run(self):
     window = tk.Tk() 
@@ -52,25 +62,59 @@ class App(threading.Thread):
     lights_label = tk.Label(text="Lights %")
     lights_label.grid(row=0, column=0)
     lights_entry = tk.Entry(width=20)
-    lights_entry.grid(row=1, column=0)
+    lights_entry.grid(row=1, column=0, padx=2)
 
     motors_left_label = tk.Label(text="Left Motor %")
     motors_left_label.grid(row=0, column=1)
     motors_left_entry = tk.Entry(width=20)
-    motors_left_entry.grid(row=1, column=1)
+    motors_left_entry.grid(row=1, column=1, padx=2)
     motors_right_label = tk.Label(text="Right Motor %")
     motors_right_label.grid(row=0, column=2)
     motors_right_entry = tk.Entry(width=20)
-    motors_right_entry.grid(row=1, column=2)
+    motors_right_entry.grid(row=1, column=2, padx=2)
 
-    servos_horizontal_label = tk.Label(text="Horizontal Camera Angle")
+    servos_horizontal_label = tk.Label(text="Horizontal\n Camera Angle")
     servos_horizontal_label.grid(row=0, column=3)
     servos_horizontal_entry = tk.Entry(width=20)
-    servos_horizontal_entry.grid(row=1, column=3)
-    servos_vertical_label = tk.Label(text="Vertical Camera Angle")
+    servos_horizontal_entry.grid(row=1, column=3, padx=2)
+    servos_vertical_label = tk.Label(text="Vertical\n Camera Angle")
     servos_vertical_label.grid(row=0, column=4)
     servos_vertical_entry = tk.Entry(width=20)
-    servos_vertical_entry.grid(row=1, column=4)
+    servos_vertical_entry.grid(row=1, column=4, padx=2)
+
+    # Ahhhhh no multiline lambdas :(
+    submit_data_button = tk.Button(
+      text="Submit Data",
+      # command = lambda 
+      #   lights_percent=lights_entry.get(), 
+      #   motor_left_percent=motors_left_entry.get(), 
+      #   motor_right_percent=motors_right_entry.get(), 
+      #   servo_horizontal_angle=servos_horizontal_entry.get(), 
+      #   servo_vertical_angle=servos_vertical_entry.get(): 
+      #     self.submitData(lights_percent, 
+      #       motor_left_percent, 
+      #       motor_right_percent, 
+      #       servo_horizontal_angle, 
+      #       servo_vertical_angle)
+      command = lambda
+        lights_entry=lights_entry,
+        motors_left_entry=motors_left_entry,
+        motors_right_entry=motors_right_entry,
+        servos_horizontal_entry=servos_horizontal_entry,
+        servos_vertical_entry=servos_vertical_entry:
+          self.submitData(
+            lights_entry,
+            motors_left_entry,
+            motors_right_entry,
+            servos_horizontal_entry,
+            servos_vertical_entry
+          )
+    )
+    submit_data_button.grid(row=1, column=5)
+
+    # Todo: Add a checkbox for constantly send the data every x seconds
+
+    # Todo: add a place where you put the current run info (pipe start id, pipe end id)
 
     self.root.mainloop()
 
