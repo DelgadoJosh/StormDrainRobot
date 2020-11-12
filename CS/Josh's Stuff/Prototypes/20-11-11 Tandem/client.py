@@ -85,9 +85,9 @@ def showVideo():
             # If going the direct encode/decode to get frameBytes
             frameBytes = base64.b64decode(frame_data) # If doing the raw encoded data
 
-            # If going the json route
-            jsonData = json.load(data.decode('utc-8'))
-            frameBytes = base64.b64decode(jsonData['img'])
+            # If going the json route to get frameBytes
+            # jsonData = json.load(data.decode('utc-8'))
+            # frameBytes = base64.b64decode(jsonData['img'].decode('utc-8'))
 
             img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
             frame = cv2.imdecode(img_as_np, flags=1)
