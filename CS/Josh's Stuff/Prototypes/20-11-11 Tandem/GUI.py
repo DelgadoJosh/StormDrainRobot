@@ -9,6 +9,7 @@
 import tkinter as tk 
 from queue import Queue 
 import threading
+import time
 
 class App(threading.Thread):
   def __init__(self):
@@ -43,6 +44,20 @@ class App(threading.Thread):
   #   outputString = f"{lights_percent} {motor_left_percent} {motor_right_percent} {servo_horizontal_angle} {servo_vertical_angle}"
   #   print(outputString)
   #   self.queue.put(outputString)
+
+  dTime = 1
+  def continuallySendData(self, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
+    nextTimeAvailable = time.time() + dTime
+    while True:
+      doConstantlySend = checkbox.get()
+      if not doConstantlySend:
+        continue
+      if time.time() < nextTimeAvailable:
+        continue 
+      nextTimeAvailable = time.time() + dTime 
+
+      submitData(lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry)
+
 
   def submitData(self, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
     outputString = f"{lights_entry.get()} {motors_left_entry.get()} {motors_right_entry.get()} {servos_horizontal_entry.get()} {servos_vertical_entry.get()}"
@@ -113,6 +128,9 @@ class App(threading.Thread):
     submit_data_button.grid(row=1, column=5)
 
     # Todo: Add a checkbox for constantly send the data every x seconds
+    constantly_submit_checkbox = tk.Checkbutton(text="Constantly Submit")
+    constantly_submit_checkbox.grid(row=1, column=6)
+    # Start a thread so it'll keep on sending every dTime interval if the checkbox is checked
 
     # Todo: add a place where you put the current run info (pipe start id, pipe end id)
 
