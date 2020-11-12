@@ -16,7 +16,10 @@ class App(threading.Thread):
     threading.Thread.__init__(self)
     self.start()
   
+  programEnd = False
   def callback(self):
+    self.programEnd = True
+    time.sleep(0.1) # To let the loop close
     self.root.quit()
   
   queue = Queue(maxsize=1000)
@@ -46,9 +49,12 @@ class App(threading.Thread):
   #   self.queue.put(outputString)
 
   dTime = 1
-  def continuallySendData(self, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
+  def continuallySendData(self, checkbox, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
+    dTime = self.dTime
     nextTimeAvailable = time.time() + dTime
     while True:
+      if self.programEnd:
+        break
       doConstantlySend = checkbox.get()
       if not doConstantlySend:
         continue
@@ -56,8 +62,8 @@ class App(threading.Thread):
         continue 
       nextTimeAvailable = time.time() + dTime 
 
-      submitData(lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry)
-
+      self.submitData(lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry)
+    # print("Ended loop")
 
   def submitData(self, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
     outputString = f"{lights_entry.get()} {motors_left_entry.get()} {motors_right_entry.get()} {servos_horizontal_entry.get()} {servos_vertical_entry.get()}"
@@ -128,9 +134,21 @@ class App(threading.Thread):
     submit_data_button.grid(row=1, column=5)
 
     # Todo: Add a checkbox for constantly send the data every x seconds
-    constantly_submit_checkbox = tk.Checkbutton(text="Constantly Submit")
+    constantly_submit_checkbox_val = tk.IntVar()
+    constantly_submit_checkbox = tk.Checkbutton(text="Constantly Submit", variable=constantly_submit_checkbox_val)
     constantly_submit_checkbox.grid(row=1, column=6)
+
     # Start a thread so it'll keep on sending every dTime interval if the checkbox is checked
+    send_data_loop = threading.Thread(target=self.continuallySendData, 
+      args=(
+        constantly_submit_checkbox_val, 
+        lights_entry,
+        motors_left_entry,
+        motors_right_entry,
+        servos_horizontal_entry,
+        servos_vertical_entry
+      )) 
+    send_data_loop.start()
 
     # Todo: add a place where you put the current run info (pipe start id, pipe end id)
 
