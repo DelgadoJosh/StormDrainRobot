@@ -6,6 +6,9 @@ import busio
 from adafruit_pca9685 import PCA9685 
 import time
 
+LIGHTS_PIN = 6
+MAX = 0xFFFF
+
 print("Starting up")
 i2c_bus = busio.I2C(SCL, SDA) 
 print(i2c_bus.scan())
@@ -16,11 +19,7 @@ pca = PCA9685(i2c_bus)
 print("Setting frequency")
 pca.frequency = 369
 
-PWM_PIN = 0
-
-MAX = 0xFFFF
-
 def setPWM(percentPower):
     power = abs(int(MAX*percentPower))
     print(f"Setting power to {power}")
-    pca.channels[PWM_PIN].duty_cycle = power
+    pca.channels[LIGHTS_PIN].duty_cycle = power
