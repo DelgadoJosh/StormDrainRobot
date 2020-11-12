@@ -54,14 +54,21 @@ class App(threading.Thread):
     lights_entry = tk.Entry(width=20)
     lights_entry.grid(row=1, column=0)
 
-    motors_left_label = tk.Label(text="Motor Left %")
+    motors_left_label = tk.Label(text="Left Motor %")
+    motors_left_label.grid(row=0, column=1)
     motors_left_entry = tk.Entry(width=20)
     motors_left_entry.grid(row=1, column=1)
+    motors_right_label = tk.Label(text="Right Motor %")
+    motors_right_label.grid(row=0, column=2)
     motors_right_entry = tk.Entry(width=20)
     motors_right_entry.grid(row=1, column=2)
 
+    servos_horizontal_label = tk.Label(text="Horizontal Camera Angle")
+    servos_horizontal_label.grid(row=0, column=3)
     servos_horizontal_entry = tk.Entry(width=20)
     servos_horizontal_entry.grid(row=1, column=3)
+    servos_vertical_label = tk.Label(text="Vertical Camera Angle")
+    servos_vertical_label.grid(row=0, column=4)
     servos_vertical_entry = tk.Entry(width=20)
     servos_vertical_entry.grid(row=1, column=4)
 
