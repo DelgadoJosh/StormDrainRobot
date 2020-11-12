@@ -19,9 +19,9 @@ class App(threading.Thread):
   programEnd = False
   def callback(self):
     self.programEnd = True
-    time.sleep(0.1) # To let the loop close
+    time.sleep(0.2) # To let the loop close
     self.root.quit()
-  
+
   queue = Queue(maxsize=1000)
 
   ids = ["Foward", "Reverse", "Left turn in place", "Right turn in place"]
@@ -53,6 +53,8 @@ class App(threading.Thread):
     dTime = self.dTime
     nextTimeAvailable = time.time() + dTime
     while True:
+      # print(self.programEnd)
+      time.sleep(dTime)
       if self.programEnd:
         break
       doConstantlySend = checkbox.get()
@@ -63,7 +65,8 @@ class App(threading.Thread):
       nextTimeAvailable = time.time() + dTime 
 
       self.submitData(lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry)
-    # print("Ended loop")
+    print("Cleaned up loop")
+    return
 
   def submitData(self, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
     outputString = f"{lights_entry.get()} {motors_left_entry.get()} {motors_right_entry.get()} {servos_horizontal_entry.get()} {servos_vertical_entry.get()}"
@@ -97,11 +100,17 @@ class App(threading.Thread):
     servos_horizontal_label = tk.Label(text="Horizontal\n Camera Angle")
     servos_horizontal_label.grid(row=0, column=3)
     servos_horizontal_entry = tk.Entry(width=20)
-    servos_horizontal_entry.grid(row=1, column=3, padx=2)
+    # servos_horizontal_entry.grid(row=1, column=3, padx=2) 
+    servos_horizontal_slider = tk.Scale(from_=0, to=180, orient=tk.HORIZONTAL)
+    servos_horizontal_slider.set(90)
+    servos_horizontal_slider.grid(row=1, column=3, padx=2)
     servos_vertical_label = tk.Label(text="Vertical\n Camera Angle")
     servos_vertical_label.grid(row=0, column=4)
     servos_vertical_entry = tk.Entry(width=20)
-    servos_vertical_entry.grid(row=1, column=4, padx=2)
+    # servos_vertical_entry.grid(row=1, column=4, padx=2)
+    servos_vertical_slider = tk.Scale(from_=0, to=90, orient=tk.HORIZONTAL)
+    servos_vertical_slider.set(45)
+    servos_vertical_slider.grid(row=1, column=4, padx=2)
 
     # Ahhhhh no multiline lambdas :(
     submit_data_button = tk.Button(
@@ -121,8 +130,10 @@ class App(threading.Thread):
         lights_entry=lights_entry,
         motors_left_entry=motors_left_entry,
         motors_right_entry=motors_right_entry,
-        servos_horizontal_entry=servos_horizontal_entry,
-        servos_vertical_entry=servos_vertical_entry:
+        # servos_horizontal_entry=servos_horizontal_entry,
+        # servos_vertical_entry=servos_vertical_entry:
+        servos_horizontal_entry=servos_horizontal_slider,
+        servos_vertical_entry=servos_vertical_slider:
           self.submitData(
             lights_entry,
             motors_left_entry,
