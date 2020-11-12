@@ -9,6 +9,8 @@
 # Lovely socket tutorial
 # https://realpython.com/python-sockets/
 
+# This server handles sending over the video frames and data
+# And it also handles receiving instructions
 
 import cv2 
 import socket
@@ -20,7 +22,8 @@ import threading
 from multiprocessing import Process
 import lights
 import utils
-import time
+# import time
+import motors
 
 port = 5000
 ip_address = ""
@@ -48,6 +51,7 @@ s.WaitForConnection()
 # Flip the image by setting the flip_method (most common values of 0 and 2)
 # display_width and display_height determine the size of the window on the screen
 
+# Adjsut display_width, display_height
 def gstreamer_pipeline(
     # capture_width=1920,
     # capture_height=1080,
@@ -65,7 +69,7 @@ def gstreamer_pipeline(
   #  display_height=180,
     # display_width=1000,
     # display_height=600,
-    framerate=30,
+    framerate=60,
     flip_method=0,
 ):
     return (
@@ -98,37 +102,28 @@ def broadcastVideo():
     prevTime = time.time()
     while True: 
         try:
-            grabbed, frame = camera.read()  # Grab the current frame
-            # print(type(frame))
+            # Grab the current frame
+            grabbed, frame = camera.read()
 
+            # Encode the frame as a jpg
             grabbed, buffer = cv2.imencode('.jpg', frame)
 
-            # Serialize frame
-            # # data = pickle.dumps(frame) 
-            # jsonData = {}
-            # # Encodes the image as a byte, then as a string to store in a json object
-            # jsonData['img'] = base64.b64encode(buffer).decode("utf-8")
-            # # Encodes the json as a string, which is then encoded into bytes
-            # data = json.dumps(jsonData).encode('utf-8')
-
+            # Convert the image as bytes encoded as a string
             data = base64.b64encode(buffer)  # What actually works
-            
-            # data = base64.b64encode(str(time))
-            # data = time.to_bytes(10, 'big')
-
-            curTime = time.time()
-            dTime = curTime - prevTime 
-            prevTime = curTime
-            print(f"Frame {frameIndex} | fps: {1.0/dTime}")
-            frameIndex += 1
 
             # Send message length first
             message_size = struct.pack("L", len(data))
 
             # Then data
             s.Client.sendall(message_size + data)
+            
+            # Record the current time needed
+            curTime = time.time()
+            dTime = curTime - prevTime 
+            prevTime = curTime
+            print(f"Frame {frameIndex} | fps: {1.0/dTime}")
+            frameIndex += 1
 
-            # Then receive data
         
         except KeyboardInterrupt:
             s.s.close((ip_address, port))
@@ -145,18 +140,15 @@ def awaitInput():
         if not data:
             break
 
-        # Move the motors
+        # Use the data received
         splitData = utils.parse(utils.cleanup(str(data)))
         if splitData is not None:
-            lights.setPWM(splitData[0])
+            lights.setPWM(splitData[utils.LIGHTS_INDEX])
+            motors.setLeftSpeed(splitData[utils.MOTORS_LEFT_INDEX])
+            motors.setRightSpeed(splitData[utils.MOTORS_RIGHT_INDEX])
+            servos.setHorizontalAngle(splitData[utils.SERVO_HORIZONTAL_INDEX])
+            servos.setVerticalAngle(splitData[utils.SERVO_VERTICAL_INDEX])
 
-
-        # if (data == b"ping"):
-        #     s.Client.sendall("Pong!".encode('utf-8'))
-        #     print("Test")
-        # else:
-        #     print("Sending back data")
-        #     # s.Client.sendall(data) # Ping back the received data
 
 # Trying using threading
 send_video = threading.Thread(target=broadcastVideo) 

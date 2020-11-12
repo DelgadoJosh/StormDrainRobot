@@ -1,6 +1,20 @@
 # The purpose of this is for support functions
 # Parsing the data
 DELIMITER = " "
+LIGHTS_INDEX = 0
+MOTOR_LEFT_INDEX = 1
+MOTOR_RIGHT_INDEX = 2
+SERVO_LEFT_INDEX = 3
+SERVO_RIGHT_INDEX = 4
+
+# The Float Values
+FLOATS = [LIGHTS_INDEX, MOTOR_LEFT_INDEX, MOTOR_RIGHT_INDEX, SERVO_LEFT_INDEX, SERVO_RIGHT_INDEX]
+
+# Defining the bounds of values intended
+PERCENTAGES = [LIGHTS_INDEX, MOTOR_LEFT_INDEX, MOTOR_RIGHT_INDEX]
+ANGLES = [SERVO_LEFT_INDEX, SERVO_RIGHT_INDEX]
+
+data_len = len(PERCENTAGES) + len(ANGLES)
 
 # This is the cheeseiest thing I'm doing and I'm almost ashamed
 def isFloat(string):
@@ -10,27 +24,28 @@ def isFloat(string):
     except ValueError:
         return False
 
-data_len = 1
 def isFormatted(splitData):
     # Returns if data is in proper format
-    # In this case it's two floats, separated by one space
-    # return  len(splitData) >= 2 and isFloat(splitData[0]) and isFloat(splitData[1])
-
     # In this case it's data_len floats, separated by one space
+    isFormatted = False
     if len(splitData) >= data_len:
-        for i in range(data_len):
+        isFormatted = True
+        for i in FLOATS:
             if not isFloat(splitData[i]):
-                return False
-        return True 
-    return False
-    # return len(splitData) >= 1 and isFloat(splitData[0])
+                isFormatted=  False
+    return isFormatted
 
 def isInMargins(parsedData):
-    for i in data_len:
-        if abs(parsedData[i]) > 1:
-            return False
-        return True
-    # return abs(parsedData[0]) <= 1 #and abs(parsedData[1]) <= 1
+    isInMargins = True
+    for i in PERCENTAGES:
+        if not (abs(parsedData[i]) <= 1):
+            isInMargins = False
+
+    for i in ANGLES:
+        if not( parsedData[i] >= 0 and parsedData[i] <= MAX_ANGLE):
+            isInMargins = False
+    
+    return isInMargins
 
 def parse(data):
     # This will take the data, split it into a pair of elements needed
@@ -41,8 +56,7 @@ def parse(data):
         parsedData = []
         for i in data_len:
             parsedData.append(float(splitData[i]))
-        # parsedData.append(float(splitData[0])) 
-        # parsedData.append(float(splitData[1]))
+            
         if (isInMargins(parsedData)):
             return parsedData 
         else:
