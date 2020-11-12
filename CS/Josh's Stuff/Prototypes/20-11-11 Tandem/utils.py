@@ -54,5 +54,5 @@ def parse(data):
 
 def cleanup(byteData):
     # Taking in a string of b'string'
-    # Scrape off the begining 2 strings, and the end
+    # Scrape off the begining 2 characters, and the end '
     return byteData[2:len(byteData)-1]
