@@ -1,7 +1,6 @@
 from board import SCL, SDA
 import busio 
-from adafruit_pca9685 import PCA9685 
-import time
+from adafruit_pca9685 import PCA9685
 import RPi.GPIO as GPIO  # Yes, that's RPi, as in Raspberry Pi. Jetson doesn't support PWM.
 
 print("Starting up")
@@ -12,7 +11,7 @@ print("Starting up pca")
 pca = PCA9685(i2c_bus) 
 
 print("Setting frequency")
-pca.frequency = 100
+pca.frequency = 369 #100
 
 # Disable warning from GPIO
 GPIO.setwarnings(False)
