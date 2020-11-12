@@ -49,19 +49,23 @@ s.WaitForConnection()
 # display_width and display_height determine the size of the window on the screen
 
 def gstreamer_pipeline(
+    # capture_width=1920,
+    # capture_height=1080,
+    # display_width=1920,
+    # display_height=1080,
    capture_width=1280,
    capture_height=720,
-    # display_width=1280,
-    # display_height=720,
+    display_width=1280,
+    display_height=720,
 #    framerate=60,
 #    flip_method=0,
     # capture_width=1280,
     # capture_height=720,
   #  display_width=320,
   #  display_height=180,
-    display_width=1000,
-    display_height=600,
-    framerate=60,
+    # display_width=1000,
+    # display_height=600,
+    framerate=30,
     flip_method=0,
 ):
     return (
@@ -100,15 +104,18 @@ def broadcastVideo():
             grabbed, buffer = cv2.imencode('.jpg', frame)
 
             # Serialize frame
-            # data = pickle.dumps(frame) 
+            # # data = pickle.dumps(frame) 
             # jsonData = {}
-            # Encodes the image as a byte, then as a string to store in a json object
+            # # Encodes the image as a byte, then as a string to store in a json object
             # jsonData['img'] = base64.b64encode(buffer).decode("utf-8")
-            # Encodes the json as a string, which is then encoded into bytes
+            # # Encodes the json as a string, which is then encoded into bytes
             # data = json.dumps(jsonData).encode('utf-8')
-            data = base64.b64encode(buffer)
+
+            data = base64.b64encode(buffer)  # What actually works
+            
             # data = base64.b64encode(str(time))
             # data = time.to_bytes(10, 'big')
+
             curTime = time.time()
             dTime = curTime - prevTime 
             prevTime = curTime

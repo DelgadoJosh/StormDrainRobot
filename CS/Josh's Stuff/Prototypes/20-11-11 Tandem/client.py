@@ -71,21 +71,26 @@ def showVideo():
 
             # print(frame_data)
 
-            # Extract frame
-            # frame = pickle.loads(frame_data)
+            # # Extract frame
+            # # frame = pickle.loads(frame_data)
+            # frameBytes = base64.b64decode(frame_data) # If doing the raw encoded data
+            # # print(frameBytes)
+            # # print(type(frameBytes))
+            # # frame = Image.open(frameBytes)
+            # img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
+            # # frame = cv2.imdecode(img_as_np, cv2.IMREAD_COLOR)
+            # frame = cv2.imdecode(img_as_np, flags=1)
+            # # cv2.imwrite("./0.jpg", frame)
+
+            # If going the direct encode/decode to get frameBytes
             frameBytes = base64.b64decode(frame_data) # If doing the raw encoded data
-            # print(frameBytes)
-            # print(type(frameBytes))
-            # frame = Image.open(frameBytes)
-            img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
-            # frame = cv2.imdecode(img_as_np, cv2.IMREAD_COLOR)
-            frame = cv2.imdecode(img_as_np, flags=1)
-            # cv2.imwrite("./0.jpg", frame)
 
             # If going the json route
-            # jsonData = json.load(data.decode('utc-8'))
-            # frame = base64.b64decode(jsonData['img'])
-            
+            jsonData = json.load(data.decode('utc-8'))
+            frameBytes = base64.b64decode(jsonData['img'])
+
+            img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
+            frame = cv2.imdecode(img_as_np, flags=1)
 
             # Display
             cv2.imshow("Frame", frame)

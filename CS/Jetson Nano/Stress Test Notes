@@ -61,7 +61,11 @@ Make sure you reboot with it connected (not hot-swappable)
 the blue tape should be pointing towards the edge of the jetson, not towards the center
 
 
+To run another diagnostic:
+sudo jtop
 
+(Installation:)
+sudo -H pip install -u jetson-stats
 
 
 

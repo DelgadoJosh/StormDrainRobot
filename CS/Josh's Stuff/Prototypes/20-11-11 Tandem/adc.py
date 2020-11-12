@@ -1,3 +1,6 @@
+# Analog to Digital Converter
+# Used to measure the voltage in the board
+
 import board
 import busio
 import adafruit_ads1x15.ads1115 as ADS 
@@ -14,14 +17,13 @@ ads.gain = 1
 R1 = 30000
 R2 = 7500
 
+# Vin = Vout * (R1 + R2)/R2
+coefficient = 1.0*(R1 + R2)/R2
 
-while(True):
+def getVoltage():
     chan = AnalogIn(ads, ADS.P0)
 
-    Vout = chan.voltage 
-    Vin = Vout * (R1 + R2)/R2
-    # print(chan.value, chan.voltage) 
-
-    print(f"{chan.value} {chan.voltage} | Vin = {Vin}")
-    time.sleep(1)
+    Vout = chan.voltage
+    Vin = Vout * coefficient 
+    return Vin
 
