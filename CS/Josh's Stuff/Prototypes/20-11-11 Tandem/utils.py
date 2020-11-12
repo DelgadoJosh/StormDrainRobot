@@ -11,10 +11,11 @@ SERVO_RIGHT_INDEX = 4
 FLOATS = [LIGHTS_INDEX, MOTOR_LEFT_INDEX, MOTOR_RIGHT_INDEX, SERVO_LEFT_INDEX, SERVO_RIGHT_INDEX]
 
 # Defining the bounds of values intended
-PERCENTAGES = [LIGHTS_INDEX, MOTOR_LEFT_INDEX, MOTOR_RIGHT_INDEX]
+POSITIVE_PERCENTAGES = [LIGHTS_INDEX]
+PERCENTAGES = [MOTOR_LEFT_INDEX, MOTOR_RIGHT_INDEX]
 ANGLES = [SERVO_LEFT_INDEX, SERVO_RIGHT_INDEX]
 
-data_len = len(PERCENTAGES) + len(ANGLES)
+data_len = len(POSITIVE_PERCENTAGES) + len(PERCENTAGES) + len(ANGLES)
 
 # This is the cheeseiest thing I'm doing and I'm almost ashamed
 def isFloat(string):
@@ -37,6 +38,10 @@ def isFormatted(splitData):
 
 def isInMargins(parsedData):
     isInMargins = True
+    for i in POSITIVE_PERCENTAGES:
+        if not (parsedData >= 0 and parsedData[i] <= 1):
+            isInMargins = False
+
     for i in PERCENTAGES:
         if not (abs(parsedData[i]) <= 1):
             isInMargins = False
@@ -56,7 +61,7 @@ def parse(data):
         parsedData = []
         for i in data_len:
             parsedData.append(float(splitData[i]))
-            
+
         if (isInMargins(parsedData)):
             return parsedData 
         else:
