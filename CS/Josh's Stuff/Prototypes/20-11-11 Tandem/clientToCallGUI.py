@@ -27,13 +27,29 @@ print("Client Connected")
 queue = GUI.app.queue
 stopFlag = GUI.app.programEnd
 
+def retrieveData(data):
+  # Retrieve the message data from the stream, parsing in a single bit of data
+  while len(data) < payload_size:
+    data += c.s.recv(4096)
+  
+  packed_msg_size = data[:payload_size]
+  data = data[payload_size:]
+  msg_size = struct.unpack("Q", packed_msg_size)[0]
+
+  # Retrieve all the data based on the message size, in buffers of 4096
+  while len(data) < msg_size:
+    data += c.s.recv(4096)
+  
+  output_data = data[:msg_size]
+  remainder_data = data[msg_size:]
+
+  return output_data, remainder_data
+
 # Loop for receiving input, the input is added to a queue
 def getInput():
     global stopFlag
     while not stopFlag:
       stopFlag = GUI.app.programEnd
-      # print("lol")
-      # print(stopFlag)
       try: 
         if not queue.empty():
           command = queue.get()
