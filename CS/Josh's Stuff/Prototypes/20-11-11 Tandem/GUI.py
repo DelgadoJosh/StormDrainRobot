@@ -10,6 +10,8 @@ import tkinter as tk
 from queue import Queue 
 import threading
 import time
+import cv2
+from PIL import Image, ImageTk
 
 class App(threading.Thread):
   def __init__(self):
@@ -48,12 +50,17 @@ class App(threading.Thread):
   #   print(outputString)
   #   self.queue.put(outputString)
 
+  camera = cv2.VideoCapture(0)   # TEMP
   dTime = 0.01
   def continuallySendData(self, checkbox, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
     dTime = self.dTime
     nextTimeAvailable = time.time() + dTime
+    camera = self.camera
     while True:
       # print(self.programEnd)
+      # print("Should show new frame") #TEMP
+      _, frame = camera.read() #TEMP
+      self.showFrame(frame) #TEMP
       time.sleep(dTime)
       if self.programEnd:
         break
@@ -74,18 +81,19 @@ class App(threading.Thread):
     self.queue.put(outputString)
 
   def showFrame(self, frame):
-    cv2Image = cv2.cvtColor(frame, cv2.COLOR_BG2RGBA)
+    cv2Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
     resizedImage = cv2.resize(cv2Image, (1280, 720))
-    img = Image.fromarray(reizedImage)
-    imgTk = IMageTk.PhotoImage(image=img)
+    img = Image.fromarray(resizedImage)
+    imgTk = ImageTk.PhotoImage(image=img)
 
     # Saves video to the directory
     # out.write(frame)
 
     global lmain
     lmain.imgtk = imgTk
-    lmain.configure(image=imgtk)
-    lmain.after(1, show_frame)
+    lmain.configure(image=imgTk)
+    lmain.image = imgTk
+    # lmain.after(1, self.showFrame)
   
   lmain = None
   def run(self):
@@ -179,13 +187,13 @@ class App(threading.Thread):
     send_data_loop.start()
 
     # Todo: Add a image for the info
-    imageFrame = tk.Frame(window, width=1280, height=720)
-    # imageFrame.grid(row=2, column=0, columnspan=6)
+    imageFrame = tk.Frame(width=1280, height=720)
+    imageFrame.grid(row=2, column=0, columnspan=8)
     
     # Capture video frames
     global lmain
     lmain = tk.Label(imageFrame)
-    lmain.grid(row=2, column=0, columnspan=6)
+    lmain.grid(row=0, column=0)
 
     # # Output Video, file type can be changed in future
     # fourcc = cv2.VideoWriter_fourcc(*'XVID')
