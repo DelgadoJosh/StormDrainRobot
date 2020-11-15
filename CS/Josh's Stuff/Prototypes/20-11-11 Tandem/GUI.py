@@ -10,6 +10,8 @@ import tkinter as tk
 from queue import Queue 
 import threading
 import time
+import cv2
+from PIL import Image, ImageTk
 
 class App(threading.Thread):
   def __init__(self):
@@ -23,6 +25,7 @@ class App(threading.Thread):
     # threading._shutdown()
     self.root.quit()
 
+  # Create a concurrency-safe queue for the client to read
   queue = Queue(maxsize=1000)
 
   ids = ["Foward", "Reverse", "Left turn in place", "Right turn in place"]
@@ -49,13 +52,18 @@ class App(threading.Thread):
   #   print(outputString)
   #   self.queue.put(outputString)
 
+  # camera = cv2.VideoCapture(0)   # TEMP
   dTime = 0.01
   def continuallySendData(self, checkbox, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
     dTime = self.dTime
     nextTimeAvailable = time.time() + dTime
+    # camera = self.camera # TEMP
     while True:
       # print(self.programEnd)
-      time.sleep(dTime)
+      # print("Should show new frame") #TEMP
+      # _, frame = camera.read() #TEMP
+      # self.showFrame(frame) #TEMP
+      # time.sleep(dTime)
       if self.programEnd:
         break
       doConstantlySend = checkbox.get()
@@ -74,6 +82,22 @@ class App(threading.Thread):
     print(outputString)
     self.queue.put(outputString)
 
+  def showFrame(self, frame):
+    cv2Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+    resizedImage = cv2.resize(cv2Image, (1280, 720))
+    img = Image.fromarray(resizedImage)
+    imgTk = ImageTk.PhotoImage(image=img)
+
+    # Saves video to the directory
+    # out.write(frame)
+
+    global lmain
+    lmain.imgtk = imgTk
+    lmain.configure(image=imgTk)
+    lmain.image = imgTk
+    # lmain.after(1, self.showFrame)
+  
+  lmain = None
   def run(self):
     window = tk.Tk() 
     self.root = window
@@ -163,6 +187,22 @@ class App(threading.Thread):
         servos_vertical_slider
       )) 
     send_data_loop.start()
+
+    # Todo: Add a image for the info
+    imageFrame = tk.Frame(width=1280, height=720)
+    imageFrame.grid(row=2, column=0, columnspan=8)
+    
+    # Capture video frames
+    global lmain
+    lmain = tk.Label(imageFrame)
+    lmain.grid(row=0, column=0)
+
+    # # Output Video, file type can be changed in future
+    # fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    # out = cv2.VideoWriter('./videos/output.avi', fourcc, 20.0, (1280, 720))
+
+    # # Init img for screenshot function
+    # img = None
 
     # Todo: add a place where you put the current run info (pipe start id, pipe end id)
 

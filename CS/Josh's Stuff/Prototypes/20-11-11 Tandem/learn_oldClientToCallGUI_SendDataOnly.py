@@ -21,7 +21,9 @@ print("Initiating Client")
 c = Client()
 print("Client Connected")
 
-# Read the queue from the GUI to grab instructions to send
+# Continually attempt to send messages to the server
+# If "quit" is sent, then it will send an empty string
+#   which turns off the server.
 queue = GUI.app.queue
 stopFlag = GUI.app.programEnd
 
@@ -43,15 +45,6 @@ def retrieveData(data):
 
   return output_data, remainder_data
 
-def parseFrameFromBytes(frame_data):
-  # If going the direct encode/decode to get frameBytes
-  frameBytes = base64.b64decode(frame_data) 
-
-  img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
-  frame = cv2.imdecode(img_as_np, flags=1)
-
-  return frame
-
 # Loop for receiving input, the input is added to a queue
 def getInput():
     global stopFlag
@@ -63,9 +56,24 @@ def getInput():
           print(f"Sending {command}")
 
           c.send(command.encode('utf-8'))
+          
+          # data = c.s.recv(1024) 
+          # print(f"Received: {repr(data)}")
       except KeyboardInterrupt:
         stopFlag = True
     print("Ended input loop")
+    # while True:
+    #     try:
+    #         command = input()
+
+    #         if command == 'quit':
+    #             stopFlag = True
+    #             return
+
+    #         c.send(command.encode('utf-8'))
+    #     except KeyboardInterrupt:
+    #         stopFlag = True
+    #         return
 
 def showVideo():
   # Loop for receiving images
@@ -75,38 +83,30 @@ def showVideo():
     try:
       if stopFlag:
         return
-      # # Retrieve message size
-      # while len(data) < payload_size:
-      #   data += c.s.recv(4096)
+      # Retrieve message size
+      while len(data) < payload_size:
+        data += c.s.recv(4096)
       
-      # packed_msg_size = data[:payload_size]
-      # data = data[payload_size:]
-      # msg_size = struct.unpack("Q", packed_msg_size)[0]
+      packed_msg_size = data[:payload_size]
+      data = data[payload_size:]
+      msg_size = struct.unpack("Q", packed_msg_size)[0]
 
-      # # Retrieve all dat based on message size
-      # while len(data) < msg_size:
-      #   data += c.s.recv(4096)
+      # Retrieve all dat based on message size
+      while len(data) < msg_size:
+        data += c.s.recv(4096)
       
-      # frame_data = data[:msg_size]
-      # data = data[msg_size:]
+      frame_data = data[:msg_size]
+      data = data[msg_size:]
 
-      frame_data, data = retrieveData(data)
-      # time_data, data = retrieveData(data)  # Uncomment to grab time data
+      # If going the direct encode/decode to get frameBytes
+      frameBytes = base64.b64decode(frame_data) 
 
-      frame = parseFrameFromBytes(frame_data)
-
-      # print(int.from_bytes(time_data, 'big')) # Uncomment to grab time_data
-
-      # # If going the direct encode/decode to get frameBytes
-      # frameBytes = base64.b64decode(frame_data) 
-
-      # img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
-      # frame = cv2.imdecode(img_as_np, flags=1)
+      img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
+      frame = cv2.imdecode(img_as_np, flags=1)
 
       # Display
       cv2.imshow("Frame", frame)
       cv2.waitKey(1)
-      # GUI.app.showFrame(frame)
 
     except KeyboardInterrupt:
       cv2.destroyAllWindows()
