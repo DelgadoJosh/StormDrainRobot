@@ -156,8 +156,10 @@ class App(threading.Thread):
         lights_entry,
         motors_left_entry,
         motors_right_entry,
-        servos_horizontal_entry,
-        servos_vertical_entry
+        # servos_horizontal_entry,
+        # servos_vertical_entry
+        servos_horizontal_slider,
+        servos_vertical_slider
       )) 
     send_data_loop.start()
 
