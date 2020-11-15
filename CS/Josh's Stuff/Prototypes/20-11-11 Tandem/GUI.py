@@ -48,7 +48,7 @@ class App(threading.Thread):
   #   print(outputString)
   #   self.queue.put(outputString)
 
-  dTime = 1
+  dTime = 0.01
   def continuallySendData(self, checkbox, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
     dTime = self.dTime
     nextTimeAvailable = time.time() + dTime
