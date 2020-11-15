@@ -50,18 +50,18 @@ class App(threading.Thread):
   #   print(outputString)
   #   self.queue.put(outputString)
 
-  camera = cv2.VideoCapture(0)   # TEMP
+  # camera = cv2.VideoCapture(0)   # TEMP
   dTime = 0.01
   def continuallySendData(self, checkbox, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
     dTime = self.dTime
     nextTimeAvailable = time.time() + dTime
-    camera = self.camera
+    # camera = self.camera # TEMP
     while True:
       # print(self.programEnd)
       # print("Should show new frame") #TEMP
-      _, frame = camera.read() #TEMP
-      self.showFrame(frame) #TEMP
-      time.sleep(dTime)
+      # _, frame = camera.read() #TEMP
+      # self.showFrame(frame) #TEMP
+      # time.sleep(dTime)
       if self.programEnd:
         break
       doConstantlySend = checkbox.get()

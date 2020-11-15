@@ -32,8 +32,8 @@ def getInput():
     global stopFlag
     while not stopFlag:
       stopFlag = GUI.app.programEnd
-      print("lol")
-      print(stopFlag)
+      # print("lol")
+      # print(stopFlag)
       try: 
         if not queue.empty():
           command = queue.get()
