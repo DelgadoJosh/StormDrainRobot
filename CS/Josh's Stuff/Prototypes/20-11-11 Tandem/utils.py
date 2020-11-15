@@ -8,12 +8,14 @@ SERVO_HORIZONTAL_INDEX = 3
 SERVO_VERTICAL_INDEX = 4
 
 # The Float Values
-FLOATS = [LIGHTS_INDEX, MOTOR_LEFT_INDEX, MOTOR_RIGHT_INDEX, SERVO_LEFT_INDEX, SERVO_RIGHT_INDEX]
+FLOATS = [LIGHTS_INDEX, MOTOR_LEFT_INDEX, MOTOR_RIGHT_INDEX, SERVO_HORIZONTAL_INDEX, SERVO_VERTICAL_INDEX]
 
 # Defining the bounds of values intended
 POSITIVE_PERCENTAGES = [LIGHTS_INDEX]
 PERCENTAGES = [MOTOR_LEFT_INDEX, MOTOR_RIGHT_INDEX]
-ANGLES = [SERVO_LEFT_INDEX, SERVO_RIGHT_INDEX]  # In the future, may want to make vertical index have custom bounds
+ANGLES = [SERVO_HORIZONTAL_INDEX, SERVO_VERTICAL_INDEX]  # In the future, may want to make vertical index have custom bounds
+
+MAX_ANGLE = 90
 
 data_len = len(POSITIVE_PERCENTAGES) + len(PERCENTAGES) + len(ANGLES)
 
@@ -39,7 +41,7 @@ def isFormatted(splitData):
 def isInMargins(parsedData):
     isInMargins = True
     for i in POSITIVE_PERCENTAGES:
-        if not (parsedData >= 0 and parsedData[i] <= 1):
+        if not (parsedData[i] >= 0 and parsedData[i] <= 1):
             isInMargins = False
 
     for i in PERCENTAGES:
@@ -59,7 +61,7 @@ def parse(data):
 
     if (isFormatted(splitData)):
         parsedData = []
-        for i in data_len:
+        for i in range(data_len):
             parsedData.append(float(splitData[i]))
 
         if (isInMargins(parsedData)):

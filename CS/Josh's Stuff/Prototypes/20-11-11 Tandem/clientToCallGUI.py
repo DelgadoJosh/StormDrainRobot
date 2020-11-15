@@ -1,13 +1,14 @@
 import socket 
 import GUI
 import struct
+import threading
 # from queue import Queue
 
 payload_size = struct.calcsize("Q")
 
 class Client():
-  ip_address = "10.0.0.2" # The one you're connecting to
-  # ip_address = "localhost"
+  # ip_address = "10.0.0.2" # The one you're connecting to
+  ip_address = "localhost"
   port = 5000
   def __init__(self, Address=(ip_address,port)):
     self.s = socket.socket() 
@@ -24,6 +25,7 @@ print("Client Connected")
 # If "quit" is sent, then it will send an empty string
 #   which turns off the server.
 queue = GUI.app.queue
+stopFlag = False
 
 # Loop for receiving input, the input is added to a queue
 def getInput():
@@ -35,8 +37,8 @@ def getInput():
 
         c.send(command.encode('utf-8'))
         
-        data = c.s.recv(1024) 
-        print(f"Received: {repr(data)}")
+        # data = c.s.recv(1024) 
+        # print(f"Received: {repr(data)}")
     # while True:
     #     try:
     #         command = input()

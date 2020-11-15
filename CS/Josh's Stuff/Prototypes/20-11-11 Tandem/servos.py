@@ -22,7 +22,7 @@ VERTICAL_PIN = 5
 # PWM_PIN = 0
 PINS = [HORIZONTAL_PIN, VERTICAL_PIN]
 
-print("Starting up")
+print("Starting up servo kit")
 myKit = ServoKit(channels=16, frequency=369) # 369   370 too high
 
 # lo = 0

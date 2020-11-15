@@ -24,6 +24,7 @@ import lights
 import utils
 # import time
 import motors
+import servos
 
 port = 5000
 ip_address = ""
@@ -144,8 +145,8 @@ def awaitInput():
         splitData = utils.parse(utils.cleanup(str(data)))
         if splitData is not None:
             lights.setPWM(splitData[utils.LIGHTS_INDEX])
-            motors.setLeftSpeed(splitData[utils.MOTORS_LEFT_INDEX])
-            motors.setRightSpeed(splitData[utils.MOTORS_RIGHT_INDEX])
+            motors.setLeftSpeed(splitData[utils.MOTOR_LEFT_INDEX])
+            motors.setRightSpeed(splitData[utils.MOTOR_RIGHT_INDEX])
             servos.setHorizontalAngle(splitData[utils.SERVO_HORIZONTAL_INDEX])
             servos.setVerticalAngle(splitData[utils.SERVO_VERTICAL_INDEX])
 
@@ -154,7 +155,7 @@ def awaitInput():
 send_video = threading.Thread(target=broadcastVideo) 
 get_input = threading.Thread(target=awaitInput)
 
-send_video.start()
+# send_video.start()
 get_input.start()
 
 # Trying using multiprocessing
