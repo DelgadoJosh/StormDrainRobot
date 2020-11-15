@@ -73,6 +73,21 @@ class App(threading.Thread):
     print(outputString)
     self.queue.put(outputString)
 
+  def showFrame(self, frame):
+    cv2Image = cv2.cvtColor(frame, cv2.COLOR_BG2RGBA)
+    resizedImage = cv2.resize(cv2Image, (1280, 720))
+    img = Image.fromarray(reizedImage)
+    imgTk = IMageTk.PhotoImage(image=img)
+
+    # Saves video to the directory
+    # out.write(frame)
+
+    global lmain
+    lmain.imgtk = imgTk
+    lmain.configure(image=imgtk)
+    lmain.after(1, show_frame)
+  
+  lmain = None
   def run(self):
     window = tk.Tk() 
     self.root = window
@@ -165,15 +180,12 @@ class App(threading.Thread):
 
     # Todo: Add a image for the info
     imageFrame = tk.Frame(window, width=1280, height=720)
+    # imageFrame.grid(row=2, column=0, columnspan=6)
     
-    # #   Capture video frames
-    # lmain = tk.Label(imageFrame)
-    # lmain.grid(row=0, column=0)
-    # cap = cv2.VideoCapture(0)
-    # #cap = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
-    # # Set to 1280x720
-    # cap.set(3, 1280)
-    # cap.set(4, 720)
+    # Capture video frames
+    global lmain
+    lmain = tk.Label(imageFrame)
+    lmain.grid(row=2, column=0, columnspan=6)
 
     # # Output Video, file type can be changed in future
     # fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -181,24 +193,6 @@ class App(threading.Thread):
 
     # # Init img for screenshot function
     # img = None
-
-    # def show_frame(frame):
-    #     frame = cv2.flip(frame, 1)
-    #     cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
-    #     # set img to global to capture in screenshot function
-    #     global img
-    #     #img = Image.fromarray(cv2image)
-    #     height, width, layers = cv2image.shape
-    #     resize = cv2.resize(cv2image, (1280, 720))
-    #     img = Image.fromarray(resize)
-    #     imgtk = ImageTk.PhotoImage(image=img)
-    #     # Saves video to directory, unsure as why it is sped up
-    #     # more likely an issue with lmain.after(1, show_frame) not sure how to fix
-    #     # RECORD
-    #     out.write(frame)
-    #     lmain.imgtk = imgtk
-    #     lmain.configure(image=imgtk)
-    #     lmain.after(1, show_frame) 
 
     # Todo: add a place where you put the current run info (pipe start id, pipe end id)
 
