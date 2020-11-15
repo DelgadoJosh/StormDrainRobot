@@ -24,6 +24,7 @@ class App(threading.Thread):
     time.sleep(0.2) # To let the loop close
     self.root.quit()
 
+  # Create a concurrency-safe queue for the client to read
   queue = Queue(maxsize=1000)
 
   ids = ["Foward", "Reverse", "Left turn in place", "Right turn in place"]
