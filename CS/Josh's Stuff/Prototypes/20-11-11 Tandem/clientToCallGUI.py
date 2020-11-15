@@ -7,8 +7,8 @@ import threading
 payload_size = struct.calcsize("Q")
 
 class Client():
-  # ip_address = "10.0.0.2" # The one you're connecting to
-  ip_address = "localhost"
+  ip_address = "10.0.0.2" # The one you're connecting to
+  # ip_address = "localhost"
   port = 5000
   def __init__(self, Address=(ip_address,port)):
     self.s = socket.socket() 
@@ -25,20 +25,24 @@ print("Client Connected")
 # If "quit" is sent, then it will send an empty string
 #   which turns off the server.
 queue = GUI.app.queue
-stopFlag = False
+stopFlag = GUI.app.programEnd
 
 # Loop for receiving input, the input is added to a queue
 def getInput():
     global stopFlag
-    while True:
-      if not queue.empty():
-        command = queue.get()
-        print(f"Sending {command}")
+    while not stopFlag:
+      try: 
+        if not queue.empty():
+          command = queue.get()
+          print(f"Sending {command}")
 
-        c.send(command.encode('utf-8'))
-        
-        # data = c.s.recv(1024) 
-        # print(f"Received: {repr(data)}")
+          c.send(command.encode('utf-8'))
+          
+          # data = c.s.recv(1024) 
+          # print(f"Received: {repr(data)}")
+      except KeyboardInterrupt:
+        stopFlag = True
+    print("Ended input loop")
     # while True:
     #     try:
     #         command = input()
@@ -88,6 +92,8 @@ def showVideo():
     except KeyboardInterrupt:
       cv2.destroyAllWindows()
       break
+  
+  print("Video loop end")
 
 
 input_thread = threading.Thread(target=getInput)
