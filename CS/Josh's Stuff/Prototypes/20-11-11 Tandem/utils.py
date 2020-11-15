@@ -13,11 +13,13 @@ FLOATS = [LIGHTS_INDEX, MOTOR_LEFT_INDEX, MOTOR_RIGHT_INDEX, SERVO_HORIZONTAL_IN
 # Defining the bounds of values intended
 POSITIVE_PERCENTAGES = [LIGHTS_INDEX]
 PERCENTAGES = [MOTOR_LEFT_INDEX, MOTOR_RIGHT_INDEX]
-ANGLES = [SERVO_HORIZONTAL_INDEX, SERVO_VERTICAL_INDEX]  # In the future, may want to make vertical index have custom bounds
+HORIZONTAL_ANGLES = [SERVO_HORIZONTAL_INDEX]  # In the future, may want to make vertical index have custom bounds
+VERTICAL_ANGLES = [SERVO_VERTICAL_INDEX]
 
-MAX_ANGLE = 90
+MAX_HORIZONTAL_ANGLE = 180
+MAX_VERTICAL_ANGLE = 90
 
-data_len = len(POSITIVE_PERCENTAGES) + len(PERCENTAGES) + len(ANGLES)
+data_len = len(POSITIVE_PERCENTAGES) + len(PERCENTAGES) + len(HORIZONTAL_ANGLES) + len(VERTICAL_ANGLES)
 
 # This is the cheeseiest thing I'm doing and I'm almost ashamed
 def isFloat(string):
@@ -48,8 +50,12 @@ def isInMargins(parsedData):
         if not (abs(parsedData[i]) <= 1):
             isInMargins = False
 
-    for i in ANGLES:
-        if not( parsedData[i] >= 0 and parsedData[i] <= MAX_ANGLE):
+    for i in HORIZONTAL_ANGLES:
+        if not( parsedData[i] >= 0 and parsedData[i] <= MAX_HORIZONTAL_ANGLE):
+            isInMargins = False
+    
+    for i in VERTICAL_ANGLES:
+        if not( parsedData[i] >= 0 and parsedData[i] <= MAX_VERTICAL_ANGLE):
             isInMargins = False
     
     return isInMargins
