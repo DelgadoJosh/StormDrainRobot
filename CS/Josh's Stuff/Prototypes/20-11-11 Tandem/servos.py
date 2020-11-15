@@ -36,3 +36,9 @@ for pin in PINS:
 def setAngle(angle, pin):
     print(f"Setting Pin {pin} to angle {angle}")
     myKit.servo[pin].angle = angle
+
+def setHorizontalAngle(angle):
+    setAngle(angle, HORIZONTAL_PIN) 
+
+def setVerticalAngle(angle):
+    setAngle(angle, VERTICAL_PIN)
