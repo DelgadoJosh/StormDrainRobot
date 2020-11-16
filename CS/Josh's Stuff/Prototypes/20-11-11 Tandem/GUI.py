@@ -275,14 +275,14 @@ class App(threading.Thread):
 # thread = threading.Thread(target=begin)
 # thread.start()
 
-# app = App()
+app = App()
 
-def init():
-  app = App()
-  print("GUI has begun")
+# def init():
+#   app = App()
+#   print("GUI has begun")
 
-def getApp():
-  app = App()
-  print("GUI has begun")
-  return app
+# def getApp():
+#   app = App()
+#   print("GUI has begun")
+#   return app
 
