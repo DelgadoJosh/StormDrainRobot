@@ -5,6 +5,7 @@ import threading
 import base64
 import numpy as np
 import cv2
+from multiprocessing import Process
 # from queue import Queue
 
 payload_size = struct.calcsize("Q")
@@ -125,6 +126,9 @@ def showVideo():
 
 input_thread = threading.Thread(target=getInput)
 video_thread = threading.Thread(target=showVideo)
+
+# input_thread = Process(target=getInput)
+# video_thread = Process(target=showVideo)
 
 input_thread.start()
 video_thread.start()
