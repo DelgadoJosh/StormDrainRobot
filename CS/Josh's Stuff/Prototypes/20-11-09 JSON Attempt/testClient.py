@@ -11,9 +11,9 @@ import numpy as np
 payload_size = struct.calcsize("Q")
 
 class Client_Viewer():
-  # ip_address = "10.0.0.2"
-  ip_address = "localhost"
-  port = 4000
+  ip_address = "10.0.0.2"
+  # ip_address = "localhost"
+  port = 5000
   def __init__(self, Address=(ip_address, port)):
     self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     self.s.connect(Address)

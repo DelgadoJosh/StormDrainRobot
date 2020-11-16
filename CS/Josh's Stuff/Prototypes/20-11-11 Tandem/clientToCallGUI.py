@@ -94,14 +94,16 @@ def showVideo():
       # data = data[msg_size:]
 
       frame_data, data = retrieveData(data)
+
       # time_data, data = retrieveData(data)  # Uncomment to grab time data
-      voltage_data, data = retrieveData(data)
+      # print(int.from_bytes(time_data, 'big')) # Uncomment to grab time_data
+
+      # voltage_data, data = retrieveData(data)
+      # print(f"ADC: Voltage={int.from_bytes(voltage_data, 'big') / 100.0}")
 
       frame = parseFrameFromBytes(frame_data)
 
-      print(f"ADC: Voltage={int.from_bytes(voltage_data, 'big') / 100.0}")
 
-      # print(int.from_bytes(time_data, 'big')) # Uncomment to grab time_data
 
       # # If going the direct encode/decode to get frameBytes
       # frameBytes = base64.b64decode(frame_data) 
