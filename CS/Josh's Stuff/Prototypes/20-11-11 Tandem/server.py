@@ -19,13 +19,14 @@ import struct
 import json 
 import base64
 import threading
-from multiprocessing import Process
+from multiprocessing import Process # Actually use multiple proccessors
 import lights
 import utils
 import time
 import motors
 import servos
 import adc
+from queue import Queue
 
 port = 5000
 ip_address = ""
@@ -97,32 +98,48 @@ def gstreamer_pipeline(
 # Initialize camera
 camera = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
 # camera = cv2.VideoCapture(0)  
-frame = None
+# frameShared = None
+frameQueue = Queue(maxsize=100)
+stopFlag = False
+frame = None 
 
 # A parallel thread
 def constantlyReadVideoFeed():
+    # global frameQueue
+    # global stopFlag
     global frame
+    print("Starting constantaly reading")
     while True:
         if stopFlag:
             return 
-        
+        print("Reading frame")
         grabbed, frame = camera.read()
+        frameQueue.put(frame)
+    print("Ending the video feed loop")
 
 # Loop to send the video, frame by frame.
 def broadcastVideo():
-    global frame 
-    read_video = threading.Thread(target=constantlyReadVideoFeed, daemon=True)
-    read_video.start()
+    global frame
+    # global camera
+    # global frameQueue
+    # read_video = threading.Thread(target=constantlyReadVideoFeed, daemon=True)
+    # read_video = Process(target=constantlyReadVideoFeed, daemon=True)
+    # read_video.start()
 
     frameIndex = 0
+    startTime = time.time()
     prevTime = time.time()
     while True: 
         try:
             # Grab the current frame
             # It should be updated by the looping constantlyReadVideoFeed()
-            # grabbed, frame = camera.read()
-            if frame == None:
-                continue 
+            grabbed, frame = camera.read()
+            # if frame == None:
+            #     continue 
+            # if frameQueue.qsize() == 0:
+            #     time.sleep(0.01)
+            #     continue 
+            # frame = frameQueue.get()
 
             # Encode the frame as a jpg
             grabbed, buffer = cv2.imencode('.jpg', frame)
@@ -142,13 +159,14 @@ def broadcastVideo():
             voltage_int = int(voltage*100)
             data = voltage_int.to_bytes(10, 'big')
             message_size = struct.pack("L", len(data))
-            s.Client.sendall(message_size + data)
+            # s.Client.sendall(message_size + data)
 
             # Record the current time needed
             curTime = time.time()
+            elapsedTime = curTime - startTime
             dTime = curTime - prevTime 
             prevTime = curTime
-            print(f"Frame {frameIndex} | fps: {1.0/dTime}")
+            print(f"Frame {frameIndex} | fps: {frameIndex/elapsedTime}")
             frameIndex += 1
 
         
@@ -178,11 +196,18 @@ def awaitInput():
 
 
 # Trying using threading
+read_video = Process(target=constantlyReadVideoFeed, daemon=True)
 send_video = threading.Thread(target=broadcastVideo) 
-get_input = threading.Thread(target=awaitInput)
+# get_input = threading.Thread(target=awaitInput)
 
+
+# send_video = Process(target=broadcastVideo, daemon=True)
+get_input = Process(target=awaitInput, daemon=True)
+
+# read_video.start()
 send_video.start()
-get_input.start()
+# get_input.start()
+
 
 # Trying using multiprocessing
 # send_video = Process(target=broadcastVideo)
