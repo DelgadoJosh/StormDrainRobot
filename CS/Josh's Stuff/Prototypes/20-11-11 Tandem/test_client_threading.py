@@ -71,115 +71,116 @@ print("Client Connected")
 #         stopFlag = True
 #     print("Ended input loop")
 
-# def showVideo():
-#   # Loop for receiving images
-#   global stopFlag
-#   data = b''
-#   while True:
-#     try:
-#       if stopFlag:
-#         return
-#       # Retrieve message size
-#       while len(data) < payload_size:
-#         data += c.s.recv(4096)
+stopFlag = False
+def showVideo():
+  # Loop for receiving images
+  global stopFlag
+  data = b''
+  while True:
+    try:
+      if stopFlag:
+        return
+      # Retrieve message size
+      while len(data) < payload_size:
+        data += c.s.recv(4096)
       
-#       packed_msg_size = data[:payload_size]
-#       data = data[payload_size:]
-#       msg_size = struct.unpack("Q", packed_msg_size)[0]
+      packed_msg_size = data[:payload_size]
+      data = data[payload_size:]
+      msg_size = struct.unpack("Q", packed_msg_size)[0]
 
-#       # Retrieve all dat based on message size
-#       while len(data) < msg_size:
-#         data += c.s.recv(4096)
+      # Retrieve all dat based on message size
+      while len(data) < msg_size:
+        data += c.s.recv(4096)
       
-#       frame_data = data[:msg_size]
-#       data = data[msg_size:]
+      frame_data = data[:msg_size]
+      data = data[msg_size:]
 
-#       # frame_data, data = retrieveData(data)
+      # frame_data, data = retrieveData(data)
 
-#       # time_data, data = retrieveData(data)  # Uncomment to grab time data
-#       # print(int.from_bytes(time_data, 'big')) # Uncomment to grab time_data
+      # time_data, data = retrieveData(data)  # Uncomment to grab time data
+      # print(int.from_bytes(time_data, 'big')) # Uncomment to grab time_data
 
-#       # voltage_data, data = retrieveData(data)
-#       # print(f"ADC: Voltage={int.from_bytes(voltage_data, 'big') / 100.0}")
+      # voltage_data, data = retrieveData(data)
+      # print(f"ADC: Voltage={int.from_bytes(voltage_data, 'big') / 100.0}")
 
-#       # frame = parseFrameFromBytes(frame_data)
+      # frame = parseFrameFromBytes(frame_data)
 
 
 
-#       # If going the direct encode/decode to get frameBytes
-#       frameBytes = base64.b64decode(frame_data) 
+      # If going the direct encode/decode to get frameBytes
+      frameBytes = base64.b64decode(frame_data) 
 
-#       img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
-#       frame = cv2.imdecode(img_as_np, flags=1)
+      img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
+      frame = cv2.imdecode(img_as_np, flags=1)
 
-#       # Display
-#       # cv2.imshow("Frame", frame)
-#       # cv2.waitKey(1)
-#       # GUI.app.showFrame(frame)
+      # Display
+      cv2.imshow("Frame", frame)
+      cv2.waitKey(1)
+      # GUI.app.showFrame(frame)
 
-#     except KeyboardInterrupt:
-#       cv2.destroyAllWindows()
-#       break
+    except KeyboardInterrupt:
+      cv2.destroyAllWindows()
+      break
   
-#   print("Video loop end")
+  print("Video loop end")
 
 
 # input_thread = threading.Thread(target=getInput)
-# video_thread = threading.Thread(target=showVideo)
+video_thread = threading.Thread(target=showVideo)
 
 # input_thread = Process(target=getInput)
 # video_thread = Process(target=showVideo)
 
 # input_thread.start()
-# video_thread.start()
+video_thread.start()
 
 
-stopFlag = False
-data = b''
-while True:
-  try:
-    if stopFlag:
-      break
-    # Retrieve message size
-    while len(data) < payload_size:
-      data += c.s.recv(4096)
+# stopFlag = False
+# data = b''
+# while True:
+#   try:
+#     if stopFlag:
+#       break
+#     # Retrieve message size
+#     while len(data) < payload_size:
+#       data += c.s.recv(4096)
     
-    packed_msg_size = data[:payload_size]
-    data = data[payload_size:]
-    msg_size = struct.unpack("Q", packed_msg_size)[0]
+#     packed_msg_size = data[:payload_size]
+#     data = data[payload_size:]
+#     msg_size = struct.unpack("Q", packed_msg_size)[0]
 
-    # Retrieve all dat based on message size
-    while len(data) < msg_size:
-      data += c.s.recv(4096)
+#     # Retrieve all dat based on message size
+#     while len(data) < msg_size:
+#       data += c.s.recv(4096)
     
-    frame_data = data[:msg_size]
-    data = data[msg_size:]
+#     frame_data = data[:msg_size]
+#     data = data[msg_size:]
 
-    # frame_data, data = retrieveData(data)
+#     # frame_data, data = retrieveData(data)
 
-    # time_data, data = retrieveData(data)  # Uncomment to grab time data
-    # print(int.from_bytes(time_data, 'big')) # Uncomment to grab time_data
+#     # time_data, data = retrieveData(data)  # Uncomment to grab time data
+#     # print(int.from_bytes(time_data, 'big')) # Uncomment to grab time_data
 
-    # voltage_data, data = retrieveData(data)
-    # print(f"ADC: Voltage={int.from_bytes(voltage_data, 'big') / 100.0}")
+#     # voltage_data, data = retrieveData(data)
+#     # print(f"ADC: Voltage={int.from_bytes(voltage_data, 'big') / 100.0}")
 
-    # frame = parseFrameFromBytes(frame_data)
+#     # frame = parseFrameFromBytes(frame_data)
 
 
 
-    # If going the direct encode/decode to get frameBytes
-    frameBytes = base64.b64decode(frame_data) 
+#     # If going the direct encode/decode to get frameBytes
+#     frameBytes = base64.b64decode(frame_data) 
 
-    img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
-    frame = cv2.imdecode(img_as_np, flags=1)
+#     img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
+#     frame = cv2.imdecode(img_as_np, flags=1)
 
-    # Display
-    cv2.imshow("Frame", frame)
-    cv2.waitKey(1)
-    # GUI.app.showFrame(frame)
+#     # Display
+#     cv2.imshow("Frame", frame)
+#     cv2.waitKey(1)
+#     # GUI.app.showFrame(frame)
 
-  except KeyboardInterrupt:
-    cv2.destroyAllWindows()
-    break
+#   except KeyboardInterrupt:
+#     cv2.destroyAllWindows()
+#     break
   
-print("Video loop end")
+# print("Video loop end")
