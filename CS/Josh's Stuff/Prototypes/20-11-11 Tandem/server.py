@@ -22,7 +22,7 @@ import threading
 from multiprocessing import Process
 import lights
 import utils
-# import time
+import time
 import motors
 import servos
 import adc
@@ -121,6 +121,9 @@ def broadcastVideo():
 
             # Grab the voltage data
             voltage = adc.getVoltage()
+            # data = voltage.to_bytes(10, 'big')
+            voltage_int = int(voltage*100)
+            data = voltage_int.to_bytes(10, 'big')
             message_size = struct.pack("L", len(data))
             s.Client.sendall(message_size + data)
 
