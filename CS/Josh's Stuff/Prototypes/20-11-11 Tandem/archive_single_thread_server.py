@@ -22,7 +22,7 @@ import threading
 from multiprocessing import Process
 import lights
 import utils
-import time
+# import time
 import motors
 import servos
 import adc
@@ -97,32 +97,15 @@ def gstreamer_pipeline(
 # Initialize camera
 camera = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
 # camera = cv2.VideoCapture(0)  
-frame = None
-
-# A parallel thread
-def constantlyReadVideoFeed():
-    global frame
-    while True:
-        if stopFlag:
-            return 
-        
-        grabbed, frame = camera.read()
 
 # Loop to send the video, frame by frame.
 def broadcastVideo():
-    global frame 
-    read_video = threading.Thread(target=constantlyReadVideoFeed, daemon=True)
-    read_video.start()
-
     frameIndex = 0
     prevTime = time.time()
     while True: 
         try:
             # Grab the current frame
-            # It should be updated by the looping constantlyReadVideoFeed()
-            # grabbed, frame = camera.read()
-            if frame == None:
-                continue 
+            grabbed, frame = camera.read()
 
             # Encode the frame as a jpg
             grabbed, buffer = cv2.imencode('.jpg', frame)
@@ -138,9 +121,6 @@ def broadcastVideo():
 
             # Grab the voltage data
             voltage = adc.getVoltage()
-            # data = voltage.to_bytes(10, 'big')
-            voltage_int = int(voltage*100)
-            data = voltage_int.to_bytes(10, 'big')
             message_size = struct.pack("L", len(data))
             s.Client.sendall(message_size + data)
 

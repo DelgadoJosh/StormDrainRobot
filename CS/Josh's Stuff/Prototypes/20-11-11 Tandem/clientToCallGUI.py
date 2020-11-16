@@ -2,6 +2,9 @@ import socket
 import GUI
 import struct
 import threading
+import base64
+import numpy as np
+import cv2
 # from queue import Queue
 
 payload_size = struct.calcsize("Q")
@@ -92,8 +95,11 @@ def showVideo():
 
       frame_data, data = retrieveData(data)
       # time_data, data = retrieveData(data)  # Uncomment to grab time data
+      voltage_data, data = retrieveData(data)
 
       frame = parseFrameFromBytes(frame_data)
+
+      print(f"ADC: Voltage={int.from_bytes(voltage_data, 'big') / 100.0}")
 
       # print(int.from_bytes(time_data, 'big')) # Uncomment to grab time_data
 
@@ -104,9 +110,9 @@ def showVideo():
       # frame = cv2.imdecode(img_as_np, flags=1)
 
       # Display
-      cv2.imshow("Frame", frame)
-      cv2.waitKey(1)
-      # GUI.app.showFrame(frame)
+      # cv2.imshow("Frame", frame)
+      # cv2.waitKey(1)
+      GUI.app.showFrame(frame)
 
     except KeyboardInterrupt:
       cv2.destroyAllWindows()
