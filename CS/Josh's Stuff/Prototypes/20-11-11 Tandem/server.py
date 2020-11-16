@@ -97,15 +97,32 @@ def gstreamer_pipeline(
 # Initialize camera
 camera = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
 # camera = cv2.VideoCapture(0)  
+frame = None
+
+# A parallel thread
+def constantlyReadVideoFeed():
+    global frame
+    while True:
+        if stopFlag:
+            return 
+        
+        grabbed, frame = camera.read()
 
 # Loop to send the video, frame by frame.
 def broadcastVideo():
+    global frame 
+    read_video = threading.Thread(target=constantlyReadVideoFeed, daemon=True)
+    read_video.start()
+
     frameIndex = 0
     prevTime = time.time()
     while True: 
         try:
             # Grab the current frame
-            grabbed, frame = camera.read()
+            # It should be updated by the looping constantlyReadVideoFeed()
+            # grabbed, frame = camera.read()
+            if frame == None:
+                continue 
 
             # Encode the frame as a jpg
             grabbed, buffer = cv2.imencode('.jpg', frame)
