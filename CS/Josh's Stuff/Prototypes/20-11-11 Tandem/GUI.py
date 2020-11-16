@@ -22,6 +22,7 @@ class App(threading.Thread):
   def callback(self):
     self.programEnd = True
     time.sleep(0.2) # To let the loop close
+    # threading._shutdown()
     self.root.quit()
 
   # Create a concurrency-safe queue for the client to read

@@ -25,6 +25,7 @@ import utils
 # import time
 import motors
 import servos
+import adc
 
 port = 5000
 ip_address = ""
@@ -117,7 +118,12 @@ def broadcastVideo():
 
             # Then data
             s.Client.sendall(message_size + data)
-            
+
+            # Grab the voltage data
+            voltage = adc.getVoltage()
+            message_size = struct.pack("L", len(data))
+            s.Client.sendall(message_size + data)
+
             # Record the current time needed
             curTime = time.time()
             dTime = curTime - prevTime 
@@ -155,7 +161,7 @@ def awaitInput():
 send_video = threading.Thread(target=broadcastVideo) 
 get_input = threading.Thread(target=awaitInput)
 
-# send_video.start()
+send_video.start()
 get_input.start()
 
 # Trying using multiprocessing
