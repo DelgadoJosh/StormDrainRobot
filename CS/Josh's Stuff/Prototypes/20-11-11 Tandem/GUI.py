@@ -337,5 +337,12 @@ class App(threading.Thread):
 
 app = App()
 
-print("GUI has begun")
+# def init():
+#   app = App()
+#   print("GUI has begun")
+
+# def getApp():
+#   app = App()
+#   print("GUI has begun")
+#   return app
 

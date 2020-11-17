@@ -28,34 +28,33 @@ print("Client Connected")
 # Read the queue from the GUI to grab instructions to send
 queue = GUI.app.queue
 stopFlag = GUI.app.programEnd
-frameQueue = GUI.app.frameQueue
 
-def retrieveData(data):
-  # Retrieve the message data from the stream, parsing in a single bit of data
-  while len(data) < payload_size:
-    data += c.s.recv(4096)
+# def retrieveData(data):
+#   # Retrieve the message data from the stream, parsing in a single bit of data
+#   while len(data) < payload_size:
+#     data += c.s.recv(4096)
   
-  packed_msg_size = data[:payload_size]
-  data = data[payload_size:]
-  msg_size = struct.unpack("Q", packed_msg_size)[0]
+#   packed_msg_size = data[:payload_size]
+#   data = data[payload_size:]
+#   msg_size = struct.unpack("Q", packed_msg_size)[0]
 
-  # Retrieve all the data based on the message size, in buffers of 4096
-  while len(data) < msg_size:
-    data += c.s.recv(4096)
+#   # Retrieve all the data based on the message size, in buffers of 4096
+#   while len(data) < msg_size:
+#     data += c.s.recv(4096)
   
-  output_data = data[:msg_size]
-  remainder_data = data[msg_size:]
+#   output_data = data[:msg_size]
+#   remainder_data = data[msg_size:]
 
-  return output_data, remainder_data
+#   return output_data, remainder_data
 
-def parseFrameFromBytes(frame_data):
-  # If going the direct encode/decode to get frameBytes
-  frameBytes = base64.b64decode(frame_data) 
+# def parseFrameFromBytes(frame_data):
+#   # If going the direct encode/decode to get frameBytes
+#   frameBytes = base64.b64decode(frame_data) 
 
-  img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
-  frame = cv2.imdecode(img_as_np, flags=1)
+#   img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
+#   frame = cv2.imdecode(img_as_np, flags=1)
 
-  return frame
+#   return frame
 
 # Loop for receiving input, the input is added to a queue
 def getInput():
@@ -72,6 +71,7 @@ def getInput():
         stopFlag = True
     print("Ended input loop")
 
+# stopFlag = False
 def showVideo():
   # Loop for receiving images
   global stopFlag
@@ -80,22 +80,22 @@ def showVideo():
     try:
       if stopFlag:
         return
-      # # Retrieve message size
-      # while len(data) < payload_size:
-      #   data += c.s.recv(4096)
+      # Retrieve message size
+      while len(data) < payload_size:
+        data += c.s.recv(4096)
       
-      # packed_msg_size = data[:payload_size]
-      # data = data[payload_size:]
-      # msg_size = struct.unpack("Q", packed_msg_size)[0]
+      packed_msg_size = data[:payload_size]
+      data = data[payload_size:]
+      msg_size = struct.unpack("Q", packed_msg_size)[0]
 
-      # # Retrieve all dat based on message size
-      # while len(data) < msg_size:
-      #   data += c.s.recv(4096)
+      # Retrieve all dat based on message size
+      while len(data) < msg_size:
+        data += c.s.recv(4096)
       
-      # frame_data = data[:msg_size]
-      # data = data[msg_size:]
+      frame_data = data[:msg_size]
+      data = data[msg_size:]
 
-      frame_data, data = retrieveData(data)
+      # frame_data, data = retrieveData(data)
 
       # time_data, data = retrieveData(data)  # Uncomment to grab time data
       # print(int.from_bytes(time_data, 'big')) # Uncomment to grab time_data
@@ -103,22 +103,20 @@ def showVideo():
       # voltage_data, data = retrieveData(data)
       # print(f"ADC: Voltage={int.from_bytes(voltage_data, 'big') / 100.0}")
 
-      frame = parseFrameFromBytes(frame_data)
+      # frame = parseFrameFromBytes(frame_data)
 
 
 
-      # # If going the direct encode/decode to get frameBytes
-      # frameBytes = base64.b64decode(frame_data) 
+      # If going the direct encode/decode to get frameBytes
+      frameBytes = base64.b64decode(frame_data) 
 
-      # img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
-      # frame = cv2.imdecode(img_as_np, flags=1)
+      img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
+      frame = cv2.imdecode(img_as_np, flags=1)
 
       # Display
       # cv2.imshow("Frame", frame)
       # cv2.waitKey(1)
-      # GUI.app.showFrame(frame)
-      if not frameQueue.full():
-        frameQueue.put(frame)
+      GUI.app.showFrame(frame)
 
     except KeyboardInterrupt:
       cv2.destroyAllWindows()
