@@ -100,9 +100,9 @@ class App(threading.Thread):
     # out.write(frame)
 
     # global lmain
-    lmain.imgtk = imgTk
-    lmain.configure(image=imgTk)
-    lmain.image = imgTk
+    self.lmain.imgtk = imgTk
+    self.lmain.configure(image=imgTk)
+    self.lmain.image = imgTk
     # lmain.after(1, self.showFrame) # After a delay of 1 ms, it would call itself again
 
     self.numFrames += 1
@@ -189,6 +189,7 @@ class App(threading.Thread):
     # Todo: Add a box for data
     data_frame = tk.Frame(self.root, relief=tk.RAISED, borderwidth=2)
     data_frame.grid(row=0, column=7, rowspan=2)
+    # Populate the box with data
     self.fps_label = tk.Label(data_frame, text="FPS: 0")
     self.fps_label.grid(row=0, column=0) 
 
@@ -212,9 +213,8 @@ class App(threading.Thread):
     imageFrame.grid(row=2, column=0, columnspan=8)
     
     # Capture video frames
-    global lmain
-    lmain = tk.Label(imageFrame)
-    lmain.grid(row=0, column=0)
+    self.lmain = tk.Label(imageFrame)
+    self.lmain.grid(row=0, column=0)
 
     # # Output Video, file type can be changed in future
     # fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -226,67 +226,6 @@ class App(threading.Thread):
     # Todo: add a place where you put the current run info (pipe start id, pipe end id)
 
     self.root.mainloop()
-
-    # lights_entry.pack()
-    # lights_text = lights_entry.get()
-
-
-
-    # entry = tk.Entry(
-    #   fg="yellow",
-    #   bg="blue",
-    #   width=50
-    # )
-    # entry.pack()
-
-    # for row in range(len(ids)):
-    #   nameFrame = tk.Frame(
-    #     master=window,
-    #     relief=tk.FLAT,
-    #     borderwidth = 1
-    #   )
-    #   nameFrame.grid(row=row, column=0, padx=2, pady=2, sticky="w")
-    #   label = tk.Label(master=nameFrame, text=f"{ids[row]}")
-    #   label.pack(fill = tk.BOTH)
-
-    #   for col in range(1, len(vals)+1):
-    #     frame = tk.Frame(
-    #       master=window,
-    #       relief=tk.RAISED,
-    #       borderwidth = 1
-    #     )
-    #     frame.grid(row=row, column=col, padx=2, pady=2) 
-    #     # label = tk.Label(master=frame, text=f"Row {row}\nColumn {col}")
-    #     # label = tk.Label(master=frame, text=f"{vals[col-1]}")
-    #     # label.pack() 
-
-    #     # https://stackoverflow.com/questions/7299955/tkinter-binding-a-function-with-arguments-to-a-widget
-    #     button = tk.Button(
-    #       master=frame,
-    #       text = f"{vals[col-1]}",
-    #       command = lambda row=row, col=col: self.handle_click(row, col)
-    #       # width = 25,
-    #       # height = 5,
-    #       # bg = "blue",
-    #       # fg = "yellow"
-    #     )
-        
-    #     # button.bind("<Button-1>", handle_click)
-    #     # <Button-1> = left click
-    #     # <Button-2> = middle click
-    #     # <Button-3> = right click
-    #     button.pack()
-
-    # stopButton = tk.Button(
-    #   master=window,
-    #   text = f"Set speed to 0",
-    #   command = lambda leftSpeed=0, rightSpeed=0: self.setSpeed(leftSpeed, rightSpeed)
-    # )
-    # stopButton.grid(row=len(ids), column=1, columnspan=len(vals), sticky="WE")
-
-    # # Begin the main loop
-    # self.root.mainloop()
-
 
 
 # https://stackoverflow.com/questions/459083/how-do-you-run-your-own-code-alongside-tkinters-event-loop
