@@ -19,7 +19,7 @@ class App(threading.Thread):
     self.start()
   
   programEnd = False
-  def quit(self):
+  def onClose(self):
     self.programEnd = True
     time.sleep(0.2) # To let the loop close
     # threading._shutdown()
@@ -170,7 +170,7 @@ class App(threading.Thread):
   def run(self):
     window = tk.Tk() 
     self.root = window
-    self.root.protocol("WM_DELETE_WINDOW", self.quit)
+    self.root.protocol("WM_DELETE_WINDOW", self.onClose)
 
     ids = self.ids 
     vals = self.vals 
