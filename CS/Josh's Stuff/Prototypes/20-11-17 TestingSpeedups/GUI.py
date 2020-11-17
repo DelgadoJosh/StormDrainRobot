@@ -99,11 +99,11 @@ class App(threading.Thread):
     # Saves video to the directory
     # out.write(frame)
 
-    global lmain
+    # global lmain
     lmain.imgtk = imgTk
     lmain.configure(image=imgTk)
     lmain.image = imgTk
-    # lmain.after(1, self.showFrame)
+    # lmain.after(1, self.showFrame) # After a delay of 1 ms, it would call itself again
 
     self.numFrames += 1
     duration = time.time() - self.startTime 
