@@ -33,6 +33,7 @@ def showVideo():
 
   # Loop for showing images images
   global stopFlag
+  global frameQueue
   data = b''
   startTime = time.time()
   numFrames = 0
@@ -46,11 +47,14 @@ def showVideo():
       numFrames += 1
       duration = time.time() - startTime 
       fps = numFrames / duration 
+      print(f"FPS: {fps}")
 
       # Display
       # cv2.imshow("Frame", frame)
       # cv2.waitKey(1)
-      GUI.app.showFrame(frame)
+      # GUI.app.showFrame(frame)
+      if not frameQueue.full():
+        frameQueue.put(frame)
 
     except KeyboardInterrupt:
       cv2.destroyAllWindows()

@@ -119,14 +119,16 @@ class App(threading.Thread):
 
   curFrame = None
   frameQueue = Queue(maxsize=100)
-  frameRefreshDelayMs = 10
+  frameRefreshMaxFramerate = 60
+  frameRefreshDelayMs = int(1000 / 60)
   def refreshFrame(self):
     # Try to grab a new frame from the queue
+    print("Refreshing frame")
     if not self.frameQueue.empty():
       # Then we update the cur frame
       self.curFrame = self.frameQueue.get()
 
-    if self.curFrame != None:
+    if self.curFrame is not None:
       # Parse the image
       img, imgTk = self.parseFrame(self.curFrame)
 
@@ -139,7 +141,7 @@ class App(threading.Thread):
       duration = time.time() - self.startTime 
       self.setFPS(self.numFrames/duration) 
 
-      self.lmain.after(self.frameRefreshDelayMs, refreshFrame)
+    self.lmain.after(self.frameRefreshDelayMs, self.refreshFrame)
 
   lmain = None
   def run(self):
