@@ -103,6 +103,14 @@ class App(threading.Thread):
       return
     self.fps_label["text"] = f"FPS: {fps:3.2f}"
 
+  # Function to parse a frame into an image and imgtk
+  def parseFrame(self, frame):
+    cv2Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+    resizedImage = cv2.resize(cv2Image, (1280, 720))
+    img = Image.fromarray(resizedImage)
+    imgTk = ImageTk.PhotoImage(image=img)
+    return img, imgTk
+
   # Thread to grab the video frame
   startTime = 0
   numFrames = 0
