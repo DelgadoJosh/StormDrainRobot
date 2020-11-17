@@ -27,6 +27,7 @@ print("Client Connected")
 # Read the queue from the GUI to grab instructions to send
 queue = GUI.app.queue
 stopFlag = GUI.app.programEnd
+frameQueue = GUI.app.frameQueue
 
 def retrieveData(data):
   # Retrieve the message data from the stream, parsing in a single bit of data
@@ -112,7 +113,9 @@ def showVideo():
       # Display
       # cv2.imshow("Frame", frame)
       # cv2.waitKey(1)
-      GUI.app.showFrame(frame)
+      # GUI.app.showFrame(frame)
+      if not frameQueue.full():
+        frameQueue.put(frame)
 
     except KeyboardInterrupt:
       cv2.destroyAllWindows()
