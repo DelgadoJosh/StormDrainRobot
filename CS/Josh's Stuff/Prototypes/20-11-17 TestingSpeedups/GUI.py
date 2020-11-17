@@ -86,29 +86,29 @@ class App(threading.Thread):
   def setFPS(self, fps):
     if self.fps_label == None:
       return
-    self.fps_label["text"] = f"FPS: {fps}"
+    self.fps_label["text"] = f"FPS: {fps:3.2f}"
 
   startTime = 0
   numFrames = 0
-  def showFrame(self, frame):
-    # cv2Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
-    # resizedImage = cv2.resize(cv2Image, (1280, 720))
-    # img = Image.fromarray(resizedImage)
-    # imgTk = ImageTk.PhotoImage(image=img)
-    img, imgTk = self.parseFrame(frame)
+  # def showFrame(self, frame):
+  #   # cv2Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+  #   # resizedImage = cv2.resize(cv2Image, (1280, 720))
+  #   # img = Image.fromarray(resizedImage)
+  #   # imgTk = ImageTk.PhotoImage(image=img)
+  #   img, imgTk = self.parseFrame(frame)
 
-    # Saves video to the directory
-    # out.write(frame)
+  #   # Saves video to the directory
+  #   # out.write(frame)
 
-    # global lmain
-    self.lmain.imgtk = imgTk
-    self.lmain.configure(image=imgTk)
-    self.lmain.image = imgTk
-    # lmain.after(1, self.showFrame) # After a delay of 1 ms, it would call itself again
+  #   # global lmain
+  #   self.lmain.imgtk = imgTk
+  #   self.lmain.configure(image=imgTk)
+  #   self.lmain.image = imgTk
+  #   # lmain.after(1, self.showFrame) # After a delay of 1 ms, it would call itself again
 
-    self.numFrames += 1
-    duration = time.time() - self.startTime 
-    self.setFPS(self.numFrames/duration)
+  #   self.numFrames += 1
+  #   duration = time.time() - self.startTime 
+  #   self.setFPS(self.numFrames/duration)
 
   def parseFrame(self, frame):
     cv2Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
@@ -132,6 +132,7 @@ class App(threading.Thread):
       # Parse the image
       img, imgTk = self.parseFrame(self.curFrame)
 
+      # Update the image
       self.lmain.imgtk = imgTk 
       self.lmain.configure(image=imgTk) 
       self.lmain.image = imgTk 
