@@ -91,10 +91,11 @@ class App(threading.Thread):
   startTime = 0
   numFrames = 0
   def showFrame(self, frame):
-    cv2Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
-    resizedImage = cv2.resize(cv2Image, (1280, 720))
-    img = Image.fromarray(resizedImage)
-    imgTk = ImageTk.PhotoImage(image=img)
+    # cv2Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+    # resizedImage = cv2.resize(cv2Image, (1280, 720))
+    # img = Image.fromarray(resizedImage)
+    # imgTk = ImageTk.PhotoImage(image=img)
+    img, imgTk = self.parseFrame(frame)
 
     # Saves video to the directory
     # out.write(frame)
@@ -108,7 +109,38 @@ class App(threading.Thread):
     self.numFrames += 1
     duration = time.time() - self.startTime 
     self.setFPS(self.numFrames/duration)
-  
+
+  def parseFrame(self, frame):
+    cv2Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+    resizedImage = cv2.resize(cv2Image, (1280, 720))
+    img = Image.fromarray(resizedImage)
+    imgTk = ImageTk.PhotoImage(image=img)
+    return img, imgTk
+
+  curFrame = None
+  frameQueue = Queue(maxsize=100)
+  frameRefreshDelayMs = 10
+  def refreshFrame(self):
+    # Try to grab a new frame from the queue
+    if not self.frameQueue.empty():
+      # Then we update the cur frame
+      self.curFrame = self.frameQueue.get()
+
+    if self.curFrame != None:
+      # Parse the image
+      img, imgTk = self.parseFrame(self.curFrame)
+
+      self.lmain.imgtk = imgTk 
+      self.lmain.configure(image=imgTk) 
+      self.lmain.image = imgTk 
+      
+      # Update the framerate
+      self.numFrames += 1
+      duration = time.time() - self.startTime 
+      self.setFPS(self.numFrames/duration) 
+
+      self.lmain.after(self.frameRefreshDelayMs, refreshFrame)
+
   lmain = None
   def run(self):
     window = tk.Tk() 

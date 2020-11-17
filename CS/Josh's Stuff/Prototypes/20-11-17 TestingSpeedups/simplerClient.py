@@ -11,6 +11,7 @@ import time
 # Read the queue from the GUI to grab instructions to send
 queue = GUI.app.queue
 stopFlag = GUI.app.programEnd
+frameQueue = GUI.app.frameQueue
 
 # Loop for receiving input, the input is added to a queue
 def getInput():
