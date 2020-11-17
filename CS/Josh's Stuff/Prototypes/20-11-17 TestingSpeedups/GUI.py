@@ -32,25 +32,25 @@ class App(threading.Thread):
   multipliers = [[1, 1], [-1, -1], [-1, 1], [1, -1]]
   vals = [10, 25, 50, 75, 100]
 
-  # def setSpeed(self, leftSpeed, rightSpeed):
-  #   print(f"Changing left to {leftSpeed} and changing right to {rightSpeed}")
-  #   speedString = f"{leftSpeed} {rightSpeed}"
-  #   self.queue.put(speedString)
+  def setSpeed(self, leftSpeed, rightSpeed):
+    print(f"Changing left to {leftSpeed} and changing right to {rightSpeed}")
+    speedString = f"{leftSpeed} {rightSpeed}"
+    self.queue.put(speedString)
 
 
-  # def handle_click(self, row, col):
-  #   # print(f"The button was clicked! by {row} {col}")
-  #   multipliers = self.multipliers 
-  #   vals = self.vals
-  #   leftSpeed = multipliers[row][0]*vals[col-1]
-  #   rightSpeed = multipliers[row][1]*vals[col-1]
-  #   self.setSpeed(leftSpeed, rightSpeed)
-  #   # testLoop.changeSpeed(leftSpeed, rightSpeed)
+  def handle_click(self, row, col):
+    # print(f"The button was clicked! by {row} {col}")
+    multipliers = self.multipliers 
+    vals = self.vals
+    leftSpeed = multipliers[row][0]*vals[col-1]
+    rightSpeed = multipliers[row][1]*vals[col-1]
+    self.setSpeed(leftSpeed, rightSpeed)
+    # testLoop.changeSpeed(leftSpeed, rightSpeed)
 
-  # def submitData(self, lights_percent, motor_left_percent, motor_right_percent, servo_horizontal_angle, servo_vertical_angle):
-  #   outputString = f"{lights_percent} {motor_left_percent} {motor_right_percent} {servo_horizontal_angle} {servo_vertical_angle}"
-  #   print(outputString)
-  #   self.queue.put(outputString)
+  def submitData(self, lights_percent, motor_left_percent, motor_right_percent, servo_horizontal_angle, servo_vertical_angle):
+    outputString = f"{lights_percent} {motor_left_percent} {motor_right_percent} {servo_horizontal_angle} {servo_vertical_angle}"
+    print(outputString)
+    self.queue.put(outputString)
 
   # camera = cv2.VideoCapture(0)   # TEMP
   dTime = 0.01
@@ -144,6 +144,28 @@ class App(threading.Thread):
 
     self.lmain.after(self.frameRefreshDelayMs, self.refreshFrame)
 
+  # Threading version!
+  def refreshFrame(self):
+    while True:
+      if not self.frameQueue.empty():
+        # Then we update the cur frame
+        self.curFrame = self.frameQueue.get()
+
+      if self.curFrame is not None:
+        # Parse the image
+        img, imgTk = self.parseFrame(self.curFrame)
+
+        # Update the image
+        self.lmain.imgtk = imgTk 
+        self.lmain.configure(image=imgTk) 
+        self.lmain.image = imgTk 
+        
+        # Update the framerate
+        self.numFrames += 1
+        duration = time.time() - self.startTime 
+        self.setFPS(self.numFrames/duration) 
+      time.sleep(self.frameRefreshDelayMs/1000)
+
   lmain = None
   def run(self):
     window = tk.Tk() 
@@ -229,7 +251,8 @@ class App(threading.Thread):
     self.fps_label.grid(row=0, column=0) 
 
     # Start a thread so it'll keep on sending every dTime interval if the checkbox is checked
-    send_data_loop = threading.Thread(target=self.continuallySendData, 
+    send_data_loop = threading.Thread(
+      target=self.continuallySendData, 
       args=(
         constantly_submit_checkbox_val, 
         lights_entry,
@@ -250,7 +273,12 @@ class App(threading.Thread):
     # Capture video frames
     self.lmain = tk.Label(imageFrame)
     self.lmain.grid(row=0, column=0)
-    self.refreshFrame()
+    # self.refreshFrame()
+    refresh_frame_loop = threading.Thread(
+      target=self.refreshFrame,
+      daemon=True
+    )
+    refresh_frame_loop.start()
 
     # # Output Video, file type can be changed in future
     # fourcc = cv2.VideoWriter_fourcc(*'XVID')
