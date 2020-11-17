@@ -18,12 +18,13 @@ def getInput():
     global stopFlag
     while not stopFlag:
       stopFlag = GUI.app.programEnd
+      time.sleep(0.01)
       try: 
         if not queue.empty():
           command = queue.get()
           print(f"Sending {command}")
 
-          c.send(command.encode('utf-8'))
+          # c.send(command.encode('utf-8'))
       except KeyboardInterrupt:
         stopFlag = True
     print("Ended input loop")
@@ -63,9 +64,9 @@ def showVideo():
   print("Video loop end")
 
 
-# input_thread = threading.Thread(target=getInput, daemon=True)
+input_thread = threading.Thread(target=getInput, daemon=True)
 video_thread = threading.Thread(target=showVideo, daemon=True)
 
-# input_thread.start()
+input_thread.start()
 video_thread.start()
 
