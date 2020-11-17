@@ -247,6 +247,7 @@ class App(threading.Thread):
     # Capture video frames
     self.lmain = tk.Label(imageFrame)
     self.lmain.grid(row=0, column=0)
+    self.refreshFrame()
 
     # # Output Video, file type can be changed in future
     # fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -264,6 +265,9 @@ class App(threading.Thread):
 # Begins the loop on a separate thread
 # thread = threading.Thread(target=begin)
 # thread.start()
+
+# Another tutorial
+# https://stackoverflow.com/questions/47934144/update-data-in-a-tkinter-gui-with-data-from-a-second-thread
 
 app = App()
 
