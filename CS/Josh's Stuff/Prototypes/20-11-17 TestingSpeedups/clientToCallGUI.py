@@ -5,20 +5,21 @@ import threading
 import base64
 import numpy as np
 import cv2
+import time
 # from queue import Queue
 
 payload_size = struct.calcsize("Q")
 
-class Client():
-  ip_address = "10.0.0.2" # The one you're connecting to
-  # ip_address = "localhost"
-  port = 5000
-  def __init__(self, Address=(ip_address,port)):
-    self.s = socket.socket() 
-    self.s.connect(Address)
+# class Client():
+#   ip_address = "10.0.0.2" # The one you're connecting to
+#   # ip_address = "localhost"
+#   port = 5000
+#   def __init__(self, Address=(ip_address,port)):
+#     self.s = socket.socket() 
+#     self.s.connect(Address)
 
-  def send(self, message):
-    self.s.send(message)
+#   def send(self, message):
+#     self.s.send(message)
 
 # print("Initiating Client")
 # c = Client()
@@ -76,6 +77,8 @@ def showVideo():
   # Loop for receiving images
   global stopFlag
   data = b''
+  startTime = time.time()
+  numFrames = 0
   while True:
     try:
       if stopFlag:
@@ -113,6 +116,9 @@ def showVideo():
 
       _, frame = camera.read()
 
+      numFrames += 1
+      duration = time.time() - startTime 
+      fps = numFrames / duration 
       # Display
       # cv2.imshow("Frame", frame)
       # cv2.waitKey(1)
