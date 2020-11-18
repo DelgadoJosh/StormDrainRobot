@@ -12,6 +12,7 @@ import threading
 import time
 import cv2
 from PIL import Image, ImageTk
+import io
 
 class App(threading.Thread):
   def __init__(self):
@@ -111,6 +112,11 @@ class App(threading.Thread):
     imgTk = ImageTk.PhotoImage(image=img)
     return img, imgTk
 
+  def parseFrameJpg(self, frame):
+    img = Image.open(io.BytesIO(frame))
+    imgTk = ImageTk.PhotoImage(img)
+    return imgTk
+
   # Thread to grab the video frame
   startTime = 0
   numFrames = 0
@@ -126,7 +132,8 @@ class App(threading.Thread):
 
       if self.curFrame is not None:
         # Parse the image
-        img, imgTk = self.parseFrame(self.curFrame)
+        # img, imgTk = self.parseFrame(self.curFrame)
+        imgTk = self.parseFrameJpg(self.curFrame)
 
         # Update the image
         self.lmain.imgtk = imgTk 

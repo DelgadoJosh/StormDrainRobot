@@ -58,6 +58,10 @@ def parseFrameFromBytes(frame_data):
 
   return frame
 
+def parseFrameFromBytesJpg(frame_data):
+  frame = base64.b64decode(frame_data)
+  return frame
+
 # Loop for receiving input, the input is added to a queue
 def getInput():
     global stopFlag
@@ -82,7 +86,8 @@ def loopToParseData():
       continue
     
     frame_data = frameDataQueue.get()
-    frame = parseFrameFromBytes(frame_data)
+    # frame = parseFrameFromBytes(frame_data)
+    frame = parseFrameFromBytesJpg(frame_data)
 
     if not frameQueue.full():
       frameQueue.put(frame)
