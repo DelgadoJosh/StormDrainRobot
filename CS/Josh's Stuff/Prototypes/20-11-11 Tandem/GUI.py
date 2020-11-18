@@ -113,7 +113,10 @@ class App(threading.Thread):
     return img, imgTk
 
   def parseFrameJpg(self, frame):
-    img = Image.open(io.BytesIO(frame))
+    # img = Image.open(io.BytesIO(frame))
+
+    # From bytes: mode, size, data, decodername
+    img = Image.frombytes('jpg', (1280, 720), frame, 'raw')
     imgTk = ImageTk.PhotoImage(img)
     return imgTk
 
