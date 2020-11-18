@@ -88,6 +88,9 @@ def grabVideoLoop():
       # Dump it into the queue to be displayed
       if not frameDataQueue.full():
         frameDataQueue.put(frame_data)
+        print("new frame")
+      else:
+        print("                     it's full rip")
 
     except KeyboardInterrupt:
       cv2.destroyAllWindows()
