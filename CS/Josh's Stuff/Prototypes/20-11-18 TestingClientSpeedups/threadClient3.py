@@ -68,6 +68,10 @@ def parseDataLoop():
     frame_data = frameDataQueue.get()
     frame = parseData(frame_data)
     
+    if frameDataQueue.full():
+      # Clear out some space from the queue to improve latency
+      _ = frameDataQueue.get()
+
     if not frameQueue.full():
       frameQueue.put(frame)
     else:
