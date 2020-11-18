@@ -6,6 +6,7 @@ import base64
 import time
 # import PIL.Image as Image
 import numpy as np
+import threading
 
 # Create the client to receive video
 
@@ -29,6 +30,7 @@ print("Client Connected to the Server")
 data = b''
 
 def grabVideoLoop():
+  global data
   numFrames = 0
   startTime = time.time()
   while True:
@@ -67,7 +69,9 @@ def grabVideoLoop():
       break
 
 
+receive_video_loop = threading.Thread(target=grabVideoLoop)
 
+receive_video_loop.start()
 
  
  
