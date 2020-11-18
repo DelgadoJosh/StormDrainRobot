@@ -7,7 +7,7 @@ import numpy as np
 import cv2
 import time
 from multiprocessing import Process
-# from queue import Queue
+from queue import Queue
 
 payload_size = struct.calcsize("Q")
 
@@ -74,6 +74,19 @@ def getInput():
         stopFlag = True
     print("Ended input loop")
 
+frameDataQueue = Queue(maxsize=100)
+def loopToParseData():
+  while True:
+    time.sleep(0.01)
+    if frameDataQueue.empty():
+      continue
+    
+    frame_data = frameDataQueue.get()
+    frame = parseFrameFromBytes(frame_data)
+
+    if not frameQueue.full():
+      frameQueue.put(frame)
+
 def showVideo():
   # Loop for receiving images
   global stopFlag
@@ -98,6 +111,9 @@ def showVideo():
       # data = data[msg_size:]
 
       frame_data, data = retrieveData(data)
+      if not frameDataQueue.full():
+        frameDataQueue.put(frame_data)
+
 
       # time_data, data = retrieveData(data)  # Uncomment to grab time data
       # print(int.from_bytes(time_data, 'big')) # Uncomment to grab time_data
@@ -105,7 +121,8 @@ def showVideo():
       # voltage_data, data = retrieveData(data)
       # print(f"ADC: Voltage={int.from_bytes(voltage_data, 'big') / 100.0}")
 
-      frame = parseFrameFromBytes(frame_data)
+      # Parsing data
+      # frame = parseFrameFromBytes(frame_data)
 
 
 
@@ -119,8 +136,8 @@ def showVideo():
       # cv2.imshow("Frame", frame)
       # cv2.waitKey(1)
       # GUI.app.showFrame(frame)
-      if not frameQueue.full():
-        frameQueue.put(frame)
+      # if not frameQueue.full():
+      #   frameQueue.put(frame)
 
     except KeyboardInterrupt:
       cv2.destroyAllWindows()
@@ -129,12 +146,15 @@ def showVideo():
   print("Video loop end")
 
 
-input_thread = threading.Thread(target=getInput)
-video_thread = threading.Thread(target=showVideo)
+input_thread = threading.Thread(target=getInput, daemon=True)
+video_thread = threading.Thread(target=showVideo, daemon=True)
+parse_data_thread = threading.Thread(target=loopToParseData, daemon=True)
+
 
 # input_thread = Process(target=getInput)
 # video_thread = Process(target=showVideo)
 
 input_thread.start()
 video_thread.start()
+parse_data_thread.start()
 
