@@ -138,9 +138,9 @@ class App(threading.Thread):
 
         if not self.imgQueue.full():
           self.imgQueue.put(img)
-          print("                                                   AddingImg")
-        else:
-          print("                                                          FullImg")
+          # print("                                                   AddingImg")
+        # else:
+        #   print("                                                          FullImg")
       else:
         time.sleep(0.01)
 
@@ -152,9 +152,9 @@ class App(threading.Thread):
 
         if not self.imgTkQueue.full():
           self.imgTkQueue.put(imgTk)
-          print("                                                                         AddingImgTk")
-        else:
-          print("                                                                                   FullImgTk")
+        #   print("                                                                         AddingImgTk")
+        # else:
+        #   print("                                                                                   FullImgTk")
       else:
         time.sleep(0.01)
 

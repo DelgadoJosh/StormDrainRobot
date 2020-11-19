@@ -89,7 +89,7 @@ def loopToParseData():
   while True:
     time.sleep(0.01)
     if frameDataQueue.empty():
-      print("                           Dirk")
+      # print("                           Dirk")
       continue
     
     frame_data = frameDataQueue.get()
@@ -98,9 +98,9 @@ def loopToParseData():
 
     if not frameQueue.full():
       frameQueue.put(frame)
-      print("                                      Adding")
-    else:
-      print("                                                  Full")
+    #   print("                                      Adding")
+    # else:
+    #   print("                                                  Full")
 
     # img_as_np = getNumpyArray(frame_data)
 
@@ -155,10 +155,11 @@ def showVideo():
       frame_data, data = retrieveData(data)
       numFramesReceived += 1
       duration = time.time() - startTime
-      print(f"Frame {numFramesReceived} | FPS: {numFramesReceived/duration:.3f}")
+      if numFramesReceived%10 == 0:
+        print(f"Frame {numFramesReceived} | FPS: {numFramesReceived/duration:.3f}")
       if not frameDataQueue.full():
         frameDataQueue.put(frame_data)
-        print("  Adding to frame data queue")
+        # print("  Adding to frame data queue")
       # else:
       #   print("     Frame Data Queue is Full!")
 
