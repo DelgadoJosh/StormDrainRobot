@@ -89,6 +89,7 @@ def loopToParseData():
   while True:
     time.sleep(0.01)
     if frameDataQueue.empty():
+      print("                           Dirk")
       continue
     
     frame_data = frameDataQueue.get()
@@ -107,12 +108,13 @@ def loopToParseData():
       npArrayQueue.put(img_as_np)
       print("                                 Adding") 
     else:
-      print("                                              Full")
+      print("                                          Full")
 
 def loopToDecodeData():
   while True:
     time.sleep(0.01)
     if npArrayQueue.empty():
+      print("                                                 Dirk")
       continue 
 
     img_as_np = npArrayQueue.get()
