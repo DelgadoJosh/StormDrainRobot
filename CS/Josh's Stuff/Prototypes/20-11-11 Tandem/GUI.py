@@ -92,7 +92,7 @@ class App(threading.Thread):
     # Saves video to the directory
     # out.write(frame)
 
-    global lmain
+    # global lmain
     lmain.imgtk = imgTk
     lmain.configure(image=imgTk)
     lmain.image = imgTk
@@ -120,13 +120,62 @@ class App(threading.Thread):
     imgTk = ImageTk.PhotoImage(img)
     return imgTk
 
-  # Thread to grab the video frame
+
   startTime = 0
   numFrames = 0
   curFrame = None
   frameQueue = Queue(maxsize=1)
+  imgQueue = Queue(maxsize=1)
+  imgTkQueue = Queue(maxsize=1)
   videoMaxFramerate = 60
   frameRefreshDelay = int(1 / videoMaxFramerate)
+  def loopToEncodeImg(self):
+    while True:
+      if not frameQueue.empty():
+        frame = frameQueue.get() 
+        img = Image.open(io.BytesIO(frame)) 
+
+        if not imgQueue.full():
+          imgQueue.put(img)
+          print("                                                   AddingImg")
+        else:
+          print("                                                          FullImg")
+      else:
+        time.sleep(0.01)
+
+  def loopToTkImg(self):
+    while True:
+      if not imgQueue.empty():
+        img = imgQueue.get()
+        imgTk = ImageTk.PhotoImage(img)
+
+        if not imgTkQueue.full():
+          imgTkQueue.put(imgTk)
+          print("                                                                         AddingImgTk")
+        else:
+          print("                                                                                   FullImgTk")
+      else:
+        time.sleep(0.01)
+
+  def loopToRefreshImage(self):
+    while True:
+      if not imgTkQueue.empty():
+        imgTk = imgTkQueue.get()
+
+        # Update the image
+        self.lmain.imgtk = imgTk 
+        self.lmain.configure(image=imgTk) 
+        self.lmain.image = imgTk 
+        
+        # Update the framerate
+        self.numFrames += 1
+        duration = time.time() - self.startTime 
+        self.setFPS(self.numFrames/duration)
+      else:
+        time.sleep(frameRefreshDelay)
+
+
+  # Thread to grab the video frame
   def refreshFrame(self):
     while True:
       if not self.frameQueue.empty():
@@ -156,9 +205,11 @@ class App(threading.Thread):
         self.setFPS(self.numFrames/duration) 
 
         self.curFrame = None
+      else: 
+        # Prevent spam on the thread by waiting
+        time.sleep(self.frameRefreshDelay)
+
       
-      # Prevent spam on the thread by waiting
-      time.sleep(self.frameRefreshDelay)
 
   
   lmain = None
@@ -274,7 +325,25 @@ class App(threading.Thread):
       target=self.refreshFrame,
       daemon=True
     )
-    refresh_frame_loop.start()
+    # refresh_frame_loop.start()
+
+    encode_image_loop = threading.Thread(
+      target=self.loopToEncodeImg,
+      daemon=True
+    )
+    encode_image_loop.start()
+
+    imageTk_loop = threading.Thread(
+      target=self.loopToTkImg,
+      daemon=True
+    )
+    imageTk_loop.start()
+
+    display_loop = threading.Thread(
+      target=self.loopToRefreshImage,
+      daemon=True
+    )
+    display_loop.start()
 
     # # Output Video, file type can be changed in future
     # fourcc = cv2.VideoWriter_fourcc(*'XVID')
