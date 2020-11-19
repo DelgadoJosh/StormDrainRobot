@@ -131,12 +131,12 @@ class App(threading.Thread):
   frameRefreshDelay = int(1 / videoMaxFramerate)
   def loopToEncodeImg(self):
     while True:
-      if not frameQueue.empty():
-        frame = frameQueue.get() 
+      if not self.frameQueue.empty():
+        frame = self.frameQueue.get() 
         img = Image.open(io.BytesIO(frame)) 
 
-        if not imgQueue.full():
-          imgQueue.put(img)
+        if not self.imgQueue.full():
+          self.imgQueue.put(img)
           print("                                                   AddingImg")
         else:
           print("                                                          FullImg")
@@ -145,12 +145,12 @@ class App(threading.Thread):
 
   def loopToTkImg(self):
     while True:
-      if not imgQueue.empty():
-        img = imgQueue.get()
+      if not self.imgQueue.empty():
+        img = self.imgQueue.get()
         imgTk = ImageTk.PhotoImage(img)
 
-        if not imgTkQueue.full():
-          imgTkQueue.put(imgTk)
+        if not self.imgTkQueue.full():
+          self.imgTkQueue.put(imgTk)
           print("                                                                         AddingImgTk")
         else:
           print("                                                                                   FullImgTk")
@@ -159,8 +159,8 @@ class App(threading.Thread):
 
   def loopToRefreshImage(self):
     while True:
-      if not imgTkQueue.empty():
-        imgTk = imgTkQueue.get()
+      if not self.imgTkQueue.empty():
+        imgTk = self.imgTkQueue.get()
 
         # Update the image
         self.lmain.imgtk = imgTk 
@@ -172,7 +172,7 @@ class App(threading.Thread):
         duration = time.time() - self.startTime 
         self.setFPS(self.numFrames/duration)
       else:
-        time.sleep(frameRefreshDelay)
+        time.sleep(self.frameRefreshDelay)
 
 
   # Thread to grab the video frame
