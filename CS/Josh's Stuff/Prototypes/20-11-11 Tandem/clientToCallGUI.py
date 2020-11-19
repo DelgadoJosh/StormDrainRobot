@@ -91,6 +91,9 @@ def loopToParseData():
 
     if not frameQueue.full():
       frameQueue.put(frame)
+      print("                                      Adding")
+    else:
+      print("                                                  Full")
 
 def showVideo():
   # Loop for receiving images
@@ -123,8 +126,9 @@ def showVideo():
       print(f"Frame {numFramesReceived} | FPS: {numFramesReceived/duration:.3f}")
       if not frameDataQueue.full():
         frameDataQueue.put(frame_data)
+        print("  Adding to frame data queue")
       # else:
-        # print("     Frame Data Queue is Full!")
+      #   print("     Frame Data Queue is Full!")
 
 
       # time_data, data = retrieveData(data)  # Uncomment to grab time data
