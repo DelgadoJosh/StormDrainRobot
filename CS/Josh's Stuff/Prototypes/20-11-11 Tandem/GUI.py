@@ -127,7 +127,7 @@ class App(threading.Thread):
   curFrame = None
   frameQueue = Queue(maxsize=1)
   imgQueue = Queue(maxsize=2)
-  imgTkQueue = Queue(maxsize=2)
+  imgTkQueue = Queue(maxsize=1)
   videoMaxFramerate = 60
   frameRefreshDelay = int(1 / videoMaxFramerate)
   def loopToEncodeImg(self):
