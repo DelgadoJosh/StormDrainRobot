@@ -13,6 +13,7 @@ import time
 import cv2
 from PIL import Image, ImageTk
 import io
+from multiprocessing import Process
 
 class App(threading.Thread):
   def __init__(self):
@@ -125,8 +126,8 @@ class App(threading.Thread):
   numFrames = 0
   curFrame = None
   frameQueue = Queue(maxsize=1)
-  imgQueue = Queue(maxsize=1)
-  imgTkQueue = Queue(maxsize=1)
+  imgQueue = Queue(maxsize=2)
+  imgTkQueue = Queue(maxsize=2)
   videoMaxFramerate = 60
   frameRefreshDelay = int(1 / videoMaxFramerate)
   def loopToEncodeImg(self):
@@ -337,6 +338,11 @@ class App(threading.Thread):
       target=self.loopToTkImg,
       daemon=True
     )
+    # imageTk_loop = Process(
+    #   target=self.loopToTkImg,
+    #   daemon=True,
+    #   args=(self,),
+    # )
     imageTk_loop.start()
 
     display_loop = threading.Thread(
