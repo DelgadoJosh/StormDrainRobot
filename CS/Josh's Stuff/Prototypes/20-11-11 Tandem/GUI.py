@@ -142,8 +142,8 @@ class App(threading.Thread):
 
       if self.curFrame is not None:
         # Parse the image
-        img, imgTk = self.parseFrame(self.curFrame)
-        # imgTk = self.parseFrameJpg(self.curFrame)
+        # img, imgTk = self.parseFrame(self.curFrame)
+        imgTk = self.parseFrameJpg(self.curFrame)
 
         # Update the image
         self.lmain.imgtk = imgTk 

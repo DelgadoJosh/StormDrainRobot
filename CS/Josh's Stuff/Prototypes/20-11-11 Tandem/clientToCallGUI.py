@@ -94,21 +94,21 @@ def loopToParseData():
     
     frame_data = frameDataQueue.get()
     # frame = parseFrameFromBytes(frame_data)
-    # frame = parseFrameFromBytesJpg(frame_data)
+    frame = parseFrameFromBytesJpg(frame_data)
 
-    # if not frameQueue.full():
-    #   frameQueue.put(frame)
-    #   print("                                      Adding")
-    # else:
-    #   print("                                                  Full")
-
-    img_as_np = getNumpyArray(frame_data)
-
-    if not npArrayQueue.full():
-      npArrayQueue.put(img_as_np)
-      print("                                 Adding") 
+    if not frameQueue.full():
+      frameQueue.put(frame)
+      print("                                      Adding")
     else:
-      print("                                          Full")
+      print("                                                  Full")
+
+    # img_as_np = getNumpyArray(frame_data)
+
+    # if not npArrayQueue.full():
+    #   npArrayQueue.put(img_as_np)
+    #   print("                                 Adding") 
+    # else:
+    #   print("                                          Full")
 
 def loopToDecodeData():
   while True:
@@ -207,4 +207,4 @@ if __name__ == '__main__':
   input_thread.start()
   video_thread.start()
   parse_data_thread.start()
-  decode_data_loop.start()
+  # decode_data_loop.start()
