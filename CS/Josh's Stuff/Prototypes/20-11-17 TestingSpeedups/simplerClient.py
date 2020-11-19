@@ -54,6 +54,20 @@ def showVideo():
       # cv2.imshow("Frame", frame)
       # cv2.waitKey(1)
       # GUI.app.showFrame(frame)
+
+      # Simulate encoding and receiving
+      # Encode the frame as a jpg
+      grabbed, buffer = cv2.imencode('.jpg', frame)
+
+      # Convert the image as bytes encoded as a string
+      data = base64.b64encode(buffer)  # What actually works
+      
+      # Receiving data
+      frame_data = data
+      frameBytes = base64.b64decode(frame_data) 
+      img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
+      frame = cv2.imdecode(img_as_np, flags=1)
+
       if not frameQueue.full():
         frameQueue.put(frame)
 
