@@ -113,10 +113,10 @@ class App(threading.Thread):
     return img, imgTk
 
   def parseFrameJpg(self, frame):
-    # img = Image.open(io.BytesIO(frame))
+    img = Image.open(io.BytesIO(frame))
 
     # From bytes: mode, size, data, decodername
-    img = Image.frombytes('jpg', (1280, 720), frame, 'raw')
+    # img = Image.frombytes('jpg', (1280, 720), frame, 'raw')
     imgTk = ImageTk.PhotoImage(img)
     return imgTk
 
@@ -132,11 +132,18 @@ class App(threading.Thread):
       if not self.frameQueue.empty():
         # Then we update the cur frame
         self.curFrame = self.frameQueue.get()
+        # duration = time.time() - self.startTime
+        # print(f"Frame {self.numFrames} | fps: {self.numFrames/duration:.3f} | type: {type(self.curFrame)}")
+
+      # if self.frameQueue.full():
+      #   # Then we empty out a few frames to improve latency
+      #   for i in range(10):
+      #     _ = self.frameQueue.get()
 
       if self.curFrame is not None:
         # Parse the image
-        # img, imgTk = self.parseFrame(self.curFrame)
-        imgTk = self.parseFrameJpg(self.curFrame)
+        img, imgTk = self.parseFrame(self.curFrame)
+        # imgTk = self.parseFrameJpg(self.curFrame)
 
         # Update the image
         self.lmain.imgtk = imgTk 

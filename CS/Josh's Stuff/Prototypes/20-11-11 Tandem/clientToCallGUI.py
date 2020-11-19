@@ -86,8 +86,8 @@ def loopToParseData():
       continue
     
     frame_data = frameDataQueue.get()
-    # frame = parseFrameFromBytes(frame_data)
-    frame = parseFrameFromBytesJpg(frame_data)
+    frame = parseFrameFromBytes(frame_data)
+    # frame = parseFrameFromBytesJpg(frame_data)
 
     if not frameQueue.full():
       frameQueue.put(frame)
