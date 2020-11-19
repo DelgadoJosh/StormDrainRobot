@@ -166,8 +166,11 @@ class App(threading.Thread):
         # Update the image
         self.lmain.imgtk = imgTk 
         self.lmain.configure(image=imgTk) 
-        self.lmain.image = imgTk 
-        
+        self.lmain.image = imgTk  
+        # https://effbot.org/tkinterbook/photoimage.htm
+        # Although the .image = imgTk seems redundant, it's necessary
+        # To avoid it being cleared due to garbage collection
+
         # Update the framerate
         self.numFrames += 1
         duration = time.time() - self.startTime 
