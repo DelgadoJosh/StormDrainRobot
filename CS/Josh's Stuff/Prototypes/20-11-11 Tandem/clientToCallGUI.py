@@ -49,19 +49,6 @@ def retrieveData(data):
 
   return output_data, remainder_data
 
-def parseFrameFromBytes(frame_data):
-  # If going the direct encode/decode to get frameBytes
-  frameBytes = base64.b64decode(frame_data) 
-
-  img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
-  frame = cv2.imdecode(img_as_np, flags=1)
-
-  return frame
-
-def parseFrameFromBytesJpg(frame_data):
-  frame = base64.b64decode(frame_data)
-  return frame
-
 # Loop for receiving input, the input is added to a queue
 def getInput():
     global stopFlag
@@ -78,7 +65,26 @@ def getInput():
         stopFlag = True
     print("Ended input loop")
 
+def parseFrameFromBytes(frame_data):
+  # If going the direct encode/decode to get frameBytes
+  frameBytes = base64.b64decode(frame_data) 
+
+  img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
+  frame = cv2.imdecode(img_as_np, flags=1)
+
+  return frame
+
+def parseFrameFromBytesJpg(frame_data):
+  frame = base64.b64decode(frame_data)
+  return frame
+
+def getNumpyArray(frame_data):
+  frameBytes = base64.b64decode(frame_data)
+  img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
+  return img_as_np
+
 frameDataQueue = Queue(maxsize=1)
+npArrayQueue = Queue(maxsize=1)
 def loopToParseData():
   while True:
     time.sleep(0.01)
@@ -86,14 +92,38 @@ def loopToParseData():
       continue
     
     frame_data = frameDataQueue.get()
-    frame = parseFrameFromBytes(frame_data)
+    # frame = parseFrameFromBytes(frame_data)
     # frame = parseFrameFromBytesJpg(frame_data)
+
+    # if not frameQueue.full():
+    #   frameQueue.put(frame)
+    #   print("                                      Adding")
+    # else:
+    #   print("                                                  Full")
+
+    img_as_np = getNumpyArray(frame_data)
+
+    if not npArrayQueue.full():
+      npArrayQueue.put(img_as_np)
+      print("                                 Adding") 
+    else:
+      print("                                              Full")
+
+def loopToDecodeData():
+  while True:
+    time.sleep(0.01)
+    if npArrayQueue.empty():
+      continue 
+
+    img_as_np = npArrayQueue.get()
+    frame = cv2.imdecode(img_as_np, flags=1)
 
     if not frameQueue.full():
       frameQueue.put(frame)
-      print("                                      Adding")
+      print("                                                       Adding")
     else:
-      print("                                                  Full")
+      print("                                                             Full")
+
 
 def showVideo():
   # Loop for receiving images
@@ -165,6 +195,7 @@ if __name__ == '__main__':
   input_thread = threading.Thread(target=getInput, daemon=True)
   video_thread = threading.Thread(target=showVideo, daemon=True)
   parse_data_thread = threading.Thread(target=loopToParseData, daemon=True)
+  decode_data_loop = threading.Thread(target=loopToDecodeData, daemon=True)
 
 
   # input_thread = Process(target=getInput)
@@ -174,4 +205,4 @@ if __name__ == '__main__':
   input_thread.start()
   video_thread.start()
   parse_data_thread.start()
-
+  decode_data_loop.start()
