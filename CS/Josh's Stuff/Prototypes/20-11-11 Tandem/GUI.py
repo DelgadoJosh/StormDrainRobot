@@ -124,7 +124,7 @@ class App(threading.Thread):
   startTime = 0
   numFrames = 0
   curFrame = None
-  frameQueue = Queue(maxsize=100)
+  frameQueue = Queue(maxsize=1)
   videoMaxFramerate = 60
   frameRefreshDelay = int(1 / videoMaxFramerate)
   def refreshFrame(self):
@@ -154,6 +154,8 @@ class App(threading.Thread):
         self.numFrames += 1
         duration = time.time() - self.startTime 
         self.setFPS(self.numFrames/duration) 
+
+        self.curFrame = None
       
       # Prevent spam on the thread by waiting
       time.sleep(self.frameRefreshDelay)

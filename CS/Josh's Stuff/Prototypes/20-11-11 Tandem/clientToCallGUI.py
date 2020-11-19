@@ -78,7 +78,7 @@ def getInput():
         stopFlag = True
     print("Ended input loop")
 
-frameDataQueue = Queue(maxsize=100)
+frameDataQueue = Queue(maxsize=1)
 def loopToParseData():
   while True:
     time.sleep(0.01)
@@ -91,11 +91,16 @@ def loopToParseData():
 
     if not frameQueue.full():
       frameQueue.put(frame)
+      print("                                      Adding")
+    else:
+      print("                                                  Full")
 
 def showVideo():
   # Loop for receiving images
   global stopFlag
   data = b''
+  startTime = time.time()
+  numFramesReceived = 0
   while True:
     try:
       if stopFlag:
@@ -116,8 +121,14 @@ def showVideo():
       # data = data[msg_size:]
 
       frame_data, data = retrieveData(data)
+      numFramesReceived += 1
+      duration = time.time() - startTime
+      print(f"Frame {numFramesReceived} | FPS: {numFramesReceived/duration:.3f}")
       if not frameDataQueue.full():
         frameDataQueue.put(frame_data)
+        print("  Adding to frame data queue")
+      # else:
+      #   print("     Frame Data Queue is Full!")
 
 
       # time_data, data = retrieveData(data)  # Uncomment to grab time data
@@ -150,16 +161,17 @@ def showVideo():
   
   print("Video loop end")
 
+if __name__ == '__main__':
+  input_thread = threading.Thread(target=getInput, daemon=True)
+  video_thread = threading.Thread(target=showVideo, daemon=True)
+  parse_data_thread = threading.Thread(target=loopToParseData, daemon=True)
 
-input_thread = threading.Thread(target=getInput, daemon=True)
-video_thread = threading.Thread(target=showVideo, daemon=True)
-parse_data_thread = threading.Thread(target=loopToParseData, daemon=True)
 
+  # input_thread = Process(target=getInput)
+  # video_thread = Process(target=showVideo)
+  # parse_data_thread = Process(target=loopToParseData, daemon=True)
 
-# input_thread = Process(target=getInput)
-# video_thread = Process(target=showVideo)
-
-input_thread.start()
-video_thread.start()
-parse_data_thread.start()
+  input_thread.start()
+  video_thread.start()
+  parse_data_thread.start()
 
