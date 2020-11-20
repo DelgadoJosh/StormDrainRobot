@@ -39,6 +39,7 @@ def testLights():
 
     print()
     print("Ending Test")
+    print()
     setPWM(0)
 
 # testLights()

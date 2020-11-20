@@ -20,11 +20,15 @@ GPIO.setwarnings(False)
 
 MAX = 0xFFFF
 motor_pwm_pins = [0, 1, 2, 3]
-motor_dir_pins = ["GPIO_PZ0", "GPIO_PE6", "SPI1_MISO", "SPI1_SCK"] # 31=GPIO_PZ0,  33=GPIO_PE6, SPI1_SCK=23, SPI1_MISO=21
+motor_dir_pins = ["GPIO_PZ0", "GPIO_PE6", "SPI1_MISO", "SPI1_SCK"] # 31=GPIO_PZ0,  33=GPIO_PE6, SPI1_MISO=21, SPI1_SCK=23
     # GPIO.TEGRA_SOC = the mode for defining the pins
+motor_signs = [-1, -1, 1, 1] 
+    # Due to the wiring, the front and back have reversed directions
 
-left_indices = [1, 3]
-right_indices = [0, 2]
+# Front = 0, 1
+# Rear = 2, 3
+left_indices = [1, 2]
+right_indices = [0, 3]
 
 def setup():
     for i in range(len(motor_dir_pins)):
@@ -32,6 +36,7 @@ def setup():
 
 def setSpeed(index, percentSpeed):
     print(f"Setting speed for {index} to {percentSpeed}")
+    percentSpeed *= motor_signs[index] 
     if percentSpeed > 0:
         sign = GPIO.HIGH 
     else: 
@@ -44,14 +49,14 @@ def setSpeed(index, percentSpeed):
 def setLeftSpeed(percentSpeed):
      # Because clockwise on the left != forwards, we reverse it
     print(f"Setting left speed to {percentSpeed}")
-    percentSpeed = -percentSpeed
+    # percentSpeed = -percentSpeed
     for i in left_indices:
         setSpeed(i, percentSpeed)
 
 def setRightSpeed(percentSpeed):
     # Due to wiring, this was reversed as well
     print(f"Setting right speed to {percentSpeed}")
-    percentSpeed = -percentSpeed 
+    # percentSpeed = -percentSpeed 
     for i in right_indices:
         setSpeed(i, percentSpeed)
 
@@ -70,16 +75,40 @@ def testMotors():
     setRightSpeed(0.1)
     time.sleep(3)
 
+    # print()
+    # print("Left in place at 0.1 for 3 secs")
+    # setLeftSpeed(-0.1)
+    # setRightSpeed(0.1)
+    # time.sleep(3)
+
+    # print()
+    # print("Right in place at 0.1 for 3 secs")
+    # setLeftSpeed(0.1)
+    # setRightSpeed(-0.1)
+    # time.sleep(3)
+
     print()
-    print("Left in place at 0.1 for 3 secs")
-    setLeftSpeed(-0.1)
+    print("Right motors only 0.1 for 3 secs")
+    setLeftSpeed(0)
     setRightSpeed(0.1)
     time.sleep(3)
 
-    print()
-    print("Right in place at 0.1 for 3 secs")
-    setLeftSpeed(0.1)
+    print() 
+    print("Right motors only -0.1 for 3 secs")
+    setLeftSpeed(0)
     setRightSpeed(-0.1)
+    time.sleep(3)
+
+    print()
+    print("Left motors only 0.1 for 3 secs")
+    setLeftSpeed(0.1)
+    setRightSpeed(0)
+    time.sleep(3)
+
+    print()
+    print("Left motors only -0.1 for 3 secs")
+    setLeftSpeed(-0.1)
+    setRightSpeed(0)
     time.sleep(3)
 
     print()

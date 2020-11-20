@@ -1,7 +1,10 @@
-# import adc 
+import adc 
 import lights 
 import motors
-# import servos 
+import servos 
 
-# servos.testServos() 
+adc.testADC()
+lights.testLights()
+motors.testMotors()
+servos.testServos() 
 motors.testMotors()
