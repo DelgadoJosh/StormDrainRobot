@@ -12,6 +12,8 @@ import threading
 import time
 import cv2
 from PIL import Image, ImageTk
+import io
+from multiprocessing import Process
 
 class App(threading.Thread):
   def __init__(self):
@@ -91,11 +93,128 @@ class App(threading.Thread):
     # Saves video to the directory
     # out.write(frame)
 
-    global lmain
+    # global lmain
     lmain.imgtk = imgTk
     lmain.configure(image=imgTk)
     lmain.image = imgTk
     # lmain.after(1, self.showFrame)
+
+  fps_label = None
+  def setFPS(self, fps):
+    if self.fps_label == None:
+      return
+    self.fps_label["text"] = f"FPS: {fps:3.2f}"
+
+  # Function to parse a frame into an image and imgtk
+  def parseFrame(self, frame):
+    cv2Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
+    resizedImage = cv2.resize(cv2Image, (1280, 720))
+    img = Image.fromarray(resizedImage)
+    imgTk = ImageTk.PhotoImage(image=img)
+    return img, imgTk
+
+  def parseFrameJpg(self, frame):
+    img = Image.open(io.BytesIO(frame))
+
+    # From bytes: mode, size, data, decodername
+    # img = Image.frombytes('jpg', (1280, 720), frame, 'raw')
+    imgTk = ImageTk.PhotoImage(img)
+    return imgTk
+
+
+  startTime = 0
+  numFrames = 0
+  curFrame = None
+  frameQueue = Queue(maxsize=1)
+  imgQueue = Queue(maxsize=2)
+  imgTkQueue = Queue(maxsize=1)
+  videoMaxFramerate = 60
+  frameRefreshDelay = int(1 / videoMaxFramerate)
+  def loopToEncodeImg(self):
+    while True:
+      if not self.frameQueue.empty():
+        frame = self.frameQueue.get() 
+        img = Image.open(io.BytesIO(frame)) 
+
+        if not self.imgQueue.full():
+          self.imgQueue.put(img)
+          # print("                                                   AddingImg")
+        # else:
+        #   print("                                                          FullImg")
+      else:
+        time.sleep(0.01)
+
+  def loopToTkImg(self):
+    while True:
+      if not self.imgQueue.empty():
+        img = self.imgQueue.get()
+        imgTk = ImageTk.PhotoImage(img)
+
+        if not self.imgTkQueue.full():
+          self.imgTkQueue.put(imgTk)
+        #   print("                                                                         AddingImgTk")
+        # else:
+        #   print("                                                                                   FullImgTk")
+      else:
+        time.sleep(0.01)
+
+  def loopToRefreshImage(self):
+    while True:
+      if not self.imgTkQueue.empty():
+        imgTk = self.imgTkQueue.get()
+
+        # Update the image
+        self.lmain.imgtk = imgTk 
+        self.lmain.configure(image=imgTk) 
+        self.lmain.image = imgTk  
+        # https://effbot.org/tkinterbook/photoimage.htm
+        # Although the .image = imgTk seems redundant, it's necessary
+        # To avoid it being cleared due to garbage collection
+
+        # Update the framerate
+        self.numFrames += 1
+        duration = time.time() - self.startTime 
+        self.setFPS(self.numFrames/duration)
+      else:
+        time.sleep(self.frameRefreshDelay)
+
+
+  # Thread to grab the video frame
+  def refreshFrame(self):
+    while True:
+      if not self.frameQueue.empty():
+        # Then we update the cur frame
+        self.curFrame = self.frameQueue.get()
+        # duration = time.time() - self.startTime
+        # print(f"Frame {self.numFrames} | fps: {self.numFrames/duration:.3f} | type: {type(self.curFrame)}")
+
+      # if self.frameQueue.full():
+      #   # Then we empty out a few frames to improve latency
+      #   for i in range(10):
+      #     _ = self.frameQueue.get()
+
+      if self.curFrame is not None:
+        # Parse the image
+        # img, imgTk = self.parseFrame(self.curFrame)
+        imgTk = self.parseFrameJpg(self.curFrame)
+
+        # Update the image
+        self.lmain.imgtk = imgTk 
+        self.lmain.configure(image=imgTk) 
+        self.lmain.image = imgTk 
+        
+        # Update the framerate
+        self.numFrames += 1
+        duration = time.time() - self.startTime 
+        self.setFPS(self.numFrames/duration) 
+
+        self.curFrame = None
+      else: 
+        # Prevent spam on the thread by waiting
+        time.sleep(self.frameRefreshDelay)
+
+      
+
   
   lmain = None
   def run(self):
@@ -105,6 +224,7 @@ class App(threading.Thread):
 
     ids = self.ids 
     vals = self.vals 
+    self.startTime = time.time()
 
 
     # Going to just manually define every part
@@ -174,8 +294,16 @@ class App(threading.Thread):
     constantly_submit_checkbox = tk.Checkbutton(text="Constantly Submit", variable=constantly_submit_checkbox_val)
     constantly_submit_checkbox.grid(row=1, column=6)
 
+    # Add a box for data
+    data_frame = tk.Frame(self.root, relief=tk.RAISED, borderwidth=2)
+    data_frame.grid(row=0, column=7, rowspan=2, padx=2)
+    # Populate the box with data
+    self.fps_label = tk.Label(data_frame, text="FPS: 0")
+    self.fps_label.grid(row=0, column=0)
+
     # Start a thread so it'll keep on sending every dTime interval if the checkbox is checked
-    send_data_loop = threading.Thread(target=self.continuallySendData, 
+    send_data_loop = threading.Thread(
+      target=self.continuallySendData, 
       args=(
         constantly_submit_checkbox_val, 
         lights_entry,
@@ -185,7 +313,8 @@ class App(threading.Thread):
         # servos_vertical_entry
         servos_horizontal_slider,
         servos_vertical_slider
-      )) 
+      ),
+      daemon=True,) 
     send_data_loop.start()
 
     # Todo: Add a image for the info
@@ -193,9 +322,37 @@ class App(threading.Thread):
     imageFrame.grid(row=2, column=0, columnspan=8)
     
     # Capture video frames
-    global lmain
-    lmain = tk.Label(imageFrame)
-    lmain.grid(row=0, column=0)
+    self.lmain = tk.Label(imageFrame)
+    self.lmain.grid(row=0, column=0)
+    # Start thread to refresh the video frame
+    refresh_frame_loop = threading.Thread(
+      target=self.refreshFrame,
+      daemon=True
+    )
+    # refresh_frame_loop.start()
+
+    encode_image_loop = threading.Thread(
+      target=self.loopToEncodeImg,
+      daemon=True
+    )
+    encode_image_loop.start()
+
+    imageTk_loop = threading.Thread(
+      target=self.loopToTkImg,
+      daemon=True
+    )
+    # imageTk_loop = Process(
+    #   target=self.loopToTkImg,
+    #   daemon=True,
+    #   args=(self,),
+    # )
+    imageTk_loop.start()
+
+    display_loop = threading.Thread(
+      target=self.loopToRefreshImage,
+      daemon=True
+    )
+    display_loop.start()
 
     # # Output Video, file type can be changed in future
     # fourcc = cv2.VideoWriter_fourcc(*'XVID')
@@ -277,5 +434,12 @@ class App(threading.Thread):
 
 app = App()
 
-print("GUI has begun")
+# def init():
+#   app = App()
+#   print("GUI has begun")
+
+# def getApp():
+#   app = App()
+#   print("GUI has begun")
+#   return app
 
