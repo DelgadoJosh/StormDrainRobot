@@ -11,8 +11,9 @@ print(i2c_bus.scan())
 print("Starting up pca")
 pca = PCA9685(i2c_bus) 
 
-print("Setting frequency")
-pca.frequency = 369 #100
+print("Setting frequency for motors")
+# pca.frequency = 369 #100
+pca.frequency = 1526
 
 # Disable warning from GPIO
 GPIO.setwarnings(False)
@@ -48,13 +49,15 @@ def setLeftSpeed(percentSpeed):
         setSpeed(i, percentSpeed)
 
 def setRightSpeed(percentSpeed):
+    # Due to wiring, this was reversed as well
     print(f"Setting right speed to {percentSpeed}")
+    percentSpeed = -percentSpeed 
     for i in right_indices:
         setSpeed(i, percentSpeed)
 
 setup()
 
-def runTest():
+def testMotors():
     print("Beginning motor test")
     print("Both at rest for 1 sec")
     setLeftSpeed(0)
@@ -67,11 +70,22 @@ def runTest():
     setRightSpeed(0.1)
     time.sleep(3)
 
+    print()
+    print("Left in place at 0.1 for 3 secs")
+    setLeftSpeed(-0.1)
+    setRightSpeed(0.1)
+    time.sleep(3)
+
+    print()
+    print("Right in place at 0.1 for 3 secs")
+    setLeftSpeed(0.1)
+    setRightSpeed(-0.1)
+    time.sleep(3)
 
     print()
     print("Ending testing.")
     setLeftSpeed(0)
     setRightSpeed(0)
 
-runTest()
+# runTest()
 

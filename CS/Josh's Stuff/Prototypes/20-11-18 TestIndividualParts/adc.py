@@ -40,4 +40,4 @@ def testADC():
     print("Ending ADC Test")
     print()
 
-testADC()
+# testADC()

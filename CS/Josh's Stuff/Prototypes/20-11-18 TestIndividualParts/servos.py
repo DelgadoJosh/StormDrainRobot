@@ -37,13 +37,13 @@ def testServos():
     setVerticalAngle(45)
     time.sleep(1)
 
-    print("Changing Horizontal Angle to 45, then waiting 3 seconds")
+    print("Changing Horizontal Angle to 45, then waiting 1 second")
     setHorizontalAngle(45)
-    time.sleep(3)
+    time.sleep(1)
 
-    print("Changing Vertical Angle to 60, then waiting 3 seconds")
+    print("Changing Vertical Angle to 60, then waiting 1 second")
     setVerticalAngle(60)
-    time.sleep(3)
+    time.sleep(1)
 
     print("Resetting to Horizontal = 90, Vertical = 45")
     setHorizontalAngle(90)
@@ -52,4 +52,4 @@ def testServos():
     print("Ending Servo Test")
     print()
 
-testServos()
+# testServos()

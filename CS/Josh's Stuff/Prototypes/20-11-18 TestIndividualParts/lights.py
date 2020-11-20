@@ -16,8 +16,9 @@ print(i2c_bus.scan())
 print("Starting up pca")
 pca = PCA9685(i2c_bus) 
 
-print("Setting frequency")
-pca.frequency = 369
+print("Setting frequency for lights")
+# pca.frequency = 369
+pca.frequency = 1526
 
 def setPWM(percentPower):
     power = abs(int(MAX*percentPower))
@@ -40,4 +41,4 @@ def testLights():
     print("Ending Test")
     setPWM(0)
 
-testLights()
+# testLights()
