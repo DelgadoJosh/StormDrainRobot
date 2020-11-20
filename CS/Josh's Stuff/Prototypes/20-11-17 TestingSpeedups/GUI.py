@@ -12,6 +12,7 @@ import threading
 import time
 import cv2
 from PIL import Image, ImageTk
+import io
 
 class App(threading.Thread):
   def __init__(self):
@@ -117,8 +118,16 @@ class App(threading.Thread):
     imgTk = ImageTk.PhotoImage(image=img)
     return img, imgTk
 
+  def parseFrameJpg(self, frame):
+    img = Image.open(io.BytesIO(frame))
+
+    # From bytes: mode, size, data, decodername
+    # img = Image.frombytes('jpg', (1280, 720), frame, 'raw')
+    imgTk = ImageTk.PhotoImage(img)
+    return imgTk
+
   curFrame = None
-  frameQueue = Queue(maxsize=100)
+  frameQueue = Queue(maxsize=10)
   frameRefreshMaxFramerate = 60
   frameRefreshDelayMs = int(1000 / 60)
   def refreshFrame(self):
@@ -153,7 +162,9 @@ class App(threading.Thread):
 
       if self.curFrame is not None:
         # Parse the image
-        img, imgTk = self.parseFrame(self.curFrame)
+        # img, imgTk = self.parseFrame(self.curFrame)
+        imgTk = self.parseFrameJpg(self.curFrame)
+        # print("Updating")
 
         # Update the image
         self.lmain.imgtk = imgTk 
@@ -164,7 +175,9 @@ class App(threading.Thread):
         self.numFrames += 1
         duration = time.time() - self.startTime 
         self.setFPS(self.numFrames/duration) 
-      time.sleep(self.frameRefreshDelayMs/1000)
+        self.curFrame = None
+      else:
+        time.sleep(self.frameRefreshDelayMs/1000)
 
   lmain = None
   def run(self):
