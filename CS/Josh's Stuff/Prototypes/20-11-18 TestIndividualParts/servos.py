@@ -3,12 +3,13 @@
 from adafruit_servokit import ServoKit
 import time 
 
-HORIZONTAL_PIN = 4
-VERTICAL_PIN = 5
+HORIZONTAL_PIN = 0 # 4 
+VERTICAL_PIN = 1 # 5
 PINS = [HORIZONTAL_PIN, VERTICAL_PIN]
 
 print("Starting up servo kit")
-myKit = ServoKit(channels=16, frequency=60) # 369   370 too high
+# myKit = ServoKit(channels=16, frequency=60) # 369   370 too high
+myKit = ServoKit(channels=16, frequency=60, address=0x41)
 
 # lo = 0
 # hi = 180
