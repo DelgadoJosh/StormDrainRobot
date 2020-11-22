@@ -28,3 +28,28 @@ def setHorizontalAngle(angle):
 
 def setVerticalAngle(angle):
     setAngle(angle, VERTICAL_PIN)
+
+def testServos():
+    print("Beginning Servo Test")
+
+    print("Initializing to Horizontal=90 degrees, Vertical=45 degrees, then wait 1 sec")
+    setHorizontalAngle(90)
+    setVerticalAngle(45)
+    time.sleep(1)
+
+    print("Changing Horizontal Angle to 45, then waiting 1 second")
+    setHorizontalAngle(45)
+    time.sleep(1)
+
+    print("Changing Vertical Angle to 60, then waiting 1 second")
+    setVerticalAngle(60)
+    time.sleep(1)
+
+    print("Resetting to Horizontal = 90, Vertical = 45")
+    setHorizontalAngle(90)
+    setVerticalAngle(45)
+
+    print("Ending Servo Test")
+    print()
+
+# testServos()

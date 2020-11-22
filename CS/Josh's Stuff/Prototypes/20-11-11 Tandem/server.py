@@ -72,7 +72,7 @@ def gstreamer_pipeline(
   #  display_height=180,
     # display_width=1000,
     # display_height=600,
-    framerate=60,
+    framerate=30,
     flip_method=0,
 ):
     return (
@@ -166,7 +166,7 @@ def broadcastVideo():
             elapsedTime = curTime - startTime
             dTime = curTime - prevTime 
             prevTime = curTime
-            print(f"Frame {frameIndex} | fps: {frameIndex/elapsedTime}")
+            print(f"Frame {frameIndex} | fps: {frameIndex/elapsedTime:.3f} | Voltage: {voltage:.3f}")
             frameIndex += 1
 
         
@@ -206,7 +206,7 @@ get_input = Process(target=awaitInput, daemon=True)
 
 # read_video.start()
 send_video.start()
-# get_input.start()
+get_input.start()
 
 
 # Trying using multiprocessing
