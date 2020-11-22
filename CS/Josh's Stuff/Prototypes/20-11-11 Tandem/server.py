@@ -27,6 +27,7 @@ import motors
 import servos
 import adc
 from queue import Queue
+import teensy
 
 port = 5000
 ip_address = ""
@@ -96,7 +97,7 @@ def gstreamer_pipeline(
 
 
 # Initialize camera
-camera = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
+# camera = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
 # camera = cv2.VideoCapture(0)  
 # frameShared = None
 frameQueue = Queue(maxsize=100)
@@ -131,27 +132,27 @@ def broadcastVideo():
     prevTime = time.time()
     while True: 
         try:
-            # Grab the current frame
-            # It should be updated by the looping constantlyReadVideoFeed()
-            grabbed, frame = camera.read()
-            # if frame == None:
-            #     continue 
-            # if frameQueue.qsize() == 0:
-            #     time.sleep(0.01)
-            #     continue 
-            # frame = frameQueue.get()
+            # # Grab the current frame
+            # # It should be updated by the looping constantlyReadVideoFeed()
+            # grabbed, frame = camera.read()
+            # # if frame == None:
+            # #     continue 
+            # # if frameQueue.qsize() == 0:
+            # #     time.sleep(0.01)
+            # #     continue 
+            # # frame = frameQueue.get()
 
-            # Encode the frame as a jpg
-            grabbed, buffer = cv2.imencode('.jpg', frame)
+            # # Encode the frame as a jpg
+            # grabbed, buffer = cv2.imencode('.jpg', frame)
 
-            # Convert the image as bytes encoded as a string
-            data = base64.b64encode(buffer)  # What actually works
+            # # Convert the image as bytes encoded as a string
+            # data = base64.b64encode(buffer)  # What actually works
 
-            # Send message length first
-            message_size = struct.pack("L", len(data))
+            # # Send message length first
+            # message_size = struct.pack("L", len(data))
 
-            # Then data
-            s.Client.sendall(message_size + data)
+            # # Then data
+            # s.Client.sendall(message_size + data)
 
             # Grab the voltage data
             voltage = adc.getVoltage()
@@ -159,7 +160,14 @@ def broadcastVideo():
             voltage_int = int(voltage*100)
             data = voltage_int.to_bytes(10, 'big')
             message_size = struct.pack("L", len(data))
+            s.Client.sendall(message_size + data)
+
+            # Grab the rotation data
+            numRotationsRaw = teensy.readEncoder()
+            data = numRotationsRaw.to_bytes(10, 'big')
+            message_size = struct.pack("L", len(data))
             # s.Client.sendall(message_size + data)
+
 
             # Record the current time needed
             curTime = time.time()
