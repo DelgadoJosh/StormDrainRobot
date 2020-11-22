@@ -1,0 +1,3 @@
+Address in use?
+ps aux | grep python 
+kill #associatedWithItInQuery

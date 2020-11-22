@@ -16,6 +16,8 @@ import pickle
 import struct
 import json 
 import base64
+import time 
+import threading
 
 port = 5000
 ip_address = ""
@@ -46,16 +48,16 @@ s.WaitForConnection()
 def gstreamer_pipeline(
    capture_width=1280,
    capture_height=720,
-    # display_width=1280,
-    # display_height=720,
+    display_width=1280,
+    display_height=720,
 #    framerate=60,
 #    flip_method=0,
     # capture_width=1280,
     # capture_height=720,
   #  display_width=320,
   #  display_height=180,
-    display_width=1000,
-    display_height=600,
+    # display_width=1000,
+    # display_height=600,
     framerate=60,
     flip_method=0,
 ):
@@ -84,36 +86,39 @@ camera = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
 # camera = cv2.VideoCapture(0)  
 
 # Loop to send the video, frame by frame.
-time = 0
-while True: 
-  try:
-    grabbed, frame = camera.read()  # Grab the current frame
-    # print(type(frame))
+numFrames = 0
+startTime = time.time()
+prevTime = startTime
+def recordVideo():
+    while True: 
+        try:
+            grabbed, frame = camera.read()  # Grab the current frame
 
-    grabbed, buffer = cv2.imencode('.jpg', frame)
+            grabbed, buffer = cv2.imencode('.jpg', frame)
 
-    # Serialize frame
-    # data = pickle.dumps(frame) 
-    # jsonData = {}
-    # Encodes the image as a byte, then as a string to store in a json object
-    # jsonData['img'] = base64.b64encode(buffer).decode("utf-8")
-    # Encodes the json as a string, which is then encoded into bytes
-    # data = json.dumps(jsonData).encode('utf-8')
-    data = base64.b64encode(buffer)
-    # data = base64.b64encode(str(time))
-    # data = time.to_bytes(10, 'big')
-    print(time)
-    time += 1
+            # Serialize frame
+            data = base64.b64encode(buffer)
 
-    # Send message length first
-    message_size = struct.pack("L", len(data))
+            # Get FPS rate
+            curTime = time.time()
+            dt = curTime - prevTime
+            prevTime = curTime
+            duration = curTime - startTime 
+            numFrames += 1
+            print(f"FPS: {numFrames/duration:.3f} dtFrameRate: {1/dt}")
 
-    # Then data
-    s.Client.sendall(message_size + data)
-  
-  except KeyboardInterrupt:
-    s.s.close((ip_address, port))
-    camera.release()
-    cv2.destroyAllWindows()
-    break
+            # Send message length first
+            message_size = struct.pack("L", len(data))
 
+            # Then data
+            s.Client.sendall(message_size + data)
+        
+        except KeyboardInterrupt:
+            s.s.close((ip_address, port))
+            camera.release()
+            cv2.destroyAllWindows()
+            break
+
+video_loop = threading.Thread(target=recordVideo, daemon=True)
+
+video_loop.start()

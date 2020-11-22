@@ -16,6 +16,7 @@ import pickle
 import struct
 import json 
 import base64
+import threading
 
 port = 5000
 ip_address = ""
@@ -84,36 +85,39 @@ camera = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
 # camera = cv2.VideoCapture(0)  
 
 # Loop to send the video, frame by frame.
-time = 0
-while True: 
-  try:
-    grabbed, frame = camera.read()  # Grab the current frame
-    # print(type(frame))
+def sendData():
+    time = 0
+    while True: 
+        try:
+            grabbed, frame = camera.read()  # Grab the current frame
+            # print(type(frame))
 
-    grabbed, buffer = cv2.imencode('.jpg', frame)
+            grabbed, buffer = cv2.imencode('.jpg', frame)
 
-    # Serialize frame
-    # data = pickle.dumps(frame) 
-    # jsonData = {}
-    # Encodes the image as a byte, then as a string to store in a json object
-    # jsonData['img'] = base64.b64encode(buffer).decode("utf-8")
-    # Encodes the json as a string, which is then encoded into bytes
-    # data = json.dumps(jsonData).encode('utf-8')
-    data = base64.b64encode(buffer)
-    # data = base64.b64encode(str(time))
-    # data = time.to_bytes(10, 'big')
-    print(time)
-    time += 1
+            # Serialize frame
+            # data = pickle.dumps(frame) 
+            # jsonData = {}
+            # Encodes the image as a byte, then as a string to store in a json object
+            # jsonData['img'] = base64.b64encode(buffer).decode("utf-8")
+            # Encodes the json as a string, which is then encoded into bytes
+            # data = json.dumps(jsonData).encode('utf-8')
+            data = base64.b64encode(buffer)
+            # data = base64.b64encode(str(time))
+            # data = time.to_bytes(10, 'big')
+            print(time)
+            time += 1
 
-    # Send message length first
-    message_size = struct.pack("L", len(data))
+            # Send message length first
+            message_size = struct.pack("L", len(data))
 
-    # Then data
-    s.Client.sendall(message_size + data)
-  
-  except KeyboardInterrupt:
-    s.s.close((ip_address, port))
-    camera.release()
-    cv2.destroyAllWindows()
-    break
+            # Then data
+            s.Client.sendall(message_size + data)
+    
+        except KeyboardInterrupt:
+            s.s.close((ip_address, port))
+            camera.release()
+            cv2.destroyAllWindows()
+            break
 
+send_data = threading.Thread(target=sendData)
+send_data.start()
