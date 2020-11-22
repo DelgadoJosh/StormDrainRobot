@@ -99,6 +99,21 @@ class App(threading.Thread):
     lmain.image = imgTk
     # lmain.after(1, self.showFrame)
 
+  voltage_label = None
+  def setVoltage(self, voltage):
+    if self.voltage_label == None: 
+      return
+    self.voltage_label["text"] = f"Voltage: {voltage:4.5f}"
+
+  voltageQueue = Queue(maxsize=1)
+  def loopToShowVoltage(self):
+    while True:
+      time.sleep(0.01)
+      if self.voltageQueue.empty():
+        continue 
+      voltage = self.voltageQueue.get()
+      self.setVoltage(self, voltage)
+
   fps_label = None
   def setFPS(self, fps):
     if self.fps_label == None:
@@ -300,6 +315,15 @@ class App(threading.Thread):
     # Populate the box with data
     self.fps_label = tk.Label(data_frame, text="FPS: 0")
     self.fps_label.grid(row=0, column=0)
+    self.voltage_label = tk.Label(data_frame, text="Voltage: 0")
+    self.voltage_label.grid(row=1, column=0)
+
+    # Threads to refresh the data
+    voltage_data_loop = threading.Thread(
+      target=self.loopToShowVoltage,
+      daemon=True
+    )
+    voltage_data_loop.start()
 
     # Start a thread so it'll keep on sending every dTime interval if the checkbox is checked
     send_data_loop = threading.Thread(
@@ -325,10 +349,10 @@ class App(threading.Thread):
     self.lmain = tk.Label(imageFrame)
     self.lmain.grid(row=0, column=0)
     # Start thread to refresh the video frame
-    refresh_frame_loop = threading.Thread(
-      target=self.refreshFrame,
-      daemon=True
-    )
+    # refresh_frame_loop = threading.Thread(
+    #   target=self.refreshFrame,
+    #   daemon=True
+    # )
     # refresh_frame_loop.start()
 
     encode_image_loop = threading.Thread(
