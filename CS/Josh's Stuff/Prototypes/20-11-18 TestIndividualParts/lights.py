@@ -22,7 +22,7 @@ pca.frequency = 1526
 
 def setPWM(percentPower):
     power = abs(int(MAX*percentPower))
-    print(f"Setting power to {power}")
+    print(f"Setting power to {percentPower}")
     pca.channels[LIGHTS_PIN].duty_cycle = power
 
 def testLights():
@@ -32,10 +32,14 @@ def testLights():
     setPWM(0)
     time.sleep(1)
 
-    print()
-    print("Setting to 2% power for 3 secs")
-    setPWM(0.02)
-    time.sleep(3)
+    # print()
+    # print("Setting to 2% power for 3 secs")
+    # setPWM(0.02)
+    # time.sleep(3)
+
+    for i in range(100):
+        setPWM(i / 100.0)
+        time.sleep(0.1)
 
     print()
     print("Ending Test")
