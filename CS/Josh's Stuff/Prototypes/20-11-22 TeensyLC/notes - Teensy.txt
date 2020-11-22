@@ -1,0 +1,18 @@
+Connecting the Teensy!
+
+4 wires from the encoder to Teensy LC:
+    Color | Purpose  | Teensy Pins 
+    ------------------------------------
+    Greys | Signal   | 5, 6 Interchangeable
+    Red   | Positive | 3V (3rd from corner)
+    Black | Negative | Ground (the corner one)
+
+4 i2c wires 
+    Color  | Purpose | Teensy Pins 
+    ------------------------------
+    Yellow | SCL     | 22 
+    Green  | SDA     | 23 
+    Orange | Ground  | G (2nd from corner) 
+    Red    | Power   | 5V (corner one) 
+
+
