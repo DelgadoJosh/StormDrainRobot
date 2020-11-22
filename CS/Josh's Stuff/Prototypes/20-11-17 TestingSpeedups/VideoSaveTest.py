@@ -19,12 +19,16 @@ frameQueue = GUI.app.frameQueue
 # https://www.fourcc.org/codecs.php
 # https://stackoverflow.com/questions/52932157/opencv-ffmpeg-tag-0x34363268-h264-is-not-supported-with-codec/56723380
 # fourcc = cv2.VideoWriter_fourcc(*'XVID')
+# out = cv2.VideoWriter('./videos/output.avi', cv2.VideoWriter_fourcc(*'XVID'), 20.0, (1280, 720))
+# fourcc = cv2.VideoWriter_fourcc(*'MJPG')
 # out = cv2.VideoWriter('./videos/output.avi', fourcc, 20.0, (1280, 720))
 fourcc = cv2.VideoWriter_fourcc(*'MP4V') # Four character code for video format
 # fourcc = cv2.VideoWriter_fourcc(*'H264')
-print("before")
+# print("before")
 out = cv2.VideoWriter('./videos/output.mp4', fourcc, 20.0, (1280, 720))
-print("after")
+# print("after")
+
+
 
 # Loop for receiving input, the input is added to a queue
 def getInput():
@@ -43,6 +47,8 @@ def getInput():
     print("Ended input loop")
 
 camera = cv2.VideoCapture(0)
+camera.set(3, 1280)  # This must be set to save correctly
+camera.set(4, 720)
 def showVideo():
 
   # Loop for showing images images
@@ -57,6 +63,9 @@ def showVideo():
         return
 
       _, frame = camera.read()
+      hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+      # out.write(hsv)
+      out.write(frame)
 
       numFrames += 1
       duration = time.time() - startTime 
@@ -79,12 +88,12 @@ def showVideo():
       if not frameQueue.full():
         frameQueue.put(frame)
 
-      out.write(frame)
 
     except KeyboardInterrupt:
       cv2.destroyAllWindows()
-      
   
+  camera.release()
+  out.release()
   print("Video loop end")
 
 
