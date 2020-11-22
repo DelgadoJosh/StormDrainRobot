@@ -14,9 +14,12 @@ ads = ADS.ADS1115(i2c)
 ads.mode = ADS.Mode.CONTINUOUS
 ads.gain = 1
 
-R1 = 30000
-R2 = 7500
+R1 = 29573 # 30000
+R2 = 7300 # 7500
 
+# Vin*R2/Vout - R2 = R1 
+# print((13.23 * R2)/Vout -R2)
+ 
 # Vin = Vout * (R1 + R2)/R2
 coefficient = 1.0*(R1 + R2)/R2
 
