@@ -103,7 +103,7 @@ class App(threading.Thread):
   def setVoltage(self, voltage):
     if self.voltage_label == None: 
       return
-    self.voltage_label["text"] = f"Voltage: {voltage:4.5f}"
+    self.voltage_label["text"] = f"Voltage: {voltage:4.2f}"
 
   voltageQueue = Queue(maxsize=1)
   def loopToShowVoltage(self):
@@ -112,7 +112,7 @@ class App(threading.Thread):
       if self.voltageQueue.empty():
         continue 
       voltage = self.voltageQueue.get()
-      self.setVoltage(self, voltage)
+      self.setVoltage(voltage)
 
   fps_label = None
   def setFPS(self, fps):
