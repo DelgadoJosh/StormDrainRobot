@@ -55,6 +55,19 @@ class App(threading.Thread):
   #   print(outputString)
   #   self.queue.put(outputString)
 
+  # X, Y axes are on a 16 bit number (0-16k)
+  DEAD_ZONE = 2000
+  def isInDeadZone(self, lx, ly, rx, ry):
+    return abs(lx) < self.DEAD_ZONE \
+      and abs(ly) < self.DEAD_ZONE \
+      and abs(rx) < self.DEAD_ZONE \
+      and abs(ry) < self.DEAD_ZONE
+  
+  def removeDeadZone(self, val):
+    if abs(val) < self.DEAD_ZONE:
+      val = 0
+    return val
+
   inputQueriesPerSecond = 100
   def loopToQueryController(self):
     controller = Controller()
@@ -67,13 +80,15 @@ class App(threading.Thread):
       #  - emergency stop
       time.sleep(inputQueryDelay)
 
-      joystickLX = controller.getLeftJoystickX()
-      joystickLY = controller.getLeftJoystickY()
+      joystickLX = self.removeDeadZone(controller.getLeftJoystickX())
+      joystickLY = self.removeDeadZone(controller.getLeftJoystickY())
 
-      joystickRX = controller.getRightJoystickX()
-      joystickRY = controller.getRightJoystickY()
+      joystickRX = self.removeDeadZone(controller.getRightJoystickX())
+      joystickRY = self.removeDeadZone(controller.getRightJoystickY())
 
-      print(f"LX: {joystickLX} | LX: {joystickLY} | RX: {joystickRX} | RY: {joystickRY}")
+      # If it's not in the deadzone, then we'll update
+      if not self.isInDeadZone(joystickLX, joystickLY, joystickRX, joystickRY):
+        print(f"LX: {joystickLX} | LX: {joystickLY} | RX: {joystickRX} | RY: {joystickRY}")
 
 
   # camera = cv2.VideoCapture(0)   # TEMP
