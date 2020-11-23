@@ -5,6 +5,7 @@ from __future__ import print_function
 
 import inputs
 
+print("Initializing Controller")
 
 EVENT_ABB = (
     # D-PAD, aka HAT
@@ -159,6 +160,9 @@ class Controller(object):
         if event.ev_type == 'Absolute':
             self.old_abs_state[abbv] = self.abs_state[abbv]
             self.abs_state[abbv] = event.state
+            if abbv == 'HY':
+                if event.state != 0:
+                    self.dPadYLastNonZeroResult = event.state
         if self.debugOutput:
             self.output_state(event.ev_type, abbv)
 
@@ -212,7 +216,15 @@ class Controller(object):
     def getRightJoystickY(self):
         self.process_events()
         return self.abs_state['RY']
-
+    
+    dPadYLastNonZeroResult = 0
+    def getDPadYState(self):
+        if self.dPadYLastNonZeroResult != 0:
+            val = self.dPadYLastNonZeroResult * -1  # Because - is up, changing it up
+            self.dPadYLastNonZeroResult = 0
+            return val 
+        return 0
+    
     # bPressed = False
     # bPressedAndReleased = False 
     def getBPressedAndReleased(self):

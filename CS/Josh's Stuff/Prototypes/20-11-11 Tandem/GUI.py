@@ -102,6 +102,7 @@ class App(threading.Thread):
 
     maxPower = 1.0
     INCREMENT = 0.1
+    LIGHT_INCREMENT = 0.05
 
     horizontalAngle = 90
     verticalAngle = 45
@@ -123,6 +124,8 @@ class App(threading.Thread):
 
       leftBumperPressed = controller.getLeftBumperPressedAndReleased()
       rightBumperPressed = controller.getRightBumperPressedAndReleased()
+
+      dPadY = controller.getDPadYState()
 
       if not self.getUseController():
         continue
@@ -167,7 +170,7 @@ class App(threading.Thread):
         verticalAngle += changeInVerticalAngle
         servoVerticalAngle = int(self.clamp(verticalAngle, 0, 90) + 0.5)
 
-        print(f"rx={joystickRX} | rx={joystickRY} | changeHoriz={changeInHorizontalAngle} | changeVert={changeInVerticalAngle}")
+        # print(f"rx={joystickRX} | rx={joystickRY} | changeHoriz={changeInHorizontalAngle} | changeVert={changeInVerticalAngle}")
 
         self.setServosHorizontal(servoHorizontalAngle)
         self.setServosVertical(servoVerticalAngle)
@@ -191,9 +194,16 @@ class App(threading.Thread):
         maxPower = newMax 
         # print(f"  new max: {maxPower}")
         print(f"Right bumper pressed, new maxpower = {maxPower}")
-    
-      
 
+      if dPadY != 0:
+        print(f"dPadY: {dPadY}")
+      try: 
+        lightsPower = float(self.getLights()) 
+        lightsPower += dPadY * LIGHT_INCREMENT
+        lightsPower = self.clamp(lightsPower, 0, 1.0)
+        self.setLights(lightsPower)
+      except:
+        print("Lights invalid")
 
   motors_left_entry_text = None
   def getLeftMotorSpeed(self):
@@ -229,11 +239,16 @@ class App(threading.Thread):
     self.motors_right_entry_text.set(str(percentSpeed))
   
 
-  lights_entry = None 
+  lights_entry_text = None 
   def getLights(self):
-    if self.lights_entry == None:
+    if self.lights_entry_text == None:
       return "0"
-    return self.lights_entry.get()
+    return self.lights_entry_text.get()
+
+  def setLights(self, val):
+    if self.lights_entry_text == None:
+      return 
+    return self.lights_entry_text.set(val)
 
   servos_horizontal_slider = None
   def getServosHorizontal(self):
