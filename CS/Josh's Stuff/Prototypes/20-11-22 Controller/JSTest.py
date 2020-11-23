@@ -11,6 +11,12 @@ EVENT_ABB = (
     ('Absolute-ABS_HAT0X', 'HX'),
     ('Absolute-ABS_HAT0Y', 'HY'),
 
+    # Joystick
+    ('Absolute-ABS_X', 'LX'),
+    ('Absolute-ABS_Y', 'LY'),
+    ('Absolute-ABS_RX', 'RX'),
+    ('Absolute-ABS_RY', 'RY'),
+
     # Face Buttons
     ('Key-BTN_NORTH', 'N'),
     ('Key-BTN_EAST', 'E'),
@@ -145,6 +151,21 @@ class JSTest(object):
         for event in events:
             self.process_event(event)
 
+    def getLeftJoystickX(self):
+        self.process_events()
+        return self.abs_state['LX']
+
+    def getLeftJoystickY(self):
+        self.process_events()
+        return self.abs_state['LY']
+
+    def getRightJoystickX(self):
+        self.process_events()
+        return self.abs_state['LX']
+
+    def getRightJoystickY(self):
+        self.process_events()
+        return self.abs_state['RY']
 
 def main():
     """Process all events forever."""
