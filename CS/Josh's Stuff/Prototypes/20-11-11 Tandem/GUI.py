@@ -338,7 +338,8 @@ class App(threading.Thread):
   def submitData(self):
     outputString = f"{self.getLights()} {self.getLeftMotorSpeed()} {self.getRightMotorSpeed()} {self.getServosHorizontal()} {self.getServosVertical()}"
     print(outputString)
-    self.queue.put(outputString)
+    if not self.queue.full():
+      self.queue.put(outputString)
 
   def showFrame(self, frame):
     cv2Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
