@@ -30,8 +30,8 @@ EVENT_ABB = (
     # Other buttons
     ('Key-BTN_THUMBL', 'THL'),
     ('Key-BTN_THUMBR', 'THR'),
-    ('Key-BTN_TL', 'TL'),
-    ('Key-BTN_TR', 'TR'),
+    ('Key-BTN_TL', 'TL'), # Left Bumper
+    ('Key-BTN_TR', 'TR'), # Right Bumper
     ('Key-BTN_TL2', 'TL2'),
     ('Key-BTN_TR2', 'TR3'),
     ('Key-BTN_MODE', 'M'),
@@ -73,6 +73,8 @@ class Controller(object):
         self.gamepad = gamepad
         if not gamepad:
             self._get_gamepad()
+    
+    debugOutput = False
 
     def _get_gamepad(self):
         """Get a gamepad object."""
@@ -115,10 +117,37 @@ class Controller(object):
         if event.ev_type == 'Key':
             self.old_btn_state[abbv] = self.btn_state[abbv]
             self.btn_state[abbv] = event.state
+
+            # Update the state of the B Button
+            if abbv == 'E':
+                if event.state == 1:
+                    self.bPressed = True 
+                else: 
+                    if self.bPressed:
+                        self.bPressedAndReleased = True 
+                        self.bPressed = False
+
+            # Update the state of the Left Bumper
+            if abbv == 'TL':
+                if event.state == 1:
+                    self.leftBumperPressed = True 
+                else:
+                    if self.leftBumperPressed:
+                        self.leftBumperPressedAndReleased = True 
+                        self.leftBumperPressed = False
+            # Update the state of the Right bumper
+            if abbv == 'TR':
+                if event.state == 1:
+                    self.rightBumperPressed = True 
+                else:
+                    if self.rightBumperPressed:
+                        self.rightBumperPressedAndReleased = True 
+                        self.rightBumperPressed = False
         if event.ev_type == 'Absolute':
             self.old_abs_state[abbv] = self.abs_state[abbv]
             self.abs_state[abbv] = event.state
-        # self.output_state(event.ev_type, abbv)
+        if self.debugOutput:
+            self.output_state(event.ev_type, abbv)
 
     def format_state(self):
         """Format the state."""
@@ -171,14 +200,40 @@ class Controller(object):
         self.process_events()
         return self.abs_state['RY']
 
+    bPressed = False
+    bPressedAndReleased = False 
+    def getBPressedAndReleased(self):
+        if self.bPressedAndReleased:
+            self.bPressedAndReleased = False 
+            return True
+        return False
+
+    leftBumperPressed = False
+    leftBumperPressedAndReleased = False 
+    def getLeftBumperPressedAndReleased(self):
+        if self.leftBumperPressedAndReleased:
+            self.leftBumperPressedAndReleased = False 
+            return True 
+        return False
+
+    rightBumperPressed = False
+    rightBumperPressedAndReleased = False
+    def getRightBumperPressedAndReleased(self):
+        if self.rightBumperPressedAndReleased:
+            self.rightBumperPressedAndReleased = False 
+            return True 
+        return False
+
 def main():
     """Process all events forever."""
     # jstest = JSTest()
+    print("Processing all events")
     jstest = Controller()
+    jstest.debugOutput = True
     while 1:
         jstest.process_events()
 
 
 if __name__ == "__main__":
-    main()
     # print("Initizialized controller")
+    main()
