@@ -28,7 +28,7 @@ import servos
 import adc
 from queue import Queue
 from datetime import datetime
-# import teensy
+import teensy
 
 port = 5000
 ip_address = ""
@@ -199,17 +199,16 @@ def broadcastVideo():
 
             # Grab the voltage data
             voltage = adc.getVoltage()
-            # data = voltage.to_bytes(10, 'big')
             voltage_int = int(voltage*100)
             data = voltage_int.to_bytes(10, 'big')
             message_size = struct.pack("L", len(data))
             s.Client.sendall(message_size + data)
 
             # Grab the rotation data
-            # numRotationsRaw = teensy.readEncoder()
-            # data = numRotationsRaw.to_bytes(10, 'big')
-            # message_size = struct.pack("L", len(data))
-            # s.Client.sendall(message_size + data)
+            numRotationsRaw = teensy.readEncoder()
+            data = numRotationsRaw.to_bytes(10, 'big')
+            message_size = struct.pack("L", len(data))
+            s.Client.sendall(message_size + data)
 
 
             # Record the current time needed
@@ -230,6 +229,7 @@ def broadcastVideo():
             cv2.destroyAllWindows()
             break
     
+    print("[Broadcast] Ending")
     out.release()
     print("Ending")
 
@@ -246,6 +246,7 @@ def awaitInput():
             # Use the data received
             splitData = utils.parse(utils.cleanup(str(data)))
             if splitData is not None:
+                # print(f"Split Data: {splitData[0]} {splitData[1]} {splitData[2]} {splitData[3]} {splitData[4]}")
                 lights.setPWM(splitData[utils.LIGHTS_INDEX])
                 motors.setLeftSpeed(splitData[utils.MOTOR_LEFT_INDEX])
                 motors.setRightSpeed(splitData[utils.MOTOR_RIGHT_INDEX])
