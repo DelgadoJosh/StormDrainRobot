@@ -29,6 +29,7 @@ import adc
 from queue import Queue
 from datetime import datetime
 import teensy
+import attachment
 
 port = 5000
 ip_address = ""
@@ -146,10 +147,15 @@ def loopToSaveVideo():
             if numFramesSaved % 10 == 0:
                 print(f"    FPS: {numFramesSaved/durationSaved:.3f}")
             frameToSave = saveVideoFrameQueue.get()
-            out.write(frameToSave)
+            if out.isOpened():
+                out.write(frameToSave)
+            else:
+                print("[SaveVideo] Out is not opened")
+                break
         except:
             print("[SaveVideo] Exception")
             out.release()
+    print("[SaveVideo] Ended")
 
 # Loop to send the video, frame by frame.
 def broadcastVideo():
@@ -221,15 +227,16 @@ def broadcastVideo():
             frameIndex += 1
 
         
-        except:
-            print("[Broadcast] Exception")
+        except Exception as e:
+            print(f"[Broadcast] Exception: {e}")
             # s.s.close((ip_address, port))
-            camera.release()
-            out.release()
-            cv2.destroyAllWindows()
+            # camera.release()
+            # out.release()
+            # cv2.destroyAllWindows()
             break
     
     print("[Broadcast] Ending")
+    # camera.release()
     out.release()
     print("Ending")
 
@@ -252,9 +259,11 @@ def awaitInput():
                 motors.setRightSpeed(splitData[utils.MOTOR_RIGHT_INDEX])
                 servos.setHorizontalAngle(splitData[utils.SERVO_HORIZONTAL_INDEX])
                 servos.setVerticalAngle(splitData[utils.SERVO_VERTICAL_INDEX])
+                attachment.setPWM(splitData[utils.ATTACHMENT_INDEX])
         except: 
             print("[InputLoop] Exception")
             break
+    print("[InputLoop] Ended")
 
 # Trying using threading
 # read_video = Process(target=constantlyReadVideoFeed, daemon=True)
