@@ -108,11 +108,15 @@ frame = None
 folderName = './videos/'
 date_split = str(datetime.now()).split(" ")
 date = date_split[0]
-name = date
+timeStartedRunString = date_split[1]
+timeStartedRunString = timeStartedRunString.replace('.', " ")
+timeStartedRunString = timeStartedRunString.split(" ")[0]  # Throwing away the milliseconds
+timeStartedRunString = timeStartedRunString.replace(":", "-")
+name = date + "_" + timeStartedRunString
 extension = '.mp4'
 filename = folderName + name + extension 
 fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-out = cv2.VideoWriter(filename, fourcc, 20.0, (1280, 720))
+out = cv2.VideoWriter(filename, fourcc, 11.0, (1280, 720))
 
 # A parallel thread
 def constantlyReadVideoFeed():
@@ -128,19 +132,24 @@ def constantlyReadVideoFeed():
         frameQueue.put(frame)
     print("Ending the video feed loop")
 
-saveVideoFrameQueue = Queue(maxsize=1)
+saveVideoFrameQueue = Queue(maxsize=10)
 def loopToSaveVideo():
     startTimeSaved = time.time()
     numFramesSaved = 0
     while True:
-        time.sleep(0.01)
-        if saveVideoFrameQueue.empty():
-            continue
-        numFramesSaved += 1
-        durationSaved = time.time() - startTimeSaved 
-        print(f"    FPS: {numFramesSaved/durationSaved:.3f}")
-        frameToSave = saveVideoFrameQueue.get()
-        out.write(frameToSave)
+        try: 
+            time.sleep(0.01)
+            if saveVideoFrameQueue.empty():
+                continue
+            numFramesSaved += 1
+            durationSaved = time.time() - startTimeSaved 
+            if numFramesSaved % 10 == 0:
+                print(f"    FPS: {numFramesSaved/durationSaved:.3f}")
+            frameToSave = saveVideoFrameQueue.get()
+            out.write(frameToSave)
+        except:
+            print("[SaveVideo] Exception")
+            out.release()
 
 # Loop to send the video, frame by frame.
 def broadcastVideo():
@@ -208,13 +217,16 @@ def broadcastVideo():
             elapsedTime = curTime - startTime
             dTime = curTime - prevTime 
             prevTime = curTime
-            print(f"Frame {frameIndex} | fps: {frameIndex/elapsedTime:.3f} | Voltage: {voltage:.3f}")
+            if frameIndex % 10 == 0:
+                print(f"Frame {frameIndex} | fps: {frameIndex/elapsedTime:.3f} | Voltage: {voltage:.3f}")
             frameIndex += 1
 
         
-        except KeyboardInterrupt:
-            s.s.close((ip_address, port))
+        except:
+            print("[Broadcast] Exception")
+            # s.s.close((ip_address, port))
             camera.release()
+            out.release()
             cv2.destroyAllWindows()
             break
     
@@ -224,21 +236,24 @@ def broadcastVideo():
 def awaitInput():
     # Wait for the data, print it, and send it back
     while True:
-        data = s.Client.recv(1024) # Recieve the data from the client
-        print(data)
+        try:
+            data = s.Client.recv(1024) # Recieve the data from the client
+            print(data)
 
-        if not data:
+            if not data:
+                break
+
+            # Use the data received
+            splitData = utils.parse(utils.cleanup(str(data)))
+            if splitData is not None:
+                lights.setPWM(splitData[utils.LIGHTS_INDEX])
+                motors.setLeftSpeed(splitData[utils.MOTOR_LEFT_INDEX])
+                motors.setRightSpeed(splitData[utils.MOTOR_RIGHT_INDEX])
+                servos.setHorizontalAngle(splitData[utils.SERVO_HORIZONTAL_INDEX])
+                servos.setVerticalAngle(splitData[utils.SERVO_VERTICAL_INDEX])
+        except: 
+            print("[InputLoop] Exception")
             break
-
-        # Use the data received
-        splitData = utils.parse(utils.cleanup(str(data)))
-        if splitData is not None:
-            lights.setPWM(splitData[utils.LIGHTS_INDEX])
-            motors.setLeftSpeed(splitData[utils.MOTOR_LEFT_INDEX])
-            motors.setRightSpeed(splitData[utils.MOTOR_RIGHT_INDEX])
-            servos.setHorizontalAngle(splitData[utils.SERVO_HORIZONTAL_INDEX])
-            servos.setVerticalAngle(splitData[utils.SERVO_VERTICAL_INDEX])
-
 
 # Trying using threading
 # read_video = Process(target=constantlyReadVideoFeed, daemon=True)
