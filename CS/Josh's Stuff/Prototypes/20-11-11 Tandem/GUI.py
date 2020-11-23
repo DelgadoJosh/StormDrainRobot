@@ -94,7 +94,6 @@ class App(threading.Thread):
       print("Invalid val")
       return val
 
-  useController = True
   inputQueriesPerSecond = 100
   SENSITIVITY = 0.001 * 10
   MAX_JOYSTICK = 32000
@@ -123,7 +122,7 @@ class App(threading.Thread):
       leftBumperPressed = controller.getLeftBumperPressedAndReleased()
       rightBumperPressed = controller.getRightBumperPressedAndReleased()
 
-      if not self.useController:
+      if not self.getUseController():
         continue
 
       # If it's not in the deadzone, then we'll update
@@ -226,11 +225,22 @@ class App(threading.Thread):
       return "0"
     return self.servos_vertical_slider.get()
   
+  use_controller_checkbox_val = None 
+  def getUseController(self):
+    if self.use_controller_checkbox_val == None:
+      return False 
+    return self.use_controller_checkbox_val.get()
+
+  def setUseController(self, val):
+    if self.use_controller_checkbox_val == None:
+      return
+    self.use_controller_checkbox_val.set(val)
 
   def emergencyStop(self):
     self.setLeftMotor(0)
     self.setRightMotor(0)
     self.submitData()
+    self.setUseController(False)
 
 
   # camera = cv2.VideoCapture(0)   # TEMP
@@ -499,10 +509,23 @@ class App(threading.Thread):
     )
     submit_data_button.grid(row=1, column=5)
 
+    emergency_stop_button = tk.Button(
+      text="STOP MOTORS",
+      command = self.emergencyStop,
+      background = 'red'
+    )
+    emergency_stop_button.grid(row=0, column=5)
+
     # Todo: Add a checkbox for constantly send the data every x seconds
+    checkbox_frame = tk.Frame(self.root, relief=tk.RAISED, borderwidth=2)
+    checkbox_frame.grid(row=1, column=6)
     constantly_submit_checkbox_val = tk.IntVar()
-    constantly_submit_checkbox = tk.Checkbutton(text="Constantly Submit", variable=constantly_submit_checkbox_val)
-    constantly_submit_checkbox.grid(row=1, column=6)
+    constantly_submit_checkbox = tk.Checkbutton(checkbox_frame, text="Constantly Submit", variable=constantly_submit_checkbox_val)
+    # constantly_submit_checkbox.grid(row=1, column=6)
+    constantly_submit_checkbox.grid(row=0, column=0)
+    self.use_controller_checkbox_val = tk.IntVar()
+    use_controller_checkbox = tk.Checkbutton(checkbox_frame, text="Use Controller", variable=self.use_controller_checkbox_val)
+    use_controller_checkbox.grid(row=1, column=0)
 
     # Add a box for data
     data_frame = tk.Frame(self.root, relief=tk.RAISED, borderwidth=2)
