@@ -14,7 +14,12 @@ import cv2
 from PIL import Image, ImageTk
 import io
 from multiprocessing import Process
-from controller import Controller
+
+try:
+  from controller import Controller
+  controllerConnected = True
+except:
+  controllerConnected = False 
 
 class App(threading.Thread):
   def __init__(self):
@@ -660,11 +665,12 @@ class App(threading.Thread):
     # img = None
 
     # Begin loop for querying the controller
-    controller_loop = threading.Thread(
-      target=self.loopToQueryController,
-      daemon=True
-    )
-    controller_loop.start()
+    if controllerConnected:
+      controller_loop = threading.Thread(
+        target=self.loopToQueryController,
+        daemon=True
+      )
+      controller_loop.start()
 
     # Todo: add a place where you put the current run info (pipe start id, pipe end id)
 

@@ -86,6 +86,7 @@ class Controller(object):
         try:
             self.gamepad = inputs.devices.gamepads[0]
         except IndexError:
+            return
             raise inputs.UnpluggedError("No gamepad found.")
 
     def handle_unknown_event(self, event, key):
@@ -198,6 +199,8 @@ class Controller(object):
             events = self.gamepad.read()
         except EOFError:
             events = []
+        except:
+            return
         for event in events:
             self.process_event(event)
 
