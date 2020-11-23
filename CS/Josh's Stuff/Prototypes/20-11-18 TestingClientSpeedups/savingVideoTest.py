@@ -27,32 +27,32 @@ from datetime import datetime
 # display_width and display_height determine the size of the window on the screen
 
 # Adjsut display_width, display_height
-def gstreamer_pipeline(
-   capture_width=1280,
-   capture_height=720,
-    display_width=1280,
-    display_height=720,
-    framerate=30,
-    flip_method=0,
-):
-    return (
-        "nvarguscamerasrc ! "
-        "video/x-raw(memory:NVMM), "
-        "width=(int)%d, height=(int)%d, "
-        "format=(string)NV12, framerate=(fraction)%d/1 ! "
-        "nvvidconv flip-method=%d ! "
-        "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
-        "videoconvert ! "
-        "video/x-raw, format=(string)BGR ! appsink"
-        % (
-            capture_width,
-            capture_height,
-            framerate,
-            flip_method,
-            display_width,
-            display_height,
-        )
-    )
+# def gstreamer_pipeline(
+#    capture_width=1280,
+#    capture_height=720,
+#     display_width=1280,
+#     display_height=720,
+#     framerate=30,
+#     flip_method=0,
+# ):
+#     return (
+#         "nvarguscamerasrc ! "
+#         "video/x-raw(memory:NVMM), "
+#         "width=(int)%d, height=(int)%d, "
+#         "format=(string)NV12, framerate=(fraction)%d/1 ! "
+#         "nvvidconv flip-method=%d ! "
+#         "video/x-raw, width=(int)%d, height=(int)%d, format=(string)BGRx ! "
+#         "videoconvert ! "
+#         "video/x-raw, format=(string)BGR ! appsink"
+#         % (
+#             capture_width,
+#             capture_height,
+#             framerate,
+#             flip_method,
+#             display_width,
+#             display_height,
+#         )
+#     )
 
 
 # Initialize camera
@@ -63,55 +63,63 @@ def gstreamer_pipeline(
 width = 600
 height = 400
 camera = cv2.VideoCapture(0)
-camera.set(3, width)
-camera.set(4, height)
+camera.set(3, 600)
+camera.set(4, 400)
 
 filename = './output.mp4'
-fourcc = cv2.VideoWriter_fourcc(*'MP4V') # four Character Code for how to encode video
+fourcc = cv2.VideoWriter_fourcc(*'mp4v') # four Character Code for how to encode video
 fps = 20.0 
     # FPS of the saved video. Note that regardless of the
     #   FPS it was saved at, it will play at this fps
     #   So if you're saving 10 frames per second, then 
     #     the 20fps playback will make it play at 2x speed
 size = (width, height)
-out = cv2.VideoWriter(filename, fourcc, fps, size)
+# out = cv2.VideoWriter(filename, fourcc, fps, size)
+out = cv2.VideoWriter("./output.mp4", cv2.VideoWriter_fourcc(*'mp4v'), 20, (600, 400))
 
 # Function for a thread to always save the video
 saveVideoFrameQueue = Queue(maxsize=5) # If maxsize is too large, latency is an issue as it processes the queue
 def loopToSaveVideo():
+    global out
     while True:
-        time.sleep(0.01) # This is essential to prevent the CPU from spinning on the same thread
-        if saveVideoFrameQueue.empty():
-            continue
-        print("Writing frame")
-        frameToSave = saveVideoFrameQueue.get()
-        out.write(frameToSave)
+        try:
+            time.sleep(0.01) # This is essential to prevent the CPU from spinning on the same thread
+            if saveVideoFrameQueue.empty():
+                continue
+            print("Writing frame")
+            frameToSave = saveVideoFrameQueue.get()
+            out.write(frameToSave)
+            print("  Frame Written")
+        except: 
+            print("Breaking")
+            # out.release()
+            break
+    print("Ending loop to save video")
+    # out.release()
 
 # Loop to send the video, frame by frame.
 def loopToBroadcastVideo():
     # while True: 
+    global saveVideoFrameQueue
     for i in range(100): # For the purposes of testing, going to close this after 100 frames
-        try:
-            # Grab the current frame
-            # It should be updated by the looping constantlyReadVideoFeed()
-            grabbed, frame = camera.read()
+        # Grab the current frame
+        # It should be updated by the looping constantlyReadVideoFeed()
+        grabbed, frame = camera.read()
 
-            if not grabbed:
-                continue
+        if not grabbed:
+            continue
 
-            # # Save the frame
-            # if not saveVideoFrameQueue.full():
-            #     saveVideoFrameQueue.put(frame)
+        # Save the frame
+        if not saveVideoFrameQueue.full():
+            saveVideoFrameQueue.put(frame)
 
-            # Then send the frame
-            # "client.send(frame)"  or similar
-            cv2.imshow("Frame", frame)
-        
-        except KeyboardInterrupt:
-            camera.release()
-            break
+        # Then send the frame
+        # "client.send(frame)"  or similar
+        # cv2.imshow("Frame", frame)
     
+    # saveVideoFrameQueue = Queue(maxsize = 1)
     print("Releasing Video Writer")
+    camera.release()
     out.release()
 
 
