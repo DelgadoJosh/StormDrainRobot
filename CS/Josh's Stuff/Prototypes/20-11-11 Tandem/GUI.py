@@ -67,8 +67,24 @@ class App(threading.Thread):
     if abs(val) < self.DEAD_ZONE:
       val = 0
     return val
+  
+  def clampAbsolute(self, val, max):
+    try:
+      val = float(val)
+      if abs(val) > max:
+        if val > 0:
+          val = max
+        else:
+          val = -max
+      return val
+    except:
+      print("Invalid val")
+      return val
 
+  useController = True
   inputQueriesPerSecond = 100
+  SENSITIVITY = 0.001
+  MAX_JOYSTICK = 32000
   def loopToQueryController(self):
     controller = Controller()
     inputQueryDelay = 1.0/100
@@ -89,11 +105,87 @@ class App(threading.Thread):
       # If it's not in the deadzone, then we'll update
       if not self.isInDeadZone(joystickLX, joystickLY, joystickRX, joystickRY):
         print(f"LX: {joystickLX} | LX: {joystickLY} | RX: {joystickRX} | RY: {joystickRY}")
+        if self.useController:
+          changeInSpeed = 1.0*joystickLY/self.MAX_JOYSTICK * self.SENSITIVITY
+          motorLeftSpeed = float(self.getLeftMotorSpeed())
+          motorLeftSpeed += changeInSpeed
+          motorLeftSpeed = self.clampAbsolute(motorLeftSpeed, 1.0)
+          motorRightSpeed = float(self.getRightMotorSpeed())
+          motorRightSpeed += changeInSpeed
+          motorRightSpeed = self.clampAbsolute(motorRightSpeed, 1.0)
+
+          print(f"Left: {motorLeftSpeed} | Right: {motorRightSpeed} | change{changeInSpeed}")
+
+          self.setLeftMotor(motorLeftSpeed)
+          self.setRightMotor(motorRightSpeed)
+
+
+  motors_left_entry_text = None
+  def getLeftMotorSpeed(self):
+    if self.motors_left_entry_text == None:
+      return "0"
+    val = self.motors_left_entry_text.get()
+    # if self.motors_left_entry == None:
+    #   return "0"
+    # val = self.motors_left_entry.get()
+    try: 
+      val = float(val)
+    except:
+      val = 0
+    return val
+  
+  def setLeftMotor(self, percentSpeed):
+    # if self.motors_left_entry == None:
+    #   print(" Nope")
+    #   return
+    # self.motors_left_entry.set(str(percentSpeed))
+    if self.motors_left_entry_text == None:
+      print(" Nope")
+      return 
+    self.motors_left_entry_text.set(str(percentSpeed))
+
+  motors_right_entry = None 
+  def getRightMotorSpeed(self):
+    if self.motors_right_entry == None:
+      return "0"
+    val = self.motors_right_entry.get()
+    try:
+      val = float(val)
+    except:
+      val = 0
+    return val
+
+  def setRightMotor(self, percentSpeed):
+    if self.motors_right_entry == None:
+      return
+    self.motors_right_entry['text'] = str(percentSpeed)
+  
+
+  lights_entry = None 
+  def getLights(self):
+    if self.lights_entry == None:
+      return "0"
+    return self.lights_entry.get()
+
+  servos_horizontal_slider = None
+  def getServosHorizontal(self):
+    if self.servos_horizontal_slider == None:
+      return "0"
+    return self.servos_horizontal_slider.get()
+
+  servos_vertical_slider = None
+  def getServosVertical(self):
+    if self.servos_vertical_slider == None:
+      return "0"
+    return self.servos_vertical_slider.get()
+  
+  
 
 
   # camera = cv2.VideoCapture(0)   # TEMP
   dTime = 0.01
-  def continuallySendData(self, checkbox, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
+  # def continuallySendData(self, checkbox, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
+  def continuallySendData(self, checkbox):
     dTime = self.dTime
     nextTimeAvailable = time.time() + dTime
     # camera = self.camera # TEMP
@@ -112,12 +204,23 @@ class App(threading.Thread):
         continue 
       nextTimeAvailable = time.time() + dTime 
 
-      self.submitData(lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry)
+      self.submitData()
+      # self.submitData(lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry)
     print("Cleaned up loop")
     return
 
-  def submitData(self, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
-    outputString = f"{lights_entry.get()} {motors_left_entry.get()} {motors_right_entry.get()} {servos_horizontal_entry.get()} {servos_vertical_entry.get()}"
+  # def submitData(self, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
+  #   outputString = f"{lights_entry.get()} {motors_left_entry.get()} {motors_right_entry.get()} {servos_horizontal_entry.get()} {servos_vertical_entry.get()}"
+  #   print(outputString)
+  #   self.queue.put(outputString)
+
+  # def submitData(self, lights_entry, servos_horizontal_entry, servos_vertical_entry):
+  #   outputString = f"{lights_entry.get()} {self.getLeftMotorSpeed()} {self.getRightMotorSpeed()} {servos_horizontal_entry.get()} {servos_vertical_entry.get()}"
+  #   print(outputString)
+  #   self.queue.put(outputString)
+
+  def submitData(self):
+    outputString = f"{self.getLights()} {self.getLeftMotorSpeed()} {self.getRightMotorSpeed()} {self.getServosHorizontal()} {self.getServosVertical()}"
     print(outputString)
     self.queue.put(outputString)
 
@@ -282,32 +385,33 @@ class App(threading.Thread):
     # Going to just manually define every part
     lights_label = tk.Label(text="Lights %")
     lights_label.grid(row=0, column=0)
-    lights_entry = tk.Entry(width=20)
-    lights_entry.grid(row=1, column=0, padx=2)
+    self.lights_entry = tk.Entry(width=20)
+    self.lights_entry.grid(row=1, column=0, padx=2)
 
+    self.motors_left_entry_text = tk.StringVar()
     motors_left_label = tk.Label(text="Left Motor %")
     motors_left_label.grid(row=0, column=1)
-    motors_left_entry = tk.Entry(width=20)
+    motors_left_entry = tk.Entry(width=20, textvariable=self.motors_left_entry_text)
     motors_left_entry.grid(row=1, column=1, padx=2)
     motors_right_label = tk.Label(text="Right Motor %")
     motors_right_label.grid(row=0, column=2)
-    motors_right_entry = tk.Entry(width=20)
-    motors_right_entry.grid(row=1, column=2, padx=2)
+    self.motors_right_entry = tk.Entry(width=20)
+    self.motors_right_entry.grid(row=1, column=2, padx=2)
 
     servos_horizontal_label = tk.Label(text="Horizontal\n Camera Angle")
     servos_horizontal_label.grid(row=0, column=3)
     servos_horizontal_entry = tk.Entry(width=20)
     # servos_horizontal_entry.grid(row=1, column=3, padx=2) 
-    servos_horizontal_slider = tk.Scale(from_=0, to=180, orient=tk.HORIZONTAL) # Can optionally set tickInterval=10, length=something
-    servos_horizontal_slider.set(90)
-    servos_horizontal_slider.grid(row=1, column=3, padx=2)
+    self.servos_horizontal_slider = tk.Scale(from_=0, to=180, orient=tk.HORIZONTAL) # Can optionally set tickInterval=10, length=something
+    self.servos_horizontal_slider.set(90)
+    self.servos_horizontal_slider.grid(row=1, column=3, padx=2)
     servos_vertical_label = tk.Label(text="Vertical\n Camera Angle")
     servos_vertical_label.grid(row=0, column=4)
     servos_vertical_entry = tk.Entry(width=20)
     # servos_vertical_entry.grid(row=1, column=4, padx=2)
-    servos_vertical_slider = tk.Scale(from_=0, to=90, orient=tk.HORIZONTAL)
-    servos_vertical_slider.set(45)
-    servos_vertical_slider.grid(row=1, column=4, padx=2)
+    self.servos_vertical_slider = tk.Scale(from_=0, to=90, orient=tk.HORIZONTAL)
+    self.servos_vertical_slider.set(45)
+    self.servos_vertical_slider.grid(row=1, column=4, padx=2)
 
     # Ahhhhh no multiline lambdas :(
     submit_data_button = tk.Button(
@@ -323,21 +427,22 @@ class App(threading.Thread):
       #       motor_right_percent, 
       #       servo_horizontal_angle, 
       #       servo_vertical_angle)
-      command = lambda
-        lights_entry=lights_entry,
-        motors_left_entry=motors_left_entry,
-        motors_right_entry=motors_right_entry,
-        # servos_horizontal_entry=servos_horizontal_entry,
-        # servos_vertical_entry=servos_vertical_entry:
-        servos_horizontal_entry=servos_horizontal_slider,
-        servos_vertical_entry=servos_vertical_slider:
-          self.submitData(
-            lights_entry,
-            motors_left_entry,
-            motors_right_entry,
-            servos_horizontal_entry,
-            servos_vertical_entry
-          )
+      command = self.submitData
+      # command = lambda
+      #   # lights_entry=lights_entry,
+      #   # motors_left_entry=motors_left_entry,
+      #   # motors_right_entry=motors_right_entry,
+      #   # # servos_horizontal_entry=servos_horizontal_entry,
+      #   # # servos_vertical_entry=servos_vertical_entry:
+      #   # servos_horizontal_entry=servos_horizontal_slider,
+      #   # servos_vertical_entry=servos_vertical_slider:
+      #     self.submitData(
+      #       # lights_entry,
+      #       # motors_left_entry,
+      #       # motors_right_entry,
+      #       # servos_horizontal_entry,
+      #       # servos_vertical_entry
+      #     )
     )
     submit_data_button.grid(row=1, column=5)
 
@@ -367,13 +472,13 @@ class App(threading.Thread):
       target=self.continuallySendData, 
       args=(
         constantly_submit_checkbox_val, 
-        lights_entry,
-        motors_left_entry,
-        motors_right_entry,
-        # servos_horizontal_entry,
-        # servos_vertical_entry
-        servos_horizontal_slider,
-        servos_vertical_slider
+        # lights_entry,
+        # motors_left_entry,
+        # motors_right_entry,
+        # # servos_horizontal_entry,
+        # # servos_vertical_entry
+        # servos_horizontal_slider,
+        # servos_vertical_slider
       ),
       daemon=True,) 
     send_data_loop.start()
