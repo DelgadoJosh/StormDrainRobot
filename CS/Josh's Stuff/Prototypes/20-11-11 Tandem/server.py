@@ -27,6 +27,8 @@ import motors
 import servos
 import adc
 from queue import Queue
+from datetime import datetime
+# import teensy
 
 port = 5000
 ip_address = ""
@@ -72,7 +74,7 @@ def gstreamer_pipeline(
   #  display_height=180,
     # display_width=1000,
     # display_height=600,
-    framerate=60,
+    framerate=30,
     flip_method=0,
 ):
     return (
@@ -103,6 +105,15 @@ frameQueue = Queue(maxsize=100)
 stopFlag = False
 frame = None 
 
+folderName = './videos/'
+date_split = str(datetime.now()).split(" ")
+date = date_split[0]
+name = date
+extension = '.mp4'
+filename = folderName + name + extension 
+fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+out = cv2.VideoWriter(filename, fourcc, 20.0, (1280, 720))
+
 # A parallel thread
 def constantlyReadVideoFeed():
     # global frameQueue
@@ -116,6 +127,20 @@ def constantlyReadVideoFeed():
         grabbed, frame = camera.read()
         frameQueue.put(frame)
     print("Ending the video feed loop")
+
+saveVideoFrameQueue = Queue(maxsize=1)
+def loopToSaveVideo():
+    startTimeSaved = time.time()
+    numFramesSaved = 0
+    while True:
+        time.sleep(0.01)
+        if saveVideoFrameQueue.empty():
+            continue
+        numFramesSaved += 1
+        durationSaved = time.time() - startTimeSaved 
+        print(f"    FPS: {numFramesSaved/durationSaved:.3f}")
+        frameToSave = saveVideoFrameQueue.get()
+        out.write(frameToSave)
 
 # Loop to send the video, frame by frame.
 def broadcastVideo():
@@ -134,6 +159,15 @@ def broadcastVideo():
             # Grab the current frame
             # It should be updated by the looping constantlyReadVideoFeed()
             grabbed, frame = camera.read()
+
+            if not grabbed:
+                continue
+
+            # Save the frame
+            # out.write(frame)
+            if not saveVideoFrameQueue.full():
+                saveVideoFrameQueue.put(frame)
+
             # if frame == None:
             #     continue 
             # if frameQueue.qsize() == 0:
@@ -153,20 +187,28 @@ def broadcastVideo():
             # Then data
             s.Client.sendall(message_size + data)
 
+
             # Grab the voltage data
             voltage = adc.getVoltage()
             # data = voltage.to_bytes(10, 'big')
             voltage_int = int(voltage*100)
             data = voltage_int.to_bytes(10, 'big')
             message_size = struct.pack("L", len(data))
+            s.Client.sendall(message_size + data)
+
+            # Grab the rotation data
+            # numRotationsRaw = teensy.readEncoder()
+            # data = numRotationsRaw.to_bytes(10, 'big')
+            # message_size = struct.pack("L", len(data))
             # s.Client.sendall(message_size + data)
+
 
             # Record the current time needed
             curTime = time.time()
             elapsedTime = curTime - startTime
             dTime = curTime - prevTime 
             prevTime = curTime
-            print(f"Frame {frameIndex} | fps: {frameIndex/elapsedTime}")
+            print(f"Frame {frameIndex} | fps: {frameIndex/elapsedTime:.3f} | Voltage: {voltage:.3f}")
             frameIndex += 1
 
         
@@ -175,6 +217,9 @@ def broadcastVideo():
             camera.release()
             cv2.destroyAllWindows()
             break
+    
+    out.release()
+    print("Ending")
 
 def awaitInput():
     # Wait for the data, print it, and send it back
@@ -196,8 +241,9 @@ def awaitInput():
 
 
 # Trying using threading
-read_video = Process(target=constantlyReadVideoFeed, daemon=True)
-send_video = threading.Thread(target=broadcastVideo) 
+# read_video = Process(target=constantlyReadVideoFeed, daemon=True)
+send_video = threading.Thread(target=broadcastVideo)
+save_video = threading.Thread(target=loopToSaveVideo, daemon=True)
 # get_input = threading.Thread(target=awaitInput)
 
 
@@ -206,7 +252,8 @@ get_input = Process(target=awaitInput, daemon=True)
 
 # read_video.start()
 send_video.start()
-# get_input.start()
+save_video.start()
+get_input.start()
 
 
 # Trying using multiprocessing

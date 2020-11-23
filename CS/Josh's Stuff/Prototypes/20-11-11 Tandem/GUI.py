@@ -14,6 +14,7 @@ import cv2
 from PIL import Image, ImageTk
 import io
 from multiprocessing import Process
+from controller import Controller
 
 class App(threading.Thread):
   def __init__(self):
@@ -54,9 +55,253 @@ class App(threading.Thread):
   #   print(outputString)
   #   self.queue.put(outputString)
 
+  # X, Y axes are on a 16 bit number (0-16k)
+  DEAD_ZONE = 2000
+  def isInDeadZone(self, lx, ly):
+    return abs(lx) < self.DEAD_ZONE \
+      and abs(ly) < self.DEAD_ZONE
+  
+  def removeDeadZone(self, val):
+    if abs(val) < self.DEAD_ZONE:
+      val = 0
+    return val
+  
+  def clamp(self, val, min, max):
+    try:
+      val = float(val)
+      if val > max:
+        val = max 
+      if val < min:
+        val = min
+      return val
+    except:
+      print("Invalid val")
+      return val
+
+  def clampAbsolute(self, val, max):
+    # return self.clamp(val, -max, max)
+    try:
+      val = float(val)
+      if abs(val) > max:
+        if val > 0:
+          val = max
+        else:
+          val = -max
+      return val
+    except:
+      print("Invalid val")
+      return val
+
+  inputQueriesPerSecond = 100
+  SENSITIVITY = 0.001 * 10
+  SENSITIVITY_ANGLE = 0.001 * 750
+  MAX_JOYSTICK = 32000
+  def loopToQueryController(self):
+    controller = Controller()
+    inputQueryDelay = 1.0/100
+
+    maxPower = 1.0
+    INCREMENT = 0.1
+    LIGHT_INCREMENT = 0.05
+
+    horizontalAngle = 90
+    verticalAngle = 45
+    while True:
+      # Every inpuQueryDelay, query to see 
+      #  - if we increase/decrease the speed
+      #  - change the servo angle
+      #  - emergency stop
+      time.sleep(inputQueryDelay)
+
+
+      joystickLX = self.removeDeadZone(controller.getLeftJoystickX())
+      joystickLY = self.removeDeadZone(controller.getLeftJoystickY())
+
+      joystickRX = self.removeDeadZone(controller.getRightJoystickX())
+      joystickRY = self.removeDeadZone(controller.getRightJoystickY())
+
+      bPressed = controller.getBPressedAndReleased()
+
+      leftBumperPressed = controller.getLeftBumperPressedAndReleased()
+      rightBumperPressed = controller.getRightBumperPressedAndReleased()
+
+      dPadY = controller.getDPadYState()
+
+      if not self.getUseController():
+        continue
+
+      # If it's not in the deadzone, then we'll update
+      if not self.isInDeadZone(joystickLX, joystickLY):
+        # print(f"LX: {joystickLX} | LX: {joystickLY} | RX: {joystickRX} | RY: {joystickRY}")
+        # changeInSpeed = 1.0*joystickLY/self.MAX_JOYSTICK * self.SENSITIVITY
+        # motorLeftSpeed = float(self.getLeftMotorSpeed())
+        # motorLeftSpeed += changeInSpeed
+        # motorLeftSpeed = self.clampAbsolute(motorLeftSpeed, 1.0)
+        # motorRightSpeed = float(self.getRightMotorSpeed())
+        # motorRightSpeed += changeInSpeed
+        # motorRightSpeed = self.clampAbsolute(motorRightSpeed, 1.0)
+
+        # # print(f"Left: {motorLeftSpeed} | Right: {motorRightSpeed} | change{changeInSpeed}")
+
+        # self.setLeftMotor(motorLeftSpeed)
+        # self.setRightMotor(motorRightSpeed)
+
+        newSpeed = 1.0*joystickLY/self.MAX_JOYSTICK
+        newSpeed = self.clampAbsolute(newSpeed, maxPower)
+        self.setLeftMotor(newSpeed)
+        self.setRightMotor(newSpeed)
+      else:
+        # If in the deadzone for the joysticks, we come to a stop
+        self.setLeftMotor(0)
+        self.setRightMotor(0)
+      
+      if not self.isInDeadZone(joystickRX, joystickRY):
+        changeInHorizontalAngle = 1.0*joystickRX/self.MAX_JOYSTICK * self.SENSITIVITY_ANGLE
+        # servoHorizontalAngle = float(self.getServosHorizontal())
+        # servoHorizontalAngle += changeInHorizontalAngle
+        # servoHorizontalAngle = int(self.clamp(servoHorizontalAngle, 0, 180) + 0.5)
+        horizontalAngle += changeInHorizontalAngle
+        servoHorizontalAngle = int(self.clamp(horizontalAngle, 0, 180) + 0.5)
+
+        changeInVerticalAngle = 1.0*joystickRY/self.MAX_JOYSTICK * self.SENSITIVITY_ANGLE
+        # servoVerticalAngle = float(self.getServosVertical())
+        # servoVerticalAngle += changeInVerticalAngle
+        # servoVerticalAngle = int(self.clamp(servoVerticalAngle, 0, 90) + 0.5)
+        verticalAngle += changeInVerticalAngle
+        servoVerticalAngle = int(self.clamp(verticalAngle, 0, 90) + 0.5)
+
+        # print(f"rx={joystickRX} | rx={joystickRY} | changeHoriz={changeInHorizontalAngle} | changeVert={changeInVerticalAngle}")
+
+        self.setServosHorizontal(servoHorizontalAngle)
+        self.setServosVertical(servoVerticalAngle)
+      
+      if bPressed:
+        print("B was pressed!")
+        self.emergencyStop()
+      
+      if leftBumperPressed:
+        newMax = maxPower - INCREMENT
+        newMax = self.clamp(newMax, 0, 1.0)
+        maxPower = newMax
+        print(f"Left Bumper pressed, new maxpower = {maxPower}")
+      
+      
+      if rightBumperPressed:
+        # print(f"right bumper pressed: maxpower = {maxPower}")
+        newMax = maxPower + INCREMENT
+        # print(f"  Temp: {newMax}")
+        newMax = self.clamp(newMax, 0, 1.0)
+        maxPower = newMax 
+        # print(f"  new max: {maxPower}")
+        print(f"Right bumper pressed, new maxpower = {maxPower}")
+
+      if dPadY != 0:
+        print(f"dPadY: {dPadY}")
+      try: 
+        lightsPower = float(self.getLights()) 
+        lightsPower += dPadY * LIGHT_INCREMENT
+        lightsPower = self.clamp(lightsPower, 0, 1.0)
+        self.setLights(lightsPower)
+      except:
+        print("Lights invalid")
+
+  motors_left_entry_text = None
+  def getLeftMotorSpeed(self):
+    if self.motors_left_entry_text == None:
+      return "0"
+    val = self.motors_left_entry_text.get()
+    try: 
+      val = float(val)
+    except:
+      val = 0
+    return val
+  
+  def setLeftMotor(self, percentSpeed):
+    if self.motors_left_entry_text == None:
+      print(" Nope")
+      return 
+    self.motors_left_entry_text.set(str(percentSpeed))
+
+  motors_right_entry_text = None 
+  def getRightMotorSpeed(self):
+    if self.motors_right_entry_text == None:
+      return "0"
+    val = self.motors_right_entry_text.get()
+    try:
+      val = float(val)
+    except:
+      val = 0
+    return val
+
+  def setRightMotor(self, percentSpeed):
+    if self.motors_right_entry_text == None:
+      return
+    self.motors_right_entry_text.set(str(percentSpeed))
+  
+
+  lights_entry_text = None 
+  def getLights(self):
+    if self.lights_entry_text == None:
+      return "0"
+    return self.lights_entry_text.get()
+
+  def setLights(self, val):
+    if self.lights_entry_text == None:
+      return 
+    return self.lights_entry_text.set(val)
+
+  servos_horizontal_slider = None
+  def getServosHorizontal(self):
+    if self.servos_horizontal_slider == None:
+      return "0"
+    return self.servos_horizontal_slider.get()
+  
+  def setServosHorizontal(self, val):
+    if self.servos_horizontal_slider == None:
+      return 
+    try:
+      val = int(val)
+      self.servos_horizontal_slider.set(val)
+    except:
+      return
+
+  servos_vertical_slider = None
+  def getServosVertical(self):
+    if self.servos_vertical_slider == None:
+      return "0"
+    return self.servos_vertical_slider.get()
+
+  def setServosVertical(self, val):
+    if self.servos_vertical_slider == None:
+      return 
+    try:
+      val = int(val)
+      self.servos_vertical_slider.set(val)
+    except:
+      return
+  
+  use_controller_checkbox_val = None 
+  def getUseController(self):
+    if self.use_controller_checkbox_val == None:
+      return False 
+    return self.use_controller_checkbox_val.get()
+
+  def setUseController(self, val):
+    if self.use_controller_checkbox_val == None:
+      return
+    self.use_controller_checkbox_val.set(val)
+
+  def emergencyStop(self):
+    self.setLeftMotor(0)
+    self.setRightMotor(0)
+    self.submitData()
+    self.setUseController(False)
+
+
   # camera = cv2.VideoCapture(0)   # TEMP
   dTime = 0.01
-  def continuallySendData(self, checkbox, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
+  # def continuallySendData(self, checkbox, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
+  def continuallySendData(self, checkbox):
     dTime = self.dTime
     nextTimeAvailable = time.time() + dTime
     # camera = self.camera # TEMP
@@ -75,14 +320,26 @@ class App(threading.Thread):
         continue 
       nextTimeAvailable = time.time() + dTime 
 
-      self.submitData(lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry)
+      self.submitData()
+      # self.submitData(lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry)
     print("Cleaned up loop")
     return
 
-  def submitData(self, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
-    outputString = f"{lights_entry.get()} {motors_left_entry.get()} {motors_right_entry.get()} {servos_horizontal_entry.get()} {servos_vertical_entry.get()}"
+  # def submitData(self, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
+  #   outputString = f"{lights_entry.get()} {motors_left_entry.get()} {motors_right_entry.get()} {servos_horizontal_entry.get()} {servos_vertical_entry.get()}"
+  #   print(outputString)
+  #   self.queue.put(outputString)
+
+  # def submitData(self, lights_entry, servos_horizontal_entry, servos_vertical_entry):
+  #   outputString = f"{lights_entry.get()} {self.getLeftMotorSpeed()} {self.getRightMotorSpeed()} {servos_horizontal_entry.get()} {servos_vertical_entry.get()}"
+  #   print(outputString)
+  #   self.queue.put(outputString)
+
+  def submitData(self):
+    outputString = f"{self.getLights()} {self.getLeftMotorSpeed()} {self.getRightMotorSpeed()} {self.getServosHorizontal()} {self.getServosVertical()}"
     print(outputString)
-    self.queue.put(outputString)
+    if not self.queue.full():
+      self.queue.put(outputString)
 
   def showFrame(self, frame):
     cv2Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
@@ -98,6 +355,21 @@ class App(threading.Thread):
     lmain.configure(image=imgTk)
     lmain.image = imgTk
     # lmain.after(1, self.showFrame)
+
+  voltage_label = None
+  def setVoltage(self, voltage):
+    if self.voltage_label == None: 
+      return
+    self.voltage_label["text"] = f"Voltage: {voltage:4.2f}"
+
+  voltageQueue = Queue(maxsize=1)
+  def loopToShowVoltage(self):
+    while True:
+      time.sleep(0.01)
+      if self.voltageQueue.empty():
+        continue 
+      voltage = self.voltageQueue.get()
+      self.setVoltage(voltage)
 
   fps_label = None
   def setFPS(self, fps):
@@ -230,32 +502,35 @@ class App(threading.Thread):
     # Going to just manually define every part
     lights_label = tk.Label(text="Lights %")
     lights_label.grid(row=0, column=0)
-    lights_entry = tk.Entry(width=20)
-    lights_entry.grid(row=1, column=0, padx=2)
+    self.lights_entry_text = tk.StringVar(value="0")
+    self.lights_entry = tk.Entry(width=20, textvariable=self.lights_entry_text)
+    self.lights_entry.grid(row=1, column=0, padx=2)
 
+    self.motors_left_entry_text = tk.StringVar(value="0")
     motors_left_label = tk.Label(text="Left Motor %")
     motors_left_label.grid(row=0, column=1)
-    motors_left_entry = tk.Entry(width=20)
+    motors_left_entry = tk.Entry(width=20, textvariable=self.motors_left_entry_text)
     motors_left_entry.grid(row=1, column=1, padx=2)
     motors_right_label = tk.Label(text="Right Motor %")
     motors_right_label.grid(row=0, column=2)
-    motors_right_entry = tk.Entry(width=20)
+    self.motors_right_entry_text = tk.StringVar(value="0")
+    motors_right_entry = tk.Entry(width=20, textvariable=self.motors_right_entry_text)
     motors_right_entry.grid(row=1, column=2, padx=2)
 
     servos_horizontal_label = tk.Label(text="Horizontal\n Camera Angle")
     servos_horizontal_label.grid(row=0, column=3)
     servos_horizontal_entry = tk.Entry(width=20)
     # servos_horizontal_entry.grid(row=1, column=3, padx=2) 
-    servos_horizontal_slider = tk.Scale(from_=0, to=180, orient=tk.HORIZONTAL) # Can optionally set tickInterval=10, length=something
-    servos_horizontal_slider.set(90)
-    servos_horizontal_slider.grid(row=1, column=3, padx=2)
+    self.servos_horizontal_slider = tk.Scale(from_=0, to=180, orient=tk.HORIZONTAL) # Can optionally set tickInterval=10, length=something
+    self.servos_horizontal_slider.set(90)
+    self.servos_horizontal_slider.grid(row=1, column=3, padx=2)
     servos_vertical_label = tk.Label(text="Vertical\n Camera Angle")
     servos_vertical_label.grid(row=0, column=4)
     servos_vertical_entry = tk.Entry(width=20)
     # servos_vertical_entry.grid(row=1, column=4, padx=2)
-    servos_vertical_slider = tk.Scale(from_=0, to=90, orient=tk.HORIZONTAL)
-    servos_vertical_slider.set(45)
-    servos_vertical_slider.grid(row=1, column=4, padx=2)
+    self.servos_vertical_slider = tk.Scale(from_=0, to=90, orient=tk.HORIZONTAL)
+    self.servos_vertical_slider.set(45)
+    self.servos_vertical_slider.grid(row=1, column=4, padx=2)
 
     # Ahhhhh no multiline lambdas :(
     submit_data_button = tk.Button(
@@ -271,28 +546,42 @@ class App(threading.Thread):
       #       motor_right_percent, 
       #       servo_horizontal_angle, 
       #       servo_vertical_angle)
-      command = lambda
-        lights_entry=lights_entry,
-        motors_left_entry=motors_left_entry,
-        motors_right_entry=motors_right_entry,
-        # servos_horizontal_entry=servos_horizontal_entry,
-        # servos_vertical_entry=servos_vertical_entry:
-        servos_horizontal_entry=servos_horizontal_slider,
-        servos_vertical_entry=servos_vertical_slider:
-          self.submitData(
-            lights_entry,
-            motors_left_entry,
-            motors_right_entry,
-            servos_horizontal_entry,
-            servos_vertical_entry
-          )
+      command = self.submitData
+      # command = lambda
+      #   # lights_entry=lights_entry,
+      #   # motors_left_entry=motors_left_entry,
+      #   # motors_right_entry=motors_right_entry,
+      #   # # servos_horizontal_entry=servos_horizontal_entry,
+      #   # # servos_vertical_entry=servos_vertical_entry:
+      #   # servos_horizontal_entry=servos_horizontal_slider,
+      #   # servos_vertical_entry=servos_vertical_slider:
+      #     self.submitData(
+      #       # lights_entry,
+      #       # motors_left_entry,
+      #       # motors_right_entry,
+      #       # servos_horizontal_entry,
+      #       # servos_vertical_entry
+      #     )
     )
     submit_data_button.grid(row=1, column=5)
 
+    emergency_stop_button = tk.Button(
+      text="STOP MOTORS",
+      command = self.emergencyStop,
+      background = 'red'
+    )
+    emergency_stop_button.grid(row=0, column=5)
+
     # Todo: Add a checkbox for constantly send the data every x seconds
+    checkbox_frame = tk.Frame(self.root, relief=tk.RAISED, borderwidth=2)
+    checkbox_frame.grid(row=1, column=6)
     constantly_submit_checkbox_val = tk.IntVar()
-    constantly_submit_checkbox = tk.Checkbutton(text="Constantly Submit", variable=constantly_submit_checkbox_val)
-    constantly_submit_checkbox.grid(row=1, column=6)
+    constantly_submit_checkbox = tk.Checkbutton(checkbox_frame, text="Constantly Submit", variable=constantly_submit_checkbox_val)
+    # constantly_submit_checkbox.grid(row=1, column=6)
+    constantly_submit_checkbox.grid(row=0, column=0)
+    self.use_controller_checkbox_val = tk.IntVar()
+    use_controller_checkbox = tk.Checkbutton(checkbox_frame, text="Use Controller", variable=self.use_controller_checkbox_val)
+    use_controller_checkbox.grid(row=1, column=0)
 
     # Add a box for data
     data_frame = tk.Frame(self.root, relief=tk.RAISED, borderwidth=2)
@@ -300,19 +589,28 @@ class App(threading.Thread):
     # Populate the box with data
     self.fps_label = tk.Label(data_frame, text="FPS: 0")
     self.fps_label.grid(row=0, column=0)
+    self.voltage_label = tk.Label(data_frame, text="Voltage: 0")
+    self.voltage_label.grid(row=1, column=0)
+
+    # Threads to refresh the data
+    voltage_data_loop = threading.Thread(
+      target=self.loopToShowVoltage,
+      daemon=True
+    )
+    voltage_data_loop.start()
 
     # Start a thread so it'll keep on sending every dTime interval if the checkbox is checked
     send_data_loop = threading.Thread(
       target=self.continuallySendData, 
       args=(
         constantly_submit_checkbox_val, 
-        lights_entry,
-        motors_left_entry,
-        motors_right_entry,
-        # servos_horizontal_entry,
-        # servos_vertical_entry
-        servos_horizontal_slider,
-        servos_vertical_slider
+        # lights_entry,
+        # motors_left_entry,
+        # motors_right_entry,
+        # # servos_horizontal_entry,
+        # # servos_vertical_entry
+        # servos_horizontal_slider,
+        # servos_vertical_slider
       ),
       daemon=True,) 
     send_data_loop.start()
@@ -325,10 +623,10 @@ class App(threading.Thread):
     self.lmain = tk.Label(imageFrame)
     self.lmain.grid(row=0, column=0)
     # Start thread to refresh the video frame
-    refresh_frame_loop = threading.Thread(
-      target=self.refreshFrame,
-      daemon=True
-    )
+    # refresh_frame_loop = threading.Thread(
+    #   target=self.refreshFrame,
+    #   daemon=True
+    # )
     # refresh_frame_loop.start()
 
     encode_image_loop = threading.Thread(
@@ -360,6 +658,13 @@ class App(threading.Thread):
 
     # # Init img for screenshot function
     # img = None
+
+    # Begin loop for querying the controller
+    controller_loop = threading.Thread(
+      target=self.loopToQueryController,
+      daemon=True
+    )
+    controller_loop.start()
 
     # Todo: add a place where you put the current run info (pipe start id, pipe end id)
 

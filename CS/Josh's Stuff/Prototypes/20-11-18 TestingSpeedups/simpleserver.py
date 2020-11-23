@@ -57,7 +57,7 @@ def gstreamer_pipeline(
   #  display_height=180,
     # display_width=1000,
     # display_height=600,
-    framerate=60,
+    framerate=30,
     flip_method=0,
 ):
     return (
@@ -106,7 +106,7 @@ while True:
     prevTime = curTime
     duration = curTime - startTime 
     numFrames += 1
-    print(f"FPS: {numFrames/duration:.3f} dtFrameRate: {1/dt}")
+    print(f"FPS: {numFrames/duration:.3f} dtFrameRate: {1/dt:.3f}")
 
     # Send message length first
     message_size = struct.pack("L", len(data))

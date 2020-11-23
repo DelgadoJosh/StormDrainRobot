@@ -30,6 +30,7 @@ print("Client Connected")
 queue = GUI.app.queue
 stopFlag = GUI.app.programEnd
 frameQueue = GUI.app.frameQueue
+voltageQueue = GUI.app.voltageQueue
 
 def retrieveData(data):
   # Retrieve the message data from the stream, parsing in a single bit of data
@@ -167,8 +168,11 @@ def showVideo():
       # time_data, data = retrieveData(data)  # Uncomment to grab time data
       # print(int.from_bytes(time_data, 'big')) # Uncomment to grab time_data
 
-      # voltage_data, data = retrieveData(data)
+      voltage_data, data = retrieveData(data)
+      voltage = int.from_bytes(voltage_data, 'big') / 100.0
       # print(f"ADC: Voltage={int.from_bytes(voltage_data, 'big') / 100.0}")
+      if not voltageQueue.full():
+        voltageQueue.put(voltage)
 
       # Parsing data
       # frame = parseFrameFromBytes(frame_data)
