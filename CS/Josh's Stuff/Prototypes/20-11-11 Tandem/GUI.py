@@ -68,7 +68,20 @@ class App(threading.Thread):
       val = 0
     return val
   
+  def clamp(self, val, min, max):
+    try:
+      val = float(val)
+      if val > max:
+        val = max 
+      if val < min:
+        val = min
+      return val
+    except:
+      print("Invalid val")
+      return val
+
   def clampAbsolute(self, val, max):
+    # return self.clamp(val, -max, max)
     try:
       val = float(val)
       if abs(val) > max:
@@ -88,7 +101,9 @@ class App(threading.Thread):
   def loopToQueryController(self):
     controller = Controller()
     inputQueryDelay = 1.0/100
-    bHeldDown = False
+
+    maxPower = 1.0
+    INCREMENT = 0.1
     while True:
       # Every inpuQueryDelay, query to see 
       #  - if we increase/decrease the speed
@@ -96,14 +111,20 @@ class App(threading.Thread):
       #  - emergency stop
       time.sleep(inputQueryDelay)
 
-      if not self.useController():
-        continue
 
       joystickLX = self.removeDeadZone(controller.getLeftJoystickX())
       joystickLY = self.removeDeadZone(controller.getLeftJoystickY())
 
       joystickRX = self.removeDeadZone(controller.getRightJoystickX())
       joystickRY = self.removeDeadZone(controller.getRightJoystickY())
+
+      bPressed = controller.getBPressedAndReleased()
+
+      leftBumperPressed = controller.getLeftBumperPressedAndReleased()
+      rightBumperPressed = controller.getRightBumperPressedAndReleased()
+
+      if not self.useController:
+        continue
 
       # If it's not in the deadzone, then we'll update
       if not self.isInDeadZone(joystickLX, joystickLY, joystickRX, joystickRY):
@@ -122,13 +143,35 @@ class App(threading.Thread):
         # self.setRightMotor(motorRightSpeed)
 
         newSpeed = 1.0*joystickLY/self.MAX_JOYSTICK
-        newSpeed = self.clampAbsolute(newSpeed, 1.0)
+        newSpeed = self.clampAbsolute(newSpeed, maxPower)
         self.setLeftMotor(newSpeed)
         self.setRightMotor(newSpeed)
       else:
         # If in the deadzone for the joysticks, we come to a stop
         self.setLeftMotor(0)
         self.setRightMotor(0)
+      
+      if bPressed:
+        print("B was pressed!")
+        self.emergencyStop()
+      
+      if leftBumperPressed:
+        newMax = maxPower - INCREMENT
+        newMax = self.clamp(newMax, 0, 1.0)
+        maxPower = newMax
+        print(f"Left Bumper pressed, new maxpower = {maxPower}")
+      
+      
+      if rightBumperPressed:
+        # print(f"right bumper pressed: maxpower = {maxPower}")
+        newMax = maxPower + INCREMENT
+        # print(f"  Temp: {newMax}")
+        newMax = self.clamp(newMax, 0, 1.0)
+        maxPower = newMax 
+        # print(f"  new max: {maxPower}")
+        print(f"Right bumper pressed, new maxpower = {maxPower}")
+    
+      
 
 
   motors_left_entry_text = None
