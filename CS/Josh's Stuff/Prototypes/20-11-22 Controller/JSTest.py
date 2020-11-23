@@ -11,11 +11,15 @@ EVENT_ABB = (
     ('Absolute-ABS_HAT0X', 'HX'),
     ('Absolute-ABS_HAT0Y', 'HY'),
 
-    # Joystick
+    # Joystick (custom USB)
     ('Absolute-ABS_X', 'LX'),
     ('Absolute-ABS_Y', 'LY'),
     ('Absolute-ABS_RX', 'RX'),
     ('Absolute-ABS_RY', 'RY'),
+
+    # Trigger buttons (custom USB)
+    ('Absolute-ABS_Z', 'LT'),
+    ('Absolute-ABS_RZ', 'RT'),
 
     # Face Buttons
     ('Key-BTN_NORTH', 'N'),
