@@ -14,6 +14,7 @@ import cv2
 from PIL import Image, ImageTk
 import io
 from multiprocessing import Process
+from controller import Controller
 
 class App(threading.Thread):
   def __init__(self):
@@ -53,6 +54,27 @@ class App(threading.Thread):
   #   outputString = f"{lights_percent} {motor_left_percent} {motor_right_percent} {servo_horizontal_angle} {servo_vertical_angle}"
   #   print(outputString)
   #   self.queue.put(outputString)
+
+  inputQueriesPerSecond = 100
+  def loopToQueryController(self):
+    controller = Controller()
+    inputQueryDelay = 1.0/100
+    bHeldDown = False
+    while True:
+      # Every inpuQueryDelay, query to see 
+      #  - if we increase/decrease the speed
+      #  - change the servo angle
+      #  - emergency stop
+      time.sleep(inputQueryDelay)
+
+      joystickLX = controller.getLeftJoystickX()
+      joystickLY = controller.getLeftJoystickY()
+
+      joystickRX = controller.getRightJoystickX()
+      joystickRY = controller.getRightJoystickY()
+
+      print(f"LX: {joystickLX} | LX: {joystickLY} | RX: {joystickRX} | RY: {joystickRY}")
+
 
   # camera = cv2.VideoCapture(0)   # TEMP
   dTime = 0.01
@@ -384,6 +406,13 @@ class App(threading.Thread):
 
     # # Init img for screenshot function
     # img = None
+
+    # Begin loop for querying the controller
+    controller_loop = threading.Thread(
+      target=self.loopToQueryController,
+      daemon=True
+    )
+    controller_loop.start()
 
     # Todo: add a place where you put the current run info (pipe start id, pipe end id)
 
