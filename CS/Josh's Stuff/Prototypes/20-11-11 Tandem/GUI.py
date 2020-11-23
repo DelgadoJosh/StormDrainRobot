@@ -57,11 +57,9 @@ class App(threading.Thread):
 
   # X, Y axes are on a 16 bit number (0-16k)
   DEAD_ZONE = 2000
-  def isInDeadZone(self, lx, ly, rx, ry):
+  def isInDeadZone(self, lx, ly):
     return abs(lx) < self.DEAD_ZONE \
-      and abs(ly) < self.DEAD_ZONE \
-      and abs(rx) < self.DEAD_ZONE \
-      and abs(ry) < self.DEAD_ZONE
+      and abs(ly) < self.DEAD_ZONE
   
   def removeDeadZone(self, val):
     if abs(val) < self.DEAD_ZONE:
@@ -96,6 +94,7 @@ class App(threading.Thread):
 
   inputQueriesPerSecond = 100
   SENSITIVITY = 0.001 * 10
+  SENSITIVITY_ANGLE = 0.001 * 750
   MAX_JOYSTICK = 32000
   def loopToQueryController(self):
     controller = Controller()
@@ -103,6 +102,9 @@ class App(threading.Thread):
 
     maxPower = 1.0
     INCREMENT = 0.1
+
+    horizontalAngle = 90
+    verticalAngle = 45
     while True:
       # Every inpuQueryDelay, query to see 
       #  - if we increase/decrease the speed
@@ -126,7 +128,7 @@ class App(threading.Thread):
         continue
 
       # If it's not in the deadzone, then we'll update
-      if not self.isInDeadZone(joystickLX, joystickLY, joystickRX, joystickRY):
+      if not self.isInDeadZone(joystickLX, joystickLY):
         # print(f"LX: {joystickLX} | LX: {joystickLY} | RX: {joystickRX} | RY: {joystickRY}")
         # changeInSpeed = 1.0*joystickLY/self.MAX_JOYSTICK * self.SENSITIVITY
         # motorLeftSpeed = float(self.getLeftMotorSpeed())
@@ -149,6 +151,26 @@ class App(threading.Thread):
         # If in the deadzone for the joysticks, we come to a stop
         self.setLeftMotor(0)
         self.setRightMotor(0)
+      
+      if not self.isInDeadZone(joystickRX, joystickRY):
+        changeInHorizontalAngle = 1.0*joystickRX/self.MAX_JOYSTICK * self.SENSITIVITY_ANGLE
+        # servoHorizontalAngle = float(self.getServosHorizontal())
+        # servoHorizontalAngle += changeInHorizontalAngle
+        # servoHorizontalAngle = int(self.clamp(servoHorizontalAngle, 0, 180) + 0.5)
+        horizontalAngle += changeInHorizontalAngle
+        servoHorizontalAngle = int(self.clamp(horizontalAngle, 0, 180) + 0.5)
+
+        changeInVerticalAngle = 1.0*joystickRY/self.MAX_JOYSTICK * self.SENSITIVITY_ANGLE
+        # servoVerticalAngle = float(self.getServosVertical())
+        # servoVerticalAngle += changeInVerticalAngle
+        # servoVerticalAngle = int(self.clamp(servoVerticalAngle, 0, 90) + 0.5)
+        verticalAngle += changeInVerticalAngle
+        servoVerticalAngle = int(self.clamp(verticalAngle, 0, 90) + 0.5)
+
+        print(f"rx={joystickRX} | rx={joystickRY} | changeHoriz={changeInHorizontalAngle} | changeVert={changeInVerticalAngle}")
+
+        self.setServosHorizontal(servoHorizontalAngle)
+        self.setServosVertical(servoVerticalAngle)
       
       if bPressed:
         print("B was pressed!")
@@ -218,12 +240,30 @@ class App(threading.Thread):
     if self.servos_horizontal_slider == None:
       return "0"
     return self.servos_horizontal_slider.get()
+  
+  def setServosHorizontal(self, val):
+    if self.servos_horizontal_slider == None:
+      return 
+    try:
+      val = int(val)
+      self.servos_horizontal_slider.set(val)
+    except:
+      return
 
   servos_vertical_slider = None
   def getServosVertical(self):
     if self.servos_vertical_slider == None:
       return "0"
     return self.servos_vertical_slider.get()
+
+  def setServosVertical(self, val):
+    if self.servos_vertical_slider == None:
+      return 
+    try:
+      val = int(val)
+      self.servos_vertical_slider.set(val)
+    except:
+      return
   
   use_controller_checkbox_val = None 
   def getUseController(self):
