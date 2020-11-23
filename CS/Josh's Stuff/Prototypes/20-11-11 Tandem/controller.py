@@ -62,6 +62,8 @@ class Controller(object):
         self.abs_state = {}
         self.old_abs_state = {}
         self.abbrevs = dict(abbrevs)
+        self.btn_pressed = {}
+        self.btn_pressed_and_released = {}
         for key, value in self.abbrevs.items():
             if key.startswith('Absolute'):
                 self.abs_state[value] = 0
@@ -69,6 +71,8 @@ class Controller(object):
             if key.startswith('Key'):
                 self.btn_state[value] = 0
                 self.old_btn_state[value] = 0
+                self.btn_pressed[value] = False
+                self.btn_pressed_and_released[value] = False
         self._other = 0
         self.gamepad = gamepad
         if not gamepad:
@@ -89,6 +93,8 @@ class Controller(object):
             new_abbv = 'B' + str(self._other)
             self.btn_state[new_abbv] = 0
             self.old_btn_state[new_abbv] = 0
+            self.btn_pressed[new_abbv] = False 
+            self.btn_pressed_and_released[new_abbv] = False
         elif event.ev_type == 'Absolute':
             new_abbv = 'A' + str(self._other)
             self.abs_state[new_abbv] = 0
@@ -118,31 +124,38 @@ class Controller(object):
             self.old_btn_state[abbv] = self.btn_state[abbv]
             self.btn_state[abbv] = event.state
 
-            # Update the state of the B Button
-            if abbv == 'E':
-                if event.state == 1:
-                    self.bPressed = True 
-                else: 
-                    if self.bPressed:
-                        self.bPressedAndReleased = True 
-                        self.bPressed = False
+            if event.state == 1:
+              self.btn_pressed[abbv] = True
+            else:
+              if self.btn_pressed[abbv]:
+                self.btn_pressed_and_released[abbv] = True
+                self.btn_pressed[abbv] = False
 
-            # Update the state of the Left Bumper
-            if abbv == 'TL':
-                if event.state == 1:
-                    self.leftBumperPressed = True 
-                else:
-                    if self.leftBumperPressed:
-                        self.leftBumperPressedAndReleased = True 
-                        self.leftBumperPressed = False
-            # Update the state of the Right bumper
-            if abbv == 'TR':
-                if event.state == 1:
-                    self.rightBumperPressed = True 
-                else:
-                    if self.rightBumperPressed:
-                        self.rightBumperPressedAndReleased = True 
-                        self.rightBumperPressed = False
+            # # Update the state of the B Button
+            # if abbv == 'E':
+            #     if event.state == 1:
+            #         self.bPressed = True 
+            #     else: 
+            #         if self.bPressed:
+            #             self.bPressedAndReleased = True 
+            #             self.bPressed = False
+
+            # # Update the state of the Left Bumper
+            # if abbv == 'TL':
+            #     if event.state == 1:
+            #         self.leftBumperPressed = True 
+            #     else:
+            #         if self.leftBumperPressed:
+            #             self.leftBumperPressedAndReleased = True 
+            #             self.leftBumperPressed = False
+            # # Update the state of the Right bumper
+            # if abbv == 'TR':
+            #     if event.state == 1:
+            #         self.rightBumperPressed = True 
+            #     else:
+            #         if self.rightBumperPressed:
+            #             self.rightBumperPressedAndReleased = True 
+            #             self.rightBumperPressed = False
         if event.ev_type == 'Absolute':
             self.old_abs_state[abbv] = self.abs_state[abbv]
             self.abs_state[abbv] = event.state
@@ -200,29 +213,41 @@ class Controller(object):
         self.process_events()
         return self.abs_state['RY']
 
-    bPressed = False
-    bPressedAndReleased = False 
+    # bPressed = False
+    # bPressedAndReleased = False 
     def getBPressedAndReleased(self):
-        if self.bPressedAndReleased:
-            self.bPressedAndReleased = False 
-            return True
+        if self.btn_pressed_and_released['E']:
+            self.btn_pressed_and_released['E'] = False 
+            return True 
         return False
+        # if self.bPressedAndReleased:
+        #     self.bPressedAndReleased = False 
+        #     return True
+        # return False
 
-    leftBumperPressed = False
-    leftBumperPressedAndReleased = False 
+    # leftBumperPressed = False
+    # leftBumperPressedAndReleased = False 
     def getLeftBumperPressedAndReleased(self):
-        if self.leftBumperPressedAndReleased:
-            self.leftBumperPressedAndReleased = False 
+        if self.btn_pressed_and_released['TL']:
+            self.btn_pressed_and_released['TL'] = False
             return True 
         return False
+        # if self.leftBumperPressedAndReleased:
+        #     self.leftBumperPressedAndReleased = False 
+        #     return True 
+        # return False
 
-    rightBumperPressed = False
-    rightBumperPressedAndReleased = False
+    # rightBumperPressed = False
+    # rightBumperPressedAndReleased = False
     def getRightBumperPressedAndReleased(self):
-        if self.rightBumperPressedAndReleased:
-            self.rightBumperPressedAndReleased = False 
+        if self.btn_pressed_and_released['TR']:
+            self.btn_pressed_and_released['TR'] = False 
             return True 
         return False
+        # if self.rightBumperPressedAndReleased:
+        #     self.rightBumperPressedAndReleased = False 
+        #     return True 
+        # return False
 
 def main():
     """Process all events forever."""
@@ -237,3 +262,5 @@ def main():
 if __name__ == "__main__":
     # print("Initizialized controller")
     main()
+
+print("Initialized Controller")
