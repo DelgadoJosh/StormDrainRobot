@@ -4,6 +4,8 @@ from adafruit_pca9685 import PCA9685
 import RPi.GPIO as GPIO  # Yes, that's RPi, as in Raspberry Pi. Jetson doesn't support PWM.
 import time 
 
+DEBUG = False
+
 print("Starting up")
 i2c_bus = busio.I2C(SCL, SDA) 
 print(i2c_bus.scan())
@@ -35,7 +37,8 @@ def setup():
         GPIO.setup(motor_dir_pins[i], GPIO.OUT)
 
 def setSpeed(index, percentSpeed):
-    print(f"Setting speed for {index} to {percentSpeed}")
+    if DEBUG:
+        print(f"Setting speed for {index} to {percentSpeed}")
     percentSpeed *= motor_signs[index] 
     if percentSpeed > 0:
         sign = GPIO.HIGH 
@@ -47,12 +50,14 @@ def setSpeed(index, percentSpeed):
     GPIO.output(motor_dir_pins[index], sign)
 
 def setLeftSpeed(percentSpeed):
-    print(f"Setting left speed to {percentSpeed}")
+    if DEBUG:
+        print(f"Setting left speed to {percentSpeed}")
     for i in left_indices:
         setSpeed(i, percentSpeed)
 
 def setRightSpeed(percentSpeed):
-    print(f"Setting right speed to {percentSpeed}")
+    if DEBUG:
+        print(f"Setting right speed to {percentSpeed}")
     for i in right_indices:
         setSpeed(i, percentSpeed)
 
