@@ -83,7 +83,7 @@ class App(threading.Thread):
 
   useController = True
   inputQueriesPerSecond = 100
-  SENSITIVITY = 0.001
+  SENSITIVITY = 0.001 * 10
   MAX_JOYSTICK = 32000
   def loopToQueryController(self):
     controller = Controller()
@@ -96,6 +96,9 @@ class App(threading.Thread):
       #  - emergency stop
       time.sleep(inputQueryDelay)
 
+      if not self.useController():
+        continue
+
       joystickLX = self.removeDeadZone(controller.getLeftJoystickX())
       joystickLY = self.removeDeadZone(controller.getLeftJoystickY())
 
@@ -104,20 +107,28 @@ class App(threading.Thread):
 
       # If it's not in the deadzone, then we'll update
       if not self.isInDeadZone(joystickLX, joystickLY, joystickRX, joystickRY):
-        print(f"LX: {joystickLX} | LX: {joystickLY} | RX: {joystickRX} | RY: {joystickRY}")
-        if self.useController:
-          changeInSpeed = 1.0*joystickLY/self.MAX_JOYSTICK * self.SENSITIVITY
-          motorLeftSpeed = float(self.getLeftMotorSpeed())
-          motorLeftSpeed += changeInSpeed
-          motorLeftSpeed = self.clampAbsolute(motorLeftSpeed, 1.0)
-          motorRightSpeed = float(self.getRightMotorSpeed())
-          motorRightSpeed += changeInSpeed
-          motorRightSpeed = self.clampAbsolute(motorRightSpeed, 1.0)
+        # print(f"LX: {joystickLX} | LX: {joystickLY} | RX: {joystickRX} | RY: {joystickRY}")
+        # changeInSpeed = 1.0*joystickLY/self.MAX_JOYSTICK * self.SENSITIVITY
+        # motorLeftSpeed = float(self.getLeftMotorSpeed())
+        # motorLeftSpeed += changeInSpeed
+        # motorLeftSpeed = self.clampAbsolute(motorLeftSpeed, 1.0)
+        # motorRightSpeed = float(self.getRightMotorSpeed())
+        # motorRightSpeed += changeInSpeed
+        # motorRightSpeed = self.clampAbsolute(motorRightSpeed, 1.0)
 
-          print(f"Left: {motorLeftSpeed} | Right: {motorRightSpeed} | change{changeInSpeed}")
+        # # print(f"Left: {motorLeftSpeed} | Right: {motorRightSpeed} | change{changeInSpeed}")
 
-          self.setLeftMotor(motorLeftSpeed)
-          self.setRightMotor(motorRightSpeed)
+        # self.setLeftMotor(motorLeftSpeed)
+        # self.setRightMotor(motorRightSpeed)
+
+        newSpeed = 1.0*joystickLY/self.MAX_JOYSTICK
+        newSpeed = self.clampAbsolute(newSpeed, 1.0)
+        self.setLeftMotor(newSpeed)
+        self.setRightMotor(newSpeed)
+      else:
+        # If in the deadzone for the joysticks, we come to a stop
+        self.setLeftMotor(0)
+        self.setRightMotor(0)
 
 
   motors_left_entry_text = None
@@ -125,9 +136,6 @@ class App(threading.Thread):
     if self.motors_left_entry_text == None:
       return "0"
     val = self.motors_left_entry_text.get()
-    # if self.motors_left_entry == None:
-    #   return "0"
-    # val = self.motors_left_entry.get()
     try: 
       val = float(val)
     except:
@@ -135,20 +143,16 @@ class App(threading.Thread):
     return val
   
   def setLeftMotor(self, percentSpeed):
-    # if self.motors_left_entry == None:
-    #   print(" Nope")
-    #   return
-    # self.motors_left_entry.set(str(percentSpeed))
     if self.motors_left_entry_text == None:
       print(" Nope")
       return 
     self.motors_left_entry_text.set(str(percentSpeed))
 
-  motors_right_entry = None 
+  motors_right_entry_text = None 
   def getRightMotorSpeed(self):
-    if self.motors_right_entry == None:
+    if self.motors_right_entry_text == None:
       return "0"
-    val = self.motors_right_entry.get()
+    val = self.motors_right_entry_text.get()
     try:
       val = float(val)
     except:
@@ -156,9 +160,9 @@ class App(threading.Thread):
     return val
 
   def setRightMotor(self, percentSpeed):
-    if self.motors_right_entry == None:
+    if self.motors_right_entry_text == None:
       return
-    self.motors_right_entry['text'] = str(percentSpeed)
+    self.motors_right_entry_text.set(str(percentSpeed))
   
 
   lights_entry = None 
@@ -179,7 +183,11 @@ class App(threading.Thread):
       return "0"
     return self.servos_vertical_slider.get()
   
-  
+
+  def emergencyStop(self):
+    self.setLeftMotor(0)
+    self.setRightMotor(0)
+    self.submitData()
 
 
   # camera = cv2.VideoCapture(0)   # TEMP
@@ -385,18 +393,20 @@ class App(threading.Thread):
     # Going to just manually define every part
     lights_label = tk.Label(text="Lights %")
     lights_label.grid(row=0, column=0)
-    self.lights_entry = tk.Entry(width=20)
+    self.lights_entry_text = tk.StringVar(value="0")
+    self.lights_entry = tk.Entry(width=20, textvariable=self.lights_entry_text)
     self.lights_entry.grid(row=1, column=0, padx=2)
 
-    self.motors_left_entry_text = tk.StringVar()
+    self.motors_left_entry_text = tk.StringVar(value="0")
     motors_left_label = tk.Label(text="Left Motor %")
     motors_left_label.grid(row=0, column=1)
     motors_left_entry = tk.Entry(width=20, textvariable=self.motors_left_entry_text)
     motors_left_entry.grid(row=1, column=1, padx=2)
     motors_right_label = tk.Label(text="Right Motor %")
     motors_right_label.grid(row=0, column=2)
-    self.motors_right_entry = tk.Entry(width=20)
-    self.motors_right_entry.grid(row=1, column=2, padx=2)
+    self.motors_right_entry_text = tk.StringVar(value="0")
+    motors_right_entry = tk.Entry(width=20, textvariable=self.motors_right_entry_text)
+    motors_right_entry.grid(row=1, column=2, padx=2)
 
     servos_horizontal_label = tk.Label(text="Horizontal\n Camera Angle")
     servos_horizontal_label.grid(row=0, column=3)
