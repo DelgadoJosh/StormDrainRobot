@@ -116,7 +116,7 @@ class App(threading.Thread):
     controller = Controller()
     inputQueryDelay = 1.0/100
 
-    maxPower = 1.0
+    maxPower = 0.5
     INCREMENT = 0.1
     LIGHT_INCREMENT = 0.05
 
@@ -260,6 +260,7 @@ class App(threading.Thread):
         newMax = maxPower - INCREMENT
         newMax = self.clamp(newMax, 0, 1.0)
         maxPower = newMax
+        self.setJoystickMaxPower(maxPower)
         print(f"Left Bumper pressed, new maxpower = {maxPower}")
       
       
@@ -269,6 +270,7 @@ class App(threading.Thread):
         # print(f"  Temp: {newMax}")
         newMax = self.clamp(newMax, 0, 1.0)
         maxPower = newMax 
+        self.setJoystickMaxPower(maxPower)
         # print(f"  new max: {maxPower}")
         print(f"Right bumper pressed, new maxpower = {maxPower}")
 
@@ -454,6 +456,32 @@ class App(threading.Thread):
     if self.fps_label == None:
       return
     self.fps_label["text"] = f"FPS: {fps:3.2f}"
+  
+  encoder_label = None
+  def setEncoder(self, numRotations):
+    if self.encoder_label == None:
+      return
+    self.encoder_label["text"] = f"Rotations: {numRotations}"
+  
+  encoderQueue = Queue(maxsize=1)
+  def loopToShowEncoder(self):
+    while True:
+      time.sleep(0.01)
+      if self.encoderQueue.empty():
+        continue 
+      numRotations = self.encoderQueue.get()
+      self.setEncoder(numRotations)
+  
+  joystick_max_power_label = None 
+  def setJoystickMaxPower(self, maxPower):
+    if self.joystick_max_power_label == None:
+      return 
+    try:
+      maxPower = int(maxPower*100)
+      self.joystick_max_power_label["text"] = f"Max Power: {maxPower:3d}%"
+    except:
+      print("Bad max power for joystick label")
+      return
 
   # Function to parse a frame into an image and imgtk
   def parseFrame(self, frame):
@@ -661,7 +689,7 @@ class App(threading.Thread):
     use_controller_checkbox = tk.Checkbutton(checkbox_frame, text="Use Controller", variable=self.use_controller_checkbox_val)
     use_controller_checkbox.grid(row=1, column=0)
 
-    # Add a box for data
+    # DATA BOX
     data_frame = tk.Frame(self.root, relief=tk.RAISED, borderwidth=2)
     data_frame.grid(row=0, column=7, rowspan=2, padx=2)
     # Populate the box with data
@@ -669,6 +697,10 @@ class App(threading.Thread):
     self.fps_label.grid(row=0, column=0)
     self.voltage_label = tk.Label(data_frame, text="Voltage: 0")
     self.voltage_label.grid(row=1, column=0)
+    self.encoder_label = tk.Label(data_frame, text="Rotations: 0")
+    self.encoder_label.grid(row=2, column=0)
+    self.joystick_max_power_label = tk.Label(data_frame, text="Max Power:  50%")
+    self.joystick_max_power_label.grid(row=3, column=0)
 
     # Threads to refresh the data
     voltage_data_loop = threading.Thread(
@@ -676,6 +708,11 @@ class App(threading.Thread):
       daemon=True
     )
     voltage_data_loop.start()
+    encoder_data_loop = threading.Thread(
+      target=self.loopToShowEncoder,
+      daemon=True
+    )
+    encoder_data_loop.start()
 
     # Start a thread so it'll keep on sending every dTime interval if the checkbox is checked
     send_data_loop = threading.Thread(
