@@ -32,6 +32,7 @@ queue = GUI.app.queue
 stopFlag = GUI.app.programEnd
 frameQueue = GUI.app.frameQueue
 voltageQueue = GUI.app.voltageQueue
+encoderQueue = GUI.app.encoderQueue
 
 def retrieveData(data):
   # Retrieve the message data from the stream, parsing in a single bit of data
@@ -175,6 +176,11 @@ def showVideo():
       # print(f"ADC: Voltage={int.from_bytes(voltage_data, 'big') / 100.0}")
       if not voltageQueue.full():
         voltageQueue.put(voltage)
+
+      encoder_data, data = retrieveData(data)
+      encoder = int.from_bytes(encoder_data, 'big')
+      if not encoderQueue.full():
+        encoderQueue.put(encoder)
 
       # Parsing data
       # frame = parseFrameFromBytes(frame_data)
