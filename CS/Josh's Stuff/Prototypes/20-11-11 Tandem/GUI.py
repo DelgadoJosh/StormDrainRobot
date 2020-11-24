@@ -14,6 +14,8 @@ import cv2
 from PIL import Image, ImageTk
 import io
 from multiprocessing import Process
+import math
+import numpy
 
 try:
   from controller import Controller
@@ -71,6 +73,13 @@ class App(threading.Thread):
       val = 0
     return val
   
+  def withinInterval(self, val, target, interval):
+    try:
+      isGood = target-interval <= val <= target+interval
+      return isGood
+    except: 
+      return False
+
   def clamp(self, val, min, max):
     try:
       val = float(val)
@@ -108,6 +117,11 @@ class App(threading.Thread):
     maxPower = 1.0
     INCREMENT = 0.1
     LIGHT_INCREMENT = 0.05
+
+    # This is the offset in a single direction, so the total is this doubled
+    VERTICAL_ANGLE_OFFSET = math.radians(30)
+    MAX_HEIGHT = 0.8 # Technically should use height
+    HALFWAY_HEIGHT = MAX_HEIGHT/2
 
     horizontalAngle = 90
     verticalAngle = 45
@@ -150,11 +164,67 @@ class App(threading.Thread):
 
         # self.setLeftMotor(motorLeftSpeed)
         # self.setRightMotor(motorRightSpeed)
+        # Relative LY and relative LX
+        relX = 1.0*joystickLX/self.MAX_JOYSTICK
+        relY = 1.0*joystickLY/self.MAX_JOYSTICK
+        relX = self.clamp(relX, -1, 1)
+        relY = self.clamp(relY, -1, 1)
+        radius = math.sqrt(relX*relX + relY*relY)
+        radius = self.clamp(radius, 0, 1)
 
-        newSpeed = 1.0*joystickLY/self.MAX_JOYSTICK
-        newSpeed = self.clampAbsolute(newSpeed, maxPower)
-        self.setLeftMotor(newSpeed)
-        self.setRightMotor(newSpeed)
+        angle = numpy.arctan2(relY, relX)
+        # self.setLights(angle)
+
+        # If going directly up/directly down within VERTICAL_ANGLE_OFFSET in either direction
+        if self.withinInterval(angle, math.pi/2, VERTICAL_ANGLE_OFFSET) or self.withinInterval(angle, -math.pi/2, VERTICAL_ANGLE_OFFSET):
+          # Going straight forward/backwards
+          newSpeed = relY
+          newSpeed *= maxPower
+          # newSpeed = self.clampAbsolute(newSpeed, maxPower)
+          self.setLeftMotor(newSpeed)
+          self.setRightMotor(newSpeed)
+        else:
+          # We are turning
+          newSpeed = radius
+          newSpeed *= maxPower
+          x = math.cos(angle)
+          y = math.sin(angle)
+          if y > 0:
+            fullSpeed = newSpeed
+            signy = 1
+          else:
+            fullSpeed = -newSpeed 
+            signy = -1
+
+          otherSideSpeed = abs(y)-HALFWAY_HEIGHT # Want the halfway to be the new 0
+          otherSideSpeed *= signy # Add back signs
+          otherSideSpeed /= HALFWAY_HEIGHT # Want it to be from -1 to 1
+          otherSideSpeed = self.clamp(otherSideSpeed, -1, 1) 
+          otherSideSpeed *= fullSpeed # Weigh it by how far from center you are
+          # self.setLights(otherSideSpeed)
+
+          if x > 0:
+            # Turning right
+            signx = 1
+            if y > 0:
+              leftSpeed = fullSpeed
+              rightSpeed = otherSideSpeed
+            else:
+              leftSpeed = otherSideSpeed 
+              rightSpeed = fullSpeed
+          else: 
+            # Turning left
+            signx = -1
+            if y > 0:
+              leftSpeed = otherSideSpeed
+              rightSpeed = fullSpeed
+            else:
+              leftSpeed = fullSpeed
+              rightSpeed = otherSideSpeed
+
+          self.setLeftMotor(leftSpeed)
+          self.setRightMotor(rightSpeed)
+
       else:
         # If in the deadzone for the joysticks, we come to a stop
         self.setLeftMotor(0)
@@ -202,13 +272,13 @@ class App(threading.Thread):
 
       if dPadY != 0:
         print(f"dPadY: {dPadY}")
-      try: 
-        lightsPower = float(self.getLights()) 
-        lightsPower += dPadY * LIGHT_INCREMENT
-        lightsPower = self.clamp(lightsPower, 0, 1.0)
-        self.setLights(lightsPower)
-      except:
-        print("Lights invalid")
+        try: 
+          lightsPower = float(self.getLights()) 
+          lightsPower += dPadY * LIGHT_INCREMENT
+          lightsPower = self.clamp(lightsPower, 0, 1.0)
+          self.setLights(lightsPower)
+        except:
+          print("Lights invalid")
 
   motors_left_entry_text = None
   def getLeftMotorSpeed(self):
