@@ -16,6 +16,7 @@ import io
 from multiprocessing import Process
 import math
 import numpy
+import shapeFile_Frontend
 
 try:
   from controller import Controller
@@ -327,7 +328,11 @@ class App(threading.Thread):
   def setLights(self, val):
     if self.lights_entry_text == None:
       return 
-    return self.lights_entry_text.set(val)
+    try:
+      val = float(val)
+      self.lights_entry_text.set(f"{val:.3}")
+    except: 
+      self.lights_entry_text.set(val)
 
   servos_horizontal_slider = None
   def getServosHorizontal(self):
@@ -597,6 +602,7 @@ class App(threading.Thread):
   lmain = None
   def run(self):
     window = tk.Tk() 
+    window.title("Storm Drain Robot")
     self.root = window
     self.root.protocol("WM_DELETE_WINDOW", self.callback)
 
@@ -669,7 +675,15 @@ class App(threading.Thread):
       #       # servos_vertical_entry
       #     )
     )
-    submit_data_button.grid(row=1, column=5)
+    # submit_data_button.grid(row=1, column=5)
+    create_shapefile_button = tk.Button(
+      text = "Create ShapeFile",
+      command = lambda 
+        root=self.root:
+        shapeFile_Frontend.create_shape_file_dialog(root),
+    )
+    create_shapefile_button.grid(row=1, column=5)
+
 
     emergency_stop_button = tk.Button(
       text="STOP MOTORS",
