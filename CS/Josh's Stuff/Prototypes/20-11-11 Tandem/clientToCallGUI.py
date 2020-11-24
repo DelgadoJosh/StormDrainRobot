@@ -9,6 +9,7 @@ import time
 from multiprocessing import Process
 from queue import Queue
 
+DEBUG = False
 payload_size = struct.calcsize("Q")
 
 class Client():
@@ -59,7 +60,8 @@ def getInput():
       try: 
         if not queue.empty():
           command = queue.get()
-          print(f"Sending {command}")
+          if DEBUG:
+            print(f"Sending {command}")
 
           c.send(command.encode('utf-8'))
       except KeyboardInterrupt:

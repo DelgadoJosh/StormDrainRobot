@@ -23,6 +23,8 @@ try:
 except:
   controllerConnected = False 
 
+DEBUG = False
+
 class App(threading.Thread):
   def __init__(self):
     threading.Thread.__init__(self)
@@ -181,8 +183,8 @@ class App(threading.Thread):
           newSpeed = relY
           newSpeed *= maxPower
           # newSpeed = self.clampAbsolute(newSpeed, maxPower)
-          self.setLeftMotor(newSpeed)
-          self.setRightMotor(newSpeed)
+          self.setLeftMotor(f"{newSpeed:.3f}")
+          self.setRightMotor(f"{newSpeed:.3f}")
         else:
           # We are turning
           newSpeed = radius
@@ -197,7 +199,7 @@ class App(threading.Thread):
             signy = -1
 
           otherSideSpeed = abs(y)-HALFWAY_HEIGHT # Want the halfway to be the new 0
-          otherSideSpeed *= signy # Add back signs
+          # otherSideSpeed *= signy # Add back signs
           otherSideSpeed /= HALFWAY_HEIGHT # Want it to be from -1 to 1
           otherSideSpeed = self.clamp(otherSideSpeed, -1, 1) 
           otherSideSpeed *= fullSpeed # Weigh it by how far from center you are
@@ -222,8 +224,8 @@ class App(threading.Thread):
               leftSpeed = fullSpeed
               rightSpeed = otherSideSpeed
 
-          self.setLeftMotor(leftSpeed)
-          self.setRightMotor(rightSpeed)
+          self.setLeftMotor(f"{leftSpeed:.3f}")
+          self.setRightMotor(f"{rightSpeed:.3f}")
 
       else:
         # If in the deadzone for the joysticks, we come to a stop
@@ -412,7 +414,8 @@ class App(threading.Thread):
 
   def submitData(self):
     outputString = f"{self.getLights()} {self.getLeftMotorSpeed()} {self.getRightMotorSpeed()} {self.getServosHorizontal()} {self.getServosVertical()}"
-    print(outputString)
+    if DEBUG:
+      print(outputString)
     if not self.queue.full():
       self.queue.put(outputString)
 
