@@ -111,7 +111,7 @@ class App(threading.Thread):
 
   inputQueriesPerSecond = 100
   SENSITIVITY = 0.001 * 10
-  SENSITIVITY_ANGLE = 0.001 * 750
+  SENSITIVITY_ANGLE = 0.001 * 750 * 1.5
   MAX_JOYSTICK = 32000
   def loopToQueryController(self):
     controller = Controller()
@@ -120,6 +120,7 @@ class App(threading.Thread):
     maxPower = 0.5
     INCREMENT = 0.1
     LIGHT_INCREMENT = 0.05
+    ATTACHMENT_INCREMENT = 0.05
 
     # This is the offset in a single direction, so the total is this doubled
     VERTICAL_ANGLE_OFFSET = math.radians(30)
@@ -147,6 +148,7 @@ class App(threading.Thread):
       leftBumperPressed = controller.getLeftBumperPressedAndReleased()
       rightBumperPressed = controller.getRightBumperPressedAndReleased()
 
+      dPadX = controller.getDPadXState()
       dPadY = controller.getDPadYState()
 
       if not self.getUseController():
@@ -239,14 +241,16 @@ class App(threading.Thread):
         # servoHorizontalAngle += changeInHorizontalAngle
         # servoHorizontalAngle = int(self.clamp(servoHorizontalAngle, 0, 180) + 0.5)
         horizontalAngle += changeInHorizontalAngle
-        servoHorizontalAngle = int(self.clamp(horizontalAngle, 0, 180) + 0.5)
+        horizontalAngle = self.clamp(horizontalAngle, 0, 180)
+        servoHorizontalAngle = int(horizontalAngle + 0.5)
 
         changeInVerticalAngle = 1.0*joystickRY/self.MAX_JOYSTICK * self.SENSITIVITY_ANGLE
         # servoVerticalAngle = float(self.getServosVertical())
         # servoVerticalAngle += changeInVerticalAngle
         # servoVerticalAngle = int(self.clamp(servoVerticalAngle, 0, 90) + 0.5)
         verticalAngle += changeInVerticalAngle
-        servoVerticalAngle = int(self.clamp(verticalAngle, 0, 90) + 0.5)
+        verticalAngle = self.clamp(verticalAngle, 0, 90)
+        servoVerticalAngle = int(verticalAngle + 0.5)
 
         # print(f"rx={joystickRX} | rx={joystickRY} | changeHoriz={changeInHorizontalAngle} | changeVert={changeInVerticalAngle}")
 
@@ -274,6 +278,15 @@ class App(threading.Thread):
         self.setJoystickMaxPower(maxPower)
         # print(f"  new max: {maxPower}")
         print(f"Right bumper pressed, new maxpower = {maxPower}")
+
+      if dPadX != 0:
+        try: 
+          attachmentPower = float(self.getAttachmentPower())
+          attachmentPower += dPadX * ATTACHMENT_INCREMENT 
+          attachmentPower = self.clamp(attachmentPower, 0, 1.0) 
+          self.setAttachmentPower(attachmentPower) 
+        except:
+          print("AttachmentPower invalid")
 
       if dPadY != 0:
         print(f"dPadY: {dPadY}")
@@ -364,6 +377,20 @@ class App(threading.Thread):
     except:
       return
   
+  def getAttachmentPower(self):
+    if self.attachment_entry_text == None:
+      return "0"
+    return self.attachment_entry_text.get()
+  
+  def setAttachmentPower(self, val):
+    if self.attachment_entry_text == None:
+      return 
+    try:
+      val = float(val)
+      self.attachment_entry_text.set(f"{val:.3}")
+    except: 
+      self.attachment_entry_text.set(val)
+  
   use_controller_checkbox_val = None 
   def getUseController(self):
     if self.use_controller_checkbox_val == None:
@@ -420,7 +447,7 @@ class App(threading.Thread):
   #   self.queue.put(outputString)
 
   def submitData(self):
-    outputString = f"{self.getLights()} {self.getLeftMotorSpeed()} {self.getRightMotorSpeed()} {self.getServosHorizontal()} {self.getServosVertical()}"
+    outputString = f"{self.getLights()} {self.getLeftMotorSpeed()} {self.getRightMotorSpeed()} {self.getServosHorizontal()} {self.getServosVertical()} {self.getAttachmentPower()}"
     if DEBUG:
       print(outputString)
     if not self.queue.full():
@@ -644,8 +671,17 @@ class App(threading.Thread):
     self.servos_vertical_slider.set(45)
     self.servos_vertical_slider.grid(row=1, column=4, padx=2)
 
+    attachment_label = tk.Label(text="Attachment\nPower")
+    attachment_label.grid(row=0, column=5)
+    self.attachment_entry_text = tk.StringVar(value="0") 
+    attachment_entry = tk.Entry(width=20, textvariable=self.attachment_entry_text)
+    attachment_entry.grid(row=1, column=5, padx=2)
+
     # Ahhhhh no multiline lambdas :(
+    button_frame = tk.Frame(self.root, relief=tk.FLAT, borderwidth=2)
+    button_frame.grid(row=1, column=6)
     submit_data_button = tk.Button(
+      button_frame,
       text="Submit Data",
       # command = lambda 
       #   lights_percent=lights_entry.get(), 
@@ -676,13 +712,15 @@ class App(threading.Thread):
       #     )
     )
     # submit_data_button.grid(row=1, column=5)
+    submit_data_button.grid(row=0, column=0)
     create_shapefile_button = tk.Button(
+      button_frame,
       text = "Create ShapeFile",
       command = lambda 
         root=self.root:
         shapeFile_Frontend.create_shape_file_dialog(root),
     )
-    create_shapefile_button.grid(row=1, column=5)
+    create_shapefile_button.grid(row=1, column=0)
 
 
     emergency_stop_button = tk.Button(
@@ -690,11 +728,11 @@ class App(threading.Thread):
       command = self.emergencyStop,
       background = 'red'
     )
-    emergency_stop_button.grid(row=0, column=5)
+    emergency_stop_button.grid(row=0, column=6)
 
     # Todo: Add a checkbox for constantly send the data every x seconds
     checkbox_frame = tk.Frame(self.root, relief=tk.RAISED, borderwidth=2)
-    checkbox_frame.grid(row=1, column=6)
+    checkbox_frame.grid(row=1, column=7)
     constantly_submit_checkbox_val = tk.IntVar()
     constantly_submit_checkbox = tk.Checkbutton(checkbox_frame, text="Constantly Submit", variable=constantly_submit_checkbox_val)
     # constantly_submit_checkbox.grid(row=1, column=6)
@@ -705,7 +743,7 @@ class App(threading.Thread):
 
     # DATA BOX
     data_frame = tk.Frame(self.root, relief=tk.RAISED, borderwidth=2)
-    data_frame.grid(row=0, column=7, rowspan=2, padx=2)
+    data_frame.grid(row=0, column=8, rowspan=2, padx=2)
     # Populate the box with data
     self.fps_label = tk.Label(data_frame, text="FPS: 0")
     self.fps_label.grid(row=0, column=0)
@@ -746,7 +784,7 @@ class App(threading.Thread):
 
     # Todo: Add a image for the info
     imageFrame = tk.Frame(width=1280, height=720)
-    imageFrame.grid(row=2, column=0, columnspan=8)
+    imageFrame.grid(row=2, column=0, columnspan=9)
     
     # Capture video frames
     self.lmain = tk.Label(imageFrame)
