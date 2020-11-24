@@ -164,6 +164,9 @@ class Controller(object):
             if abbv == 'HY':
                 if event.state != 0:
                     self.dPadYLastNonZeroResult = event.state
+            if abbv == 'HX':
+                if event.state != 0:
+                    self.dPadXLastNonZeroResult = event.state
         if self.debugOutput:
             self.output_state(event.ev_type, abbv)
 
@@ -228,6 +231,13 @@ class Controller(object):
             return val 
         return 0
     
+    dPadXLastNonZeroResult = 0
+    def getDPadXState(self):
+        if self.dPadXLastNonZeroResult != 0:
+            val = self.dPadXLastNonZeroResult
+            self.dPadXLastNonZeroResult = 0
+            return val 
+        return 0
     # bPressed = False
     # bPressedAndReleased = False 
     def getBPressedAndReleased(self):
