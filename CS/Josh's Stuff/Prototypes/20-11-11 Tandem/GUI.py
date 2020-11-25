@@ -111,8 +111,11 @@ class App(threading.Thread):
 
   inputQueriesPerSecond = 100
   SENSITIVITY = 0.001 * 10
-  SENSITIVITY_ANGLE = 0.001 * 750 * 1.5
+  SENSITIVITY_HORIZONTAL_ANGLE = 0.001 * 750 * 1.5  # This is magic
+  SENSITIVITY_VERTICAL_ANGLE = 0.001 * 750 * 1.5
   MAX_JOYSTICK = 32000
+  horizontalAngle = 90
+  verticalAngle = 45
   def loopToQueryController(self):
     controller = Controller()
     inputQueryDelay = 1.0/100
@@ -127,10 +130,10 @@ class App(threading.Thread):
     MAX_HEIGHT = 0.8 # Technically should use height
     HALFWAY_HEIGHT = MAX_HEIGHT/2
 
-    horizontalAngle = 90
-    verticalAngle = 45
+    # horizontalAngle = 90
+    # verticalAngle = 45
     while True:
-      # Every inpuQueryDelay, query to see 
+      # Every inputQueryDelay, query to see 
       #  - if we increase/decrease the speed
       #  - change the servo angle
       #  - emergency stop
@@ -235,22 +238,30 @@ class App(threading.Thread):
         self.setLeftMotor(0)
         self.setRightMotor(0)
       
+      # [SERVO ANGLES]
+      # <RIGHT STICK>
       if not self.isInDeadZone(joystickRX, joystickRY):
-        changeInHorizontalAngle = 1.0*joystickRX/self.MAX_JOYSTICK * self.SENSITIVITY_ANGLE
+        changeInHorizontalAngle = 1.0*joystickRX/self.MAX_JOYSTICK * self.SENSITIVITY_HORIZONTAL_ANGLE
         # servoHorizontalAngle = float(self.getServosHorizontal())
         # servoHorizontalAngle += changeInHorizontalAngle
         # servoHorizontalAngle = int(self.clamp(servoHorizontalAngle, 0, 180) + 0.5)
-        horizontalAngle += changeInHorizontalAngle
-        horizontalAngle = self.clamp(horizontalAngle, 0, 180)
-        servoHorizontalAngle = int(horizontalAngle + 0.5)
+        # horizontalAngle += changeInHorizontalAngle
+        # horizontalAngle = self.clamp(horizontalAngle, 0, 180)
+        # servoHorizontalAngle = int(horizontalAngle + 0.5)
+        self.horizontalAngle += changeInHorizontalAngle
+        self.horizontalAngle = self.clamp(self.horizontalAngle, 0, 180) 
+        servoHorizontalAngle = int(self.horizontalAngle + 0.5)
 
-        changeInVerticalAngle = 1.0*joystickRY/self.MAX_JOYSTICK * self.SENSITIVITY_ANGLE
+        changeInVerticalAngle = 1.0*joystickRY/self.MAX_JOYSTICK * self.SENSITIVITY_VERTICAL_ANGLE
         # servoVerticalAngle = float(self.getServosVertical())
         # servoVerticalAngle += changeInVerticalAngle
         # servoVerticalAngle = int(self.clamp(servoVerticalAngle, 0, 90) + 0.5)
-        verticalAngle += changeInVerticalAngle
-        verticalAngle = self.clamp(verticalAngle, 0, 90)
-        servoVerticalAngle = int(verticalAngle + 0.5)
+        # verticalAngle += changeInVerticalAngle
+        # verticalAngle = self.clamp(verticalAngle, 0, 90)
+        # servoVerticalAngle = int(verticalAngle + 0.5)
+        self.verticalAngle += changeInVerticalAngle
+        self.verticalAngle = self.clamp(self.verticalAngle, 0, 90) 
+        servoVerticalAngle = int(self.verticalAngle + 0.5)
 
         # print(f"rx={joystickRX} | rx={joystickRY} | changeHoriz={changeInHorizontalAngle} | changeVert={changeInVerticalAngle}")
 
@@ -258,7 +269,8 @@ class App(threading.Thread):
         self.setServosVertical(servoVerticalAngle)
       
       if bPressed:
-        print("B was pressed!")
+        if DEBUG:
+          print("B was pressed!")
         self.emergencyStop()
       
       if leftBumperPressed:
@@ -447,7 +459,13 @@ class App(threading.Thread):
   #   self.queue.put(outputString)
 
   def submitData(self):
-    outputString = f"{self.getLights()} {self.getLeftMotorSpeed()} {self.getRightMotorSpeed()} {self.getServosHorizontal()} {self.getServosVertical()} {self.getAttachmentPower()}"
+    servoHorizontal = self.getServosHorizontal()
+    # try:
+    #   servoHorizontal = 180 - float(servoHorizontal)
+    # except: 
+    #   # print("Bad horizontal")
+    #   servoHorizontal = 90
+    outputString = f"{self.getLights()} {self.getLeftMotorSpeed()} {self.getRightMotorSpeed()} {servoHorizontal} {self.getServosVertical()} {self.getAttachmentPower()}"
     if DEBUG:
       print(outputString)
     if not self.queue.full():
