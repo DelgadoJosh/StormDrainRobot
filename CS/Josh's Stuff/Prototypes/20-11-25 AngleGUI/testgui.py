@@ -37,7 +37,7 @@ class App(threading.Thread):
     # Constants
     ORIGIN_X = 150 
     ORIGIN_Y = 100
-    LEN = 50
+    LEN = 100
     angle = math.radians(angle)
     
 
@@ -48,12 +48,12 @@ class App(threading.Thread):
     left_dx = math.cos(left_angle)
     left_dx = int(left_dx*LEN) 
     left_dy = math.sin(left_angle) 
-    left_dy = int(left_dy*LEN)
+    left_dy = -int(left_dy*LEN) # up is negative in canvas
 
     right_dx = math.cos(right_angle)
     right_dx = int(right_dx*LEN) 
     right_dy = math.sin(right_angle) 
-    right_dy = int(right_dy*LEN)
+    right_dy = -int(right_dy*LEN)
 
     if self.left_line != None:
       self.canvas.delete(self.left_line)
