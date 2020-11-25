@@ -9,6 +9,7 @@ import time
 from multiprocessing import Process
 from queue import Queue
 
+DEBUG = False
 payload_size = struct.calcsize("Q")
 
 class Client():
@@ -31,6 +32,7 @@ queue = GUI.app.queue
 stopFlag = GUI.app.programEnd
 frameQueue = GUI.app.frameQueue
 voltageQueue = GUI.app.voltageQueue
+encoderQueue = GUI.app.encoderQueue
 
 def retrieveData(data):
   # Retrieve the message data from the stream, parsing in a single bit of data
@@ -59,7 +61,8 @@ def getInput():
       try: 
         if not queue.empty():
           command = queue.get()
-          print(f"Sending {command}")
+          if DEBUG:
+            print(f"Sending {command}")
 
           c.send(command.encode('utf-8'))
       except KeyboardInterrupt:
@@ -173,6 +176,11 @@ def showVideo():
       # print(f"ADC: Voltage={int.from_bytes(voltage_data, 'big') / 100.0}")
       if not voltageQueue.full():
         voltageQueue.put(voltage)
+
+      encoder_data, data = retrieveData(data)
+      encoder = int.from_bytes(encoder_data, 'big')
+      if not encoderQueue.full():
+        encoderQueue.put(encoder)
 
       # Parsing data
       # frame = parseFrameFromBytes(frame_data)

@@ -14,7 +14,17 @@ import cv2
 from PIL import Image, ImageTk
 import io
 from multiprocessing import Process
-from controller import Controller
+import math
+import numpy
+import shapeFile_Frontend
+
+try:
+  from controller import Controller
+  controllerConnected = True
+except:
+  controllerConnected = False 
+
+DEBUG = False
 
 class App(threading.Thread):
   def __init__(self):
@@ -66,6 +76,13 @@ class App(threading.Thread):
       val = 0
     return val
   
+  def withinInterval(self, val, target, interval):
+    try:
+      isGood = target-interval <= val <= target+interval
+      return isGood
+    except: 
+      return False
+
   def clamp(self, val, min, max):
     try:
       val = float(val)
@@ -100,9 +117,14 @@ class App(threading.Thread):
     controller = Controller()
     inputQueryDelay = 1.0/100
 
-    maxPower = 1.0
+    maxPower = 0.5
     INCREMENT = 0.1
     LIGHT_INCREMENT = 0.05
+
+    # This is the offset in a single direction, so the total is this doubled
+    VERTICAL_ANGLE_OFFSET = math.radians(30)
+    MAX_HEIGHT = 0.8 # Technically should use height
+    HALFWAY_HEIGHT = MAX_HEIGHT/2
 
     horizontalAngle = 90
     verticalAngle = 45
@@ -145,11 +167,67 @@ class App(threading.Thread):
 
         # self.setLeftMotor(motorLeftSpeed)
         # self.setRightMotor(motorRightSpeed)
+        # Relative LY and relative LX
+        relX = 1.0*joystickLX/self.MAX_JOYSTICK
+        relY = 1.0*joystickLY/self.MAX_JOYSTICK
+        relX = self.clamp(relX, -1, 1)
+        relY = self.clamp(relY, -1, 1)
+        radius = math.sqrt(relX*relX + relY*relY)
+        radius = self.clamp(radius, 0, 1)
 
-        newSpeed = 1.0*joystickLY/self.MAX_JOYSTICK
-        newSpeed = self.clampAbsolute(newSpeed, maxPower)
-        self.setLeftMotor(newSpeed)
-        self.setRightMotor(newSpeed)
+        angle = numpy.arctan2(relY, relX)
+        # self.setLights(angle)
+
+        # If going directly up/directly down within VERTICAL_ANGLE_OFFSET in either direction
+        if self.withinInterval(angle, math.pi/2, VERTICAL_ANGLE_OFFSET) or self.withinInterval(angle, -math.pi/2, VERTICAL_ANGLE_OFFSET):
+          # Going straight forward/backwards
+          newSpeed = relY
+          newSpeed *= maxPower
+          # newSpeed = self.clampAbsolute(newSpeed, maxPower)
+          self.setLeftMotor(f"{newSpeed:.3f}")
+          self.setRightMotor(f"{newSpeed:.3f}")
+        else:
+          # We are turning
+          newSpeed = radius
+          newSpeed *= maxPower
+          x = math.cos(angle)
+          y = math.sin(angle)
+          if y > 0:
+            fullSpeed = newSpeed
+            signy = 1
+          else:
+            fullSpeed = -newSpeed 
+            signy = -1
+
+          otherSideSpeed = abs(y)-HALFWAY_HEIGHT # Want the halfway to be the new 0
+          # otherSideSpeed *= signy # Add back signs
+          otherSideSpeed /= HALFWAY_HEIGHT # Want it to be from -1 to 1
+          otherSideSpeed = self.clamp(otherSideSpeed, -1, 1) 
+          otherSideSpeed *= fullSpeed # Weigh it by how far from center you are
+          # self.setLights(otherSideSpeed)
+
+          if x > 0:
+            # Turning right
+            signx = 1
+            if y > 0:
+              leftSpeed = fullSpeed
+              rightSpeed = otherSideSpeed
+            else:
+              leftSpeed = otherSideSpeed 
+              rightSpeed = fullSpeed
+          else: 
+            # Turning left
+            signx = -1
+            if y > 0:
+              leftSpeed = otherSideSpeed
+              rightSpeed = fullSpeed
+            else:
+              leftSpeed = fullSpeed
+              rightSpeed = otherSideSpeed
+
+          self.setLeftMotor(f"{leftSpeed:.3f}")
+          self.setRightMotor(f"{rightSpeed:.3f}")
+
       else:
         # If in the deadzone for the joysticks, we come to a stop
         self.setLeftMotor(0)
@@ -183,6 +261,7 @@ class App(threading.Thread):
         newMax = maxPower - INCREMENT
         newMax = self.clamp(newMax, 0, 1.0)
         maxPower = newMax
+        self.setJoystickMaxPower(maxPower)
         print(f"Left Bumper pressed, new maxpower = {maxPower}")
       
       
@@ -192,18 +271,19 @@ class App(threading.Thread):
         # print(f"  Temp: {newMax}")
         newMax = self.clamp(newMax, 0, 1.0)
         maxPower = newMax 
+        self.setJoystickMaxPower(maxPower)
         # print(f"  new max: {maxPower}")
         print(f"Right bumper pressed, new maxpower = {maxPower}")
 
       if dPadY != 0:
         print(f"dPadY: {dPadY}")
-      try: 
-        lightsPower = float(self.getLights()) 
-        lightsPower += dPadY * LIGHT_INCREMENT
-        lightsPower = self.clamp(lightsPower, 0, 1.0)
-        self.setLights(lightsPower)
-      except:
-        print("Lights invalid")
+        try: 
+          lightsPower = float(self.getLights()) 
+          lightsPower += dPadY * LIGHT_INCREMENT
+          lightsPower = self.clamp(lightsPower, 0, 1.0)
+          self.setLights(lightsPower)
+        except:
+          print("Lights invalid")
 
   motors_left_entry_text = None
   def getLeftMotorSpeed(self):
@@ -248,7 +328,11 @@ class App(threading.Thread):
   def setLights(self, val):
     if self.lights_entry_text == None:
       return 
-    return self.lights_entry_text.set(val)
+    try:
+      val = float(val)
+      self.lights_entry_text.set(f"{val:.3}")
+    except: 
+      self.lights_entry_text.set(val)
 
   servos_horizontal_slider = None
   def getServosHorizontal(self):
@@ -337,7 +421,8 @@ class App(threading.Thread):
 
   def submitData(self):
     outputString = f"{self.getLights()} {self.getLeftMotorSpeed()} {self.getRightMotorSpeed()} {self.getServosHorizontal()} {self.getServosVertical()}"
-    print(outputString)
+    if DEBUG:
+      print(outputString)
     if not self.queue.full():
       self.queue.put(outputString)
 
@@ -376,6 +461,32 @@ class App(threading.Thread):
     if self.fps_label == None:
       return
     self.fps_label["text"] = f"FPS: {fps:3.2f}"
+  
+  encoder_label = None
+  def setEncoder(self, numRotations):
+    if self.encoder_label == None:
+      return
+    self.encoder_label["text"] = f"Rotations: {numRotations}"
+  
+  encoderQueue = Queue(maxsize=1)
+  def loopToShowEncoder(self):
+    while True:
+      time.sleep(0.01)
+      if self.encoderQueue.empty():
+        continue 
+      numRotations = self.encoderQueue.get()
+      self.setEncoder(numRotations)
+  
+  joystick_max_power_label = None 
+  def setJoystickMaxPower(self, maxPower):
+    if self.joystick_max_power_label == None:
+      return 
+    try:
+      maxPower = int(maxPower*100)
+      self.joystick_max_power_label["text"] = f"Max Power: {maxPower:3d}%"
+    except:
+      print("Bad max power for joystick label")
+      return
 
   # Function to parse a frame into an image and imgtk
   def parseFrame(self, frame):
@@ -491,6 +602,7 @@ class App(threading.Thread):
   lmain = None
   def run(self):
     window = tk.Tk() 
+    window.title("Storm Drain Robot")
     self.root = window
     self.root.protocol("WM_DELETE_WINDOW", self.callback)
 
@@ -563,7 +675,15 @@ class App(threading.Thread):
       #       # servos_vertical_entry
       #     )
     )
-    submit_data_button.grid(row=1, column=5)
+    # submit_data_button.grid(row=1, column=5)
+    create_shapefile_button = tk.Button(
+      text = "Create ShapeFile",
+      command = lambda 
+        root=self.root:
+        shapeFile_Frontend.create_shape_file_dialog(root),
+    )
+    create_shapefile_button.grid(row=1, column=5)
+
 
     emergency_stop_button = tk.Button(
       text="STOP MOTORS",
@@ -583,7 +703,7 @@ class App(threading.Thread):
     use_controller_checkbox = tk.Checkbutton(checkbox_frame, text="Use Controller", variable=self.use_controller_checkbox_val)
     use_controller_checkbox.grid(row=1, column=0)
 
-    # Add a box for data
+    # DATA BOX
     data_frame = tk.Frame(self.root, relief=tk.RAISED, borderwidth=2)
     data_frame.grid(row=0, column=7, rowspan=2, padx=2)
     # Populate the box with data
@@ -591,6 +711,10 @@ class App(threading.Thread):
     self.fps_label.grid(row=0, column=0)
     self.voltage_label = tk.Label(data_frame, text="Voltage: 0")
     self.voltage_label.grid(row=1, column=0)
+    self.encoder_label = tk.Label(data_frame, text="Rotations: 0")
+    self.encoder_label.grid(row=2, column=0)
+    self.joystick_max_power_label = tk.Label(data_frame, text="Max Power:  50%")
+    self.joystick_max_power_label.grid(row=3, column=0)
 
     # Threads to refresh the data
     voltage_data_loop = threading.Thread(
@@ -598,6 +722,11 @@ class App(threading.Thread):
       daemon=True
     )
     voltage_data_loop.start()
+    encoder_data_loop = threading.Thread(
+      target=self.loopToShowEncoder,
+      daemon=True
+    )
+    encoder_data_loop.start()
 
     # Start a thread so it'll keep on sending every dTime interval if the checkbox is checked
     send_data_loop = threading.Thread(
@@ -660,11 +789,12 @@ class App(threading.Thread):
     # img = None
 
     # Begin loop for querying the controller
-    controller_loop = threading.Thread(
-      target=self.loopToQueryController,
-      daemon=True
-    )
-    controller_loop.start()
+    if controllerConnected:
+      controller_loop = threading.Thread(
+        target=self.loopToQueryController,
+        daemon=True
+      )
+      controller_loop.start()
 
     # Todo: add a place where you put the current run info (pipe start id, pipe end id)
 
