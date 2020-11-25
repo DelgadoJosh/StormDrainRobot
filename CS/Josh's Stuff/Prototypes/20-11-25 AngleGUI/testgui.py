@@ -66,6 +66,15 @@ class App(threading.Thread):
 
     self.right_line = self.canvas.create_line(ORIGIN_X, ORIGIN_Y, ORIGIN_X+right_dx, ORIGIN_Y+right_dy, width=5, fill="black")
 
+  slider = None
+  def loopToUpdateAngle(self):
+    while True: 
+      time.sleep(0.01)
+      if self.slider is None:
+        continue 
+      angle = self.slider.get()
+
+      self.changeAngle(angle)
 
   def run(self):
     window = tk.Tk() 
@@ -91,7 +100,18 @@ class App(threading.Thread):
     # label = tk.Label(image=imagetk) 
     # label.grid(row=1, column=0)
 
-    self.canvas.grid(row=0, column=0) 
+
+    self.canvas.grid(row=1, column=0) 
+
+    self.slider = tk.Scale(from_=0, to=180, orient=tk.HORIZONTAL)
+    self.slider.set(90)
+    self.slider.grid(row=0, column=0)
+    loop_to_update_pic = threading.Thread(
+      target = self.loopToUpdateAngle,
+      daemon = True 
+    )
+    loop_to_update_pic.start()
+
 
     self.root.mainloop()
 
