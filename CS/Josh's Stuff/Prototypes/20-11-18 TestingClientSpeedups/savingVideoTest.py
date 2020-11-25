@@ -79,9 +79,11 @@ out = cv2.VideoWriter("./output.mp4", cv2.VideoWriter_fourcc(*'mp4v'), 20, (600,
 
 # Function for a thread to always save the video
 saveVideoFrameQueue = Queue(maxsize=5) # If maxsize is too large, latency is an issue as it processes the queue
+doLoop = True
 def loopToSaveVideo():
     global out
-    while True:
+    global doLoop
+    while doLoop:
         try:
             time.sleep(0.01) # This is essential to prevent the CPU from spinning on the same thread
             if saveVideoFrameQueue.empty():
@@ -95,12 +97,13 @@ def loopToSaveVideo():
             # out.release()
             break
     print("Ending loop to save video")
-    # out.release()
+    out.release()
 
 # Loop to send the video, frame by frame.
 def loopToBroadcastVideo():
     # while True: 
     global saveVideoFrameQueue
+    global doLoop
     for i in range(100): # For the purposes of testing, going to close this after 100 frames
         # Grab the current frame
         # It should be updated by the looping constantlyReadVideoFeed()
@@ -108,6 +111,8 @@ def loopToBroadcastVideo():
 
         if not grabbed:
             continue
+
+        grabbed, buffer = cv2.imencode('.jpg', frame)
 
         # Save the frame
         if not saveVideoFrameQueue.full():
@@ -118,9 +123,12 @@ def loopToBroadcastVideo():
         # cv2.imshow("Frame", frame)
     
     # saveVideoFrameQueue = Queue(maxsize = 1)
+    doLoop = False
+    time.sleep(0.1)
     print("Releasing Video Writer")
     camera.release()
     out.release()
+    print("Everything released")
 
 
 # Create Threads
