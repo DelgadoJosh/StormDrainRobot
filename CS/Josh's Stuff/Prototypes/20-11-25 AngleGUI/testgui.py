@@ -38,7 +38,8 @@ class App(threading.Thread):
     ORIGIN_X = 150 
     ORIGIN_Y = 100
     LEN = 100
-    angle = math.radians(angle)
+    angle = 180 - angle # We want 0 degrees to be left
+    angle = math.radians(angle) 
     
 
     ANGLE_WIDTH = math.radians(90)
