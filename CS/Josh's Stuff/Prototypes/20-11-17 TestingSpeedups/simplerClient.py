@@ -30,6 +30,8 @@ def getInput():
     print("Ended input loop")
 
 camera = cv2.VideoCapture(0)
+# camera.set(3, 600)
+# camera.set(4, 400)
 def showVideo():
 
   # Loop for showing images images
