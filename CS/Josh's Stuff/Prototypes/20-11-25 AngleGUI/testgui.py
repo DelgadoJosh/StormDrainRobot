@@ -69,12 +69,17 @@ class App(threading.Thread):
   slider = None
   def loopToUpdateAngle(self):
     while True: 
-      time.sleep(0.01)
+      time.sleep(0.04)
       if self.slider is None:
-        continue 
+        return 
       angle = self.slider.get()
 
       self.changeAngle(angle)
+
+  def centerAngle(self):
+    if self.slider is None:
+      return 
+    self.slider.set(90)
 
   def run(self):
     window = tk.Tk() 
@@ -101,7 +106,7 @@ class App(threading.Thread):
     # label.grid(row=1, column=0)
 
 
-    self.canvas.grid(row=1, column=0) 
+    self.canvas.grid(row=1, column=0, columnspan=2) 
 
     self.slider = tk.Scale(from_=0, to=180, orient=tk.HORIZONTAL)
     self.slider.set(90)
@@ -112,6 +117,11 @@ class App(threading.Thread):
     )
     loop_to_update_pic.start()
 
+    button = tk.Button(
+      text="Center Angle",
+      command=self.centerAngle,
+    )
+    button.grid(row=0, column=1)
 
     self.root.mainloop()
 
