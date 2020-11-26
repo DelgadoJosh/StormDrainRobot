@@ -17,6 +17,7 @@ from multiprocessing import Process
 import math
 import numpy
 import shapeFile_Frontend
+import os
 
 try:
   from controller import Controller
@@ -805,7 +806,11 @@ class App(threading.Thread):
     imageFrame.grid(row=2, column=0, columnspan=9)
     
     # Capture video frames
-    self.lmain = tk.Label(imageFrame)
+    defaultWallpaperFileName = os.getcwd() + "\\UCF Wallpaper.png"
+    defaultWallpaper = Image.open(defaultWallpaperFileName)
+    defaultWallpaper = defaultWallpaper.resize((1280, 720), Image.ANTIALIAS)
+    defaultWallpapertk = ImageTk.PhotoImage(defaultWallpaper)
+    self.lmain = tk.Label(imageFrame, image=defaultWallpapertk)
     self.lmain.grid(row=0, column=0)
     # Start thread to refresh the video frame
     # refresh_frame_loop = threading.Thread(
