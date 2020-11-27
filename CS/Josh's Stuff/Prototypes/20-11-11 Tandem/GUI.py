@@ -534,6 +534,32 @@ class App(threading.Thread):
       print("Bad max power for joystick label")
       return
 
+  def clearLayout(self):
+    try: 
+      print("Todo")
+    except Exception as e:
+      print(f"[ClearLayout] Exception: {e}")
+
+  def setLayoutDefault(self):
+    try: 
+      self.clearLayout()
+      
+    except Exception as e: 
+      print(f"[LayoutDefault] Exception: {e}")
+
+  def setLayoutManualInput(self):
+    try:
+      self.clearLayout()
+
+    except Exception as e: 
+      print(f"[LayoutManualInput] Exception: {e}")
+
+  def shrinkVideo(self):
+    self.smallerFrame = True
+  
+  def defaultVideoSize(self):
+    self.smallerFrame = False
+
   # Function to parse a frame into an image and imgtk
   def parseFrame(self, frame):
     cv2Image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
@@ -557,6 +583,7 @@ class App(threading.Thread):
   frameQueue = Queue(maxsize=1)
   imgQueue = Queue(maxsize=2)
   imgTkQueue = Queue(maxsize=1)
+  smallerFrame = False
   videoMaxFramerate = 60
   frameRefreshDelay = int(1 / videoMaxFramerate)
   def loopToEncodeImg(self):
@@ -564,6 +591,9 @@ class App(threading.Thread):
       if not self.frameQueue.empty():
         frame = self.frameQueue.get() 
         img = Image.open(io.BytesIO(frame)) 
+
+        if self.smallerFrame:
+          img = img.resize((16*70, 9*70), Image.ANTIALIAS)
 
         if not self.imgQueue.full():
           self.imgQueue.put(img)
@@ -647,14 +677,33 @@ class App(threading.Thread):
   
   lmain = None
   def run(self):
-    window = tk.Tk() 
-    window.title("Storm Drain Robot")
-    self.root = window
+    root = tk.Tk() 
+    root.title("Storm Drain Robot")
+    self.root = root
     self.root.protocol("WM_DELETE_WINDOW", self.callback)
+    self.root.geometry("+0+0") # Sets the location of the window
 
     ids = self.ids 
     vals = self.vals 
     self.startTime = time.time()
+
+    # Menubar
+    menubar = tk.Menu(self.root)
+
+    # Create a layoutMenu
+    layoutMenu = tk.Menu(menubar, tearoff=0) 
+    layoutMenu.add_command(label="Default Layout", command=self.setLayoutDefault)
+    layoutMenu.add_command(label="Debug Layout", command=self.setLayoutManualInput) 
+    layoutMenu.add_separator()
+    layoutMenu.add_command(label="Default Video Stream Size", command=self.shrinkVideo)
+    layoutMenu.add_command(label="Shrink Video Stream Size (For smaller screens)", command=self.defaultVideoSize)
+    menubar.add_cascade(label="Layouts", menu=layoutMenu)
+
+    # Rinse and repeat with other menus
+
+    # Add menubar to the root frame
+    self.root.config(menu=menubar)
+
 
 
     # Going to just manually define every part
