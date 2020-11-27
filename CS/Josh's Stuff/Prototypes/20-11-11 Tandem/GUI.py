@@ -537,20 +537,38 @@ class App(threading.Thread):
   def clearLayout(self):
     try: 
       self.manual_input_frame.grid_remove()
+      self.side_frame.grid_remove()
+      self.button_frame.grid_remove()
+      self.data_frame.grid_remove()
+      self.checkbox_frame.grid_remove()
+      self.image_frame.grid_remove()
     except Exception as e:
       print(f"[ClearLayout] Exception: {e}")
 
   def setLayoutDefault(self):
     try: 
       self.clearLayout()
-      
+      self.image_frame.grid(row=0, column=0)
+      self.side_frame.grid(row=0, column=1)
+
+      # Setup their grid in their data frame
+      self.data_frame.grid(row=0, column=0)
+      self.checkbox_frame.grid(row=1, column=0)
+      self.button_frame.grid(row=2, column=0)
     except Exception as e: 
       print(f"[LayoutDefault] Exception: {e}")
 
   def setLayoutManualInput(self):
     try:
       self.clearLayout()
+      self.side_frame.grid(row=0, column=0)
+      self.image_frame.grid(row=1, column=0, columnspan=4)
 
+      # Within the side frame
+      self.manual_input_frame.grid()
+      self.button_frame.grid(row=0, column=1)
+      self.checkbox_frame.grid(row=0, column=2)
+      self.data_frame.grid(row=0, column=3)
     except Exception as e: 
       print(f"[LayoutManualInput] Exception: {e}")
 
@@ -717,7 +735,10 @@ class App(threading.Thread):
 
 
     # Going to just manually define every part
-    self.manual_input_frame = tk.Frame(self.root)
+    self.side_frame = tk.Frame(self.root)
+    self.side_frame.grid(row=0, column=0)
+
+    self.manual_input_frame = tk.Frame(self.side_frame)
     self.manual_input_frame.grid(row=0, column=0)
     lights_label = tk.Label(self.manual_input_frame, text="Lights %")
     lights_label.grid(row=0, column=0)
@@ -757,11 +778,9 @@ class App(threading.Thread):
     attachment_entry = tk.Entry(self.manual_input_frame, width=20, textvariable=self.attachment_entry_text)
     attachment_entry.grid(row=1, column=5, padx=2)
 
-    # Ahhhhh no multiline lambdas :(
-    button_frame = tk.Frame(self.manual_input_frame, relief=tk.FLAT, borderwidth=2)
-    button_frame.grid(row=1, column=6)
+    # Ahhhhh no multiline lambdas :(  Wait nvm.
     submit_data_button = tk.Button(
-      button_frame,
+      self.manual_input_frame,
       text="Submit Data",
       # command = lambda 
       #   lights_percent=lights_entry.get(), 
@@ -792,9 +811,13 @@ class App(threading.Thread):
       #     )
     )
     # submit_data_button.grid(row=1, column=5)
-    submit_data_button.grid(row=0, column=0)
+    submit_data_button.grid(row=1, column=6)
+
+    self.button_frame = tk.Frame(self.side_frame, relief=tk.FLAT, borderwidth=2)
+    # self.button_frame.grid(row=0, column=6)
+    self.button_frame.grid(row=0, column=1)
     create_shapefile_button = tk.Button(
-      button_frame,
+      self.button_frame,
       text = "Create ShapeFile",
       command = lambda 
         root=self.root:
@@ -804,27 +827,31 @@ class App(threading.Thread):
 
 
     emergency_stop_button = tk.Button(
-      self.manual_input_frame,
+      # self.manual_input_frame,
+      self.button_frame,
       text="STOP MOTORS",
       command = self.emergencyStop,
       background = 'red'
     )
-    emergency_stop_button.grid(row=0, column=6)
+    # emergency_stop_button.grid(row=0, column=6)
+    emergency_stop_button.grid(row=0, column=0)
 
     # Todo: Add a checkbox for constantly send the data every x seconds
-    checkbox_frame = tk.Frame(self.manual_input_frame, relief=tk.RAISED, borderwidth=2)
-    checkbox_frame.grid(row=1, column=7)
+    self.checkbox_frame = tk.Frame(self.side_frame, relief=tk.RAISED, borderwidth=2)
+    # self.checkbox_frame.grid(row=1, column=7)
+    self.checkbox_frame.grid(row=0, column=2)
     constantly_submit_checkbox_val = tk.IntVar()
-    constantly_submit_checkbox = tk.Checkbutton(checkbox_frame, text="Constantly Submit", variable=constantly_submit_checkbox_val)
+    constantly_submit_checkbox = tk.Checkbutton(self.checkbox_frame, text="Constantly Submit", variable=constantly_submit_checkbox_val)
     # constantly_submit_checkbox.grid(row=1, column=6)
     constantly_submit_checkbox.grid(row=0, column=0)
     self.use_controller_checkbox_val = tk.IntVar()
-    use_controller_checkbox = tk.Checkbutton(checkbox_frame, text="Use Controller", variable=self.use_controller_checkbox_val)
+    use_controller_checkbox = tk.Checkbutton(self.checkbox_frame, text="Use Controller", variable=self.use_controller_checkbox_val)
     use_controller_checkbox.grid(row=1, column=0)
 
     # DATA BOX
-    self.data_frame = tk.Frame(self.manual_input_frame, relief=tk.RAISED, borderwidth=2)
-    self.data_frame.grid(row=0, column=8, rowspan=2, padx=2)
+    self.data_frame = tk.Frame(self.side_frame, relief=tk.RAISED, borderwidth=2)
+    # self.data_frame.grid(row=0, column=8, rowspan=2, padx=2)
+    self.data_frame.grid(row=0, column=3)
     # Populate the box with data
     self.fps_label = tk.Label(self.data_frame, text="FPS: 0")
     self.fps_label.grid(row=0, column=0)
@@ -874,8 +901,8 @@ class App(threading.Thread):
     # Todo: Add a image for the info
     # imageFrame = tk.Frame(width=1280, height=720)
     # imageFrame.grid(row=2, column=0, columnspan=9)
-    imageFrame = tk.Frame(self.root)
-    imageFrame.grid(row=1, column=0)
+    self.image_frame = tk.Frame(self.root)
+    self.image_frame.grid(row=1, column=0)
     
     # Capture video frames
     # Create a default image for the frame before streaming
@@ -883,8 +910,12 @@ class App(threading.Thread):
     self.defaultWallpaper = Image.open(defaultWallpaperFileName)
     self.defaultWallpaper = self.defaultWallpaper.resize((1280, 720), Image.ANTIALIAS)
     defaultWallpapertk = ImageTk.PhotoImage(self.defaultWallpaper)
-    self.lmain = tk.Label(imageFrame, image=defaultWallpapertk)
+    self.lmain = tk.Label(self.image_frame, image=defaultWallpapertk)
     self.lmain.grid(row=0, column=0)
+
+    # To default layout
+    self.setLayoutDefault()
+
     # Start thread to refresh the video frame
     # refresh_frame_loop = threading.Thread(
     #   target=self.refreshFrame,
