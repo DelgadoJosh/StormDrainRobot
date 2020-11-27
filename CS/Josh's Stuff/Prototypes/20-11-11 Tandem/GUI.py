@@ -571,6 +571,7 @@ class App(threading.Thread):
       self.button_frame.grid(row=0, column=1)
       self.checkbox_frame.grid(row=0, column=2)
       self.data_frame.grid(row=0, column=3)
+      self.canvas.grid(row=0, column=4, rowspan=2) # TEMP
     except Exception as e: 
       print(f"[LayoutManualInput] Exception: {e}")
 
@@ -605,7 +606,55 @@ class App(threading.Thread):
     # img = Image.frombytes('jpg', (1280, 720), frame, 'raw')
     imgTk = ImageTk.PhotoImage(img)
     return imgTk
+  
+  canvas = None
+  left_line = None
+  right_line = None
+  canvas_width = 150
+  canvas_height = 200
+  def updateGUIAngle(self, angle):
+    if self.canvas == None: 
+      return
+    # Constants
+    ORIGIN_X = self.canvas_width//2 
+    ORIGIN_Y = self.canvas_height//4
+    LEN = 50
+    angle = 180 - angle # We want 0 degrees to be left
+    angle = math.radians(angle) 
+    
 
+    ANGLE_WIDTH = math.radians(90)
+    left_angle = angle + ANGLE_WIDTH/2 
+    right_angle = angle - ANGLE_WIDTH/2 
+    
+    left_dx = math.cos(left_angle)
+    left_dx = int(left_dx*LEN) 
+    left_dy = math.sin(left_angle) 
+    left_dy = -int(left_dy*LEN) # up is negative in canvas
+
+    right_dx = math.cos(right_angle)
+    right_dx = int(right_dx*LEN) 
+    right_dy = math.sin(right_angle) 
+    right_dy = -int(right_dy*LEN)
+
+    if self.left_line != None:
+      self.canvas.delete(self.left_line)
+
+    self.left_line = self.canvas.create_line(ORIGIN_X, ORIGIN_Y, ORIGIN_X+left_dx, ORIGIN_Y+left_dy, width=5, fill="black")
+
+    if self.right_line != None:
+      self.canvas.delete(self.right_line)
+
+    self.right_line = self.canvas.create_line(ORIGIN_X, ORIGIN_Y, ORIGIN_X+right_dx, ORIGIN_Y+right_dy, width=5, fill="black")
+
+
+  def loopToUpdateGUIAngle(self):
+    while True:
+      time.sleep(0.04)
+      if self.horizontalAngle == None: 
+        continue 
+      # self.updateGUIAngle(self.horizontalAngle)
+      self.updateGUIAngle(self.getServosHorizontal())
 
   startTime = 0
   numFrames = 0
@@ -893,12 +942,17 @@ class App(threading.Thread):
     send_data_loop.start()
 
     # Create Canvas to show the current bearing of the camera
-    self.canvas = tk.Canvas(self.side_frame, bg="white", height=200, width=150)
+    self.canvas = tk.Canvas(self.side_frame, bg="white", height=self.canvas_height, width=self.canvas_width)
     filename = os.getcwd() + "\\RobotTopDown.png" # 300 x 400
     robotImage = Image.open(filename)
-    robotImage = robotImage.resize((150, 200), Image.ANTIALIAS)
+    robotImage = robotImage.resize((self.canvas_width, self.canvas_height), Image.ANTIALIAS)
     robotImagetk = ImageTk.PhotoImage(robotImage)
     robotImage = self.canvas.create_image(0, 0, image=robotImagetk, anchor='nw', tags="IMG")
+    canvas_update_loop = threading.Thread(
+      target=self.loopToUpdateGUIAngle,
+      daemon=True
+    )
+    canvas_update_loop.start()
 
     # Todo: Add a image for the info
     # imageFrame = tk.Frame(width=1280, height=720)
