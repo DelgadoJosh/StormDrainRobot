@@ -536,7 +536,7 @@ class App(threading.Thread):
 
   def clearLayout(self):
     try: 
-      print("Todo")
+      self.manual_input_frame.grid_remove()
     except Exception as e:
       print(f"[ClearLayout] Exception: {e}")
 
@@ -554,11 +554,21 @@ class App(threading.Thread):
     except Exception as e: 
       print(f"[LayoutManualInput] Exception: {e}")
 
-  def shrinkVideo(self):
+  def setVideoSizeSmall(self):
     self.smallerFrame = True
+    self.defaultWallpaper = self.defaultWallpaper.resize((16*70, 9*70), Image.ANTIALIAS)
+    defaultWallpapertk = ImageTk.PhotoImage(self.defaultWallpaper)
+    if self.imgTkQueue.empty():
+      self.lmain.imgtk = defaultWallpapertk 
+      self.lmain.configure(image=defaultWallpapertk)
   
-  def defaultVideoSize(self):
+  def setVideoSizeDefault(self):
     self.smallerFrame = False
+    self.defaultWallpaper = self.defaultWallpaper.resize((1280, 720), Image.ANTIALIAS)
+    defaultWallpapertk = ImageTk.PhotoImage(self.defaultWallpaper)
+    if self.imgTkQueue.empty():
+      self.lmain.imgtk = defaultWallpapertk 
+      self.lmain.configure(image=defaultWallpapertk) 
 
   # Function to parse a frame into an image and imgtk
   def parseFrame(self, frame):
@@ -695,8 +705,8 @@ class App(threading.Thread):
     layoutMenu.add_command(label="Default Layout", command=self.setLayoutDefault)
     layoutMenu.add_command(label="Debug Layout", command=self.setLayoutManualInput) 
     layoutMenu.add_separator()
-    layoutMenu.add_command(label="Default Video Stream Size", command=self.shrinkVideo)
-    layoutMenu.add_command(label="Shrink Video Stream Size (For smaller screens)", command=self.defaultVideoSize)
+    layoutMenu.add_command(label="Default Video Stream Size", command=self.setVideoSizeDefault)
+    layoutMenu.add_command(label="Shrink Video Stream Size (For smaller screens)", command=self.setVideoSizeSmall)
     menubar.add_cascade(label="Layouts", menu=layoutMenu)
 
     # Rinse and repeat with other menus
@@ -813,16 +823,16 @@ class App(threading.Thread):
     use_controller_checkbox.grid(row=1, column=0)
 
     # DATA BOX
-    data_frame = tk.Frame(self.manual_input_frame, relief=tk.RAISED, borderwidth=2)
-    data_frame.grid(row=0, column=8, rowspan=2, padx=2)
+    self.data_frame = tk.Frame(self.manual_input_frame, relief=tk.RAISED, borderwidth=2)
+    self.data_frame.grid(row=0, column=8, rowspan=2, padx=2)
     # Populate the box with data
-    self.fps_label = tk.Label(data_frame, text="FPS: 0")
+    self.fps_label = tk.Label(self.data_frame, text="FPS: 0")
     self.fps_label.grid(row=0, column=0)
-    self.voltage_label = tk.Label(data_frame, text="Voltage: 0")
+    self.voltage_label = tk.Label(self.data_frame, text="Voltage: 0")
     self.voltage_label.grid(row=1, column=0)
-    self.encoder_label = tk.Label(data_frame, text="Rotations: 0")
+    self.encoder_label = tk.Label(self.data_frame, text="Rotations: 0")
     self.encoder_label.grid(row=2, column=0)
-    self.joystick_max_power_label = tk.Label(data_frame, text="Max Power:  50%")
+    self.joystick_max_power_label = tk.Label(self.data_frame, text="Max Power:  50%")
     self.joystick_max_power_label.grid(row=3, column=0)
 
     # Threads to refresh the data
@@ -853,6 +863,14 @@ class App(threading.Thread):
       daemon=True,) 
     send_data_loop.start()
 
+    # Create Canvas to show the current bearing of the camera
+    self.canvas = tk.Canvas(self.root, bg="white", height=400, width=300)
+    filename = os.getcwd() + "\\RobotTopDown.png" # 300 x 400
+    robotImage = Image.open(filename)
+    robotImage = robotImage.resize((300, 400), Image.ANTIALIAS)
+    robotImagetk = ImageTk.PhotoImage(robotImage)
+    robotImage = self.canvas.create_image(0, 0, image=robotImagetk, anchor='nw', tags="IMG")
+
     # Todo: Add a image for the info
     # imageFrame = tk.Frame(width=1280, height=720)
     # imageFrame.grid(row=2, column=0, columnspan=9)
@@ -860,10 +878,11 @@ class App(threading.Thread):
     imageFrame.grid(row=1, column=0)
     
     # Capture video frames
+    # Create a default image for the frame before streaming
     defaultWallpaperFileName = os.getcwd() + "\\UCF Wallpaper.png"
-    defaultWallpaper = Image.open(defaultWallpaperFileName)
-    defaultWallpaper = defaultWallpaper.resize((1280, 720), Image.ANTIALIAS)
-    defaultWallpapertk = ImageTk.PhotoImage(defaultWallpaper)
+    self.defaultWallpaper = Image.open(defaultWallpaperFileName)
+    self.defaultWallpaper = self.defaultWallpaper.resize((1280, 720), Image.ANTIALIAS)
+    defaultWallpapertk = ImageTk.PhotoImage(self.defaultWallpaper)
     self.lmain = tk.Label(imageFrame, image=defaultWallpapertk)
     self.lmain.grid(row=0, column=0)
     # Start thread to refresh the video frame
