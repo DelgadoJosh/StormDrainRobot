@@ -707,46 +707,48 @@ class App(threading.Thread):
 
 
     # Going to just manually define every part
-    lights_label = tk.Label(text="Lights %")
+    self.manual_input_frame = tk.Frame(self.root)
+    self.manual_input_frame.grid(row=0, column=0)
+    lights_label = tk.Label(self.manual_input_frame, text="Lights %")
     lights_label.grid(row=0, column=0)
     self.lights_entry_text = tk.StringVar(value="0")
-    self.lights_entry = tk.Entry(width=20, textvariable=self.lights_entry_text)
+    self.lights_entry = tk.Entry(self.manual_input_frame, width=20, textvariable=self.lights_entry_text)
     self.lights_entry.grid(row=1, column=0, padx=2)
 
     self.motors_left_entry_text = tk.StringVar(value="0")
-    motors_left_label = tk.Label(text="Left Motor %")
+    motors_left_label = tk.Label(self.manual_input_frame, text="Left Motor %")
     motors_left_label.grid(row=0, column=1)
-    motors_left_entry = tk.Entry(width=20, textvariable=self.motors_left_entry_text)
+    motors_left_entry = tk.Entry(self.manual_input_frame, width=20, textvariable=self.motors_left_entry_text)
     motors_left_entry.grid(row=1, column=1, padx=2)
-    motors_right_label = tk.Label(text="Right Motor %")
+    motors_right_label = tk.Label(self.manual_input_frame, text="Right Motor %")
     motors_right_label.grid(row=0, column=2)
     self.motors_right_entry_text = tk.StringVar(value="0")
-    motors_right_entry = tk.Entry(width=20, textvariable=self.motors_right_entry_text)
+    motors_right_entry = tk.Entry(self.manual_input_frame, width=20, textvariable=self.motors_right_entry_text)
     motors_right_entry.grid(row=1, column=2, padx=2)
 
-    servos_horizontal_label = tk.Label(text="Horizontal\n Camera Angle")
+    servos_horizontal_label = tk.Label(self.manual_input_frame, text="Horizontal\n Camera Angle")
     servos_horizontal_label.grid(row=0, column=3)
-    servos_horizontal_entry = tk.Entry(width=20)
+    servos_horizontal_entry = tk.Entry(self.manual_input_frame, width=20)
     # servos_horizontal_entry.grid(row=1, column=3, padx=2) 
-    self.servos_horizontal_slider = tk.Scale(from_=0, to=180, orient=tk.HORIZONTAL) # Can optionally set tickInterval=10, length=something
+    self.servos_horizontal_slider = tk.Scale(self.manual_input_frame, from_=0, to=180, orient=tk.HORIZONTAL) # Can optionally set tickInterval=10, length=something
     self.servos_horizontal_slider.set(90)
     self.servos_horizontal_slider.grid(row=1, column=3, padx=2)
-    servos_vertical_label = tk.Label(text="Vertical\n Camera Angle")
+    servos_vertical_label = tk.Label(self.manual_input_frame, text="Vertical\n Camera Angle")
     servos_vertical_label.grid(row=0, column=4)
-    servos_vertical_entry = tk.Entry(width=20)
+    servos_vertical_entry = tk.Entry(self.manual_input_frame, width=20)
     # servos_vertical_entry.grid(row=1, column=4, padx=2)
-    self.servos_vertical_slider = tk.Scale(from_=0, to=90, orient=tk.HORIZONTAL)
+    self.servos_vertical_slider = tk.Scale(self.manual_input_frame, from_=0, to=90, orient=tk.HORIZONTAL)
     self.servos_vertical_slider.set(45)
     self.servos_vertical_slider.grid(row=1, column=4, padx=2)
 
-    attachment_label = tk.Label(text="Attachment\nPower")
+    attachment_label = tk.Label(self.manual_input_frame, text="Attachment\nPower")
     attachment_label.grid(row=0, column=5)
     self.attachment_entry_text = tk.StringVar(value="0") 
-    attachment_entry = tk.Entry(width=20, textvariable=self.attachment_entry_text)
+    attachment_entry = tk.Entry(self.manual_input_frame, width=20, textvariable=self.attachment_entry_text)
     attachment_entry.grid(row=1, column=5, padx=2)
 
     # Ahhhhh no multiline lambdas :(
-    button_frame = tk.Frame(self.root, relief=tk.FLAT, borderwidth=2)
+    button_frame = tk.Frame(self.manual_input_frame, relief=tk.FLAT, borderwidth=2)
     button_frame.grid(row=1, column=6)
     submit_data_button = tk.Button(
       button_frame,
@@ -792,6 +794,7 @@ class App(threading.Thread):
 
 
     emergency_stop_button = tk.Button(
+      self.manual_input_frame,
       text="STOP MOTORS",
       command = self.emergencyStop,
       background = 'red'
@@ -799,7 +802,7 @@ class App(threading.Thread):
     emergency_stop_button.grid(row=0, column=6)
 
     # Todo: Add a checkbox for constantly send the data every x seconds
-    checkbox_frame = tk.Frame(self.root, relief=tk.RAISED, borderwidth=2)
+    checkbox_frame = tk.Frame(self.manual_input_frame, relief=tk.RAISED, borderwidth=2)
     checkbox_frame.grid(row=1, column=7)
     constantly_submit_checkbox_val = tk.IntVar()
     constantly_submit_checkbox = tk.Checkbutton(checkbox_frame, text="Constantly Submit", variable=constantly_submit_checkbox_val)
@@ -810,7 +813,7 @@ class App(threading.Thread):
     use_controller_checkbox.grid(row=1, column=0)
 
     # DATA BOX
-    data_frame = tk.Frame(self.root, relief=tk.RAISED, borderwidth=2)
+    data_frame = tk.Frame(self.manual_input_frame, relief=tk.RAISED, borderwidth=2)
     data_frame.grid(row=0, column=8, rowspan=2, padx=2)
     # Populate the box with data
     self.fps_label = tk.Label(data_frame, text="FPS: 0")
@@ -851,8 +854,10 @@ class App(threading.Thread):
     send_data_loop.start()
 
     # Todo: Add a image for the info
-    imageFrame = tk.Frame(width=1280, height=720)
-    imageFrame.grid(row=2, column=0, columnspan=9)
+    # imageFrame = tk.Frame(width=1280, height=720)
+    # imageFrame.grid(row=2, column=0, columnspan=9)
+    imageFrame = tk.Frame(self.root)
+    imageFrame.grid(row=1, column=0)
     
     # Capture video frames
     defaultWallpaperFileName = os.getcwd() + "\\UCF Wallpaper.png"
