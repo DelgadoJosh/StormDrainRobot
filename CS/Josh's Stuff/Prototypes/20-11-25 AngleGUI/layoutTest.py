@@ -52,6 +52,7 @@ class App(threading.Thread):
     self.root = tk.Tk()
     self.root.title("Test")
     self.root.protocol("WM_DELETE_WINDOW", self.onExit)
+    self.root.geometry("+0+0") # Sets the location of the window
 
     # Menubar
     menubar = tk.Menu(self.root)
@@ -70,11 +71,14 @@ class App(threading.Thread):
     self.root.config(menu=menubar)
 
     # IMAGE FRAME
-    self.image_frame = tk.Frame(self.root, width=1280, height=720)
+    # self.image_frame = tk.Frame(self.root, width=1280, height=720)
+    self.image_frame = tk.Frame(self.root, width=1000, height=720)
     self.image_frame.grid(row=1, column=0)
     defaultWallpaperFileName = os.getcwd() + "\\UCF Wallpaper.png"
     defaultWallpaper = Image.open(defaultWallpaperFileName)
-    defaultWallpaper = defaultWallpaper.resize((1280, 720), Image.ANTIALIAS)
+    # defaultWallpaper = defaultWallpaper.resize((1280, 720), Image.ANTIALIAS)
+    defaultWallpaper = defaultWallpaper.resize((16*70, 9*70), Image.ANTIALIAS)
+    # defaultWallpaper = defaultWallpaper.crop((10, 0, 1100, 720))
     defaultWallpapertk = ImageTk.PhotoImage(defaultWallpaper)
     self.image_label = tk.Label(self.image_frame, image=defaultWallpapertk)
     self.image_label.grid(row=0, column=0)
