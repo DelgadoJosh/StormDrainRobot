@@ -374,6 +374,10 @@ class App(threading.Thread):
       self.servos_horizontal_slider.set(val)
     except:
       return
+  
+  def centerAngle(self):
+    self.setServosHorizontal(90)
+    self.horizontalAngle = 90
 
   servos_vertical_slider = None
   def getServosVertical(self):
@@ -874,8 +878,14 @@ class App(threading.Thread):
         root=self.root:
         shapeFile_Frontend.create_shape_file_dialog(root),
     )
-    create_shapefile_button.grid(row=1, column=0)
+    create_shapefile_button.grid(row=2, column=0)
 
+    center_angle_button = tk.Button(
+      self.button_frame, 
+      text="Center Angle",
+      command = self.centerAngle,
+    )
+    center_angle_button.grid(row=1, column=0)
 
     emergency_stop_button = tk.Button(
       # self.manual_input_frame,
