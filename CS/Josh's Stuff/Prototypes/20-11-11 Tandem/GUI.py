@@ -542,6 +542,7 @@ class App(threading.Thread):
       self.data_frame.grid_remove()
       self.checkbox_frame.grid_remove()
       self.image_frame.grid_remove()
+      self.canvas.grid_remove()
     except Exception as e:
       print(f"[ClearLayout] Exception: {e}")
 
@@ -549,12 +550,13 @@ class App(threading.Thread):
     try: 
       self.clearLayout()
       self.image_frame.grid(row=0, column=0)
-      self.side_frame.grid(row=0, column=1)
+      self.side_frame.grid(row=0, column=1, sticky='n')
 
       # Setup their grid in their data frame
-      self.data_frame.grid(row=0, column=0)
-      self.checkbox_frame.grid(row=1, column=0)
-      self.button_frame.grid(row=2, column=0)
+      self.canvas.grid(row=0, column=0)
+      self.data_frame.grid(row=1, column=0, pady=2)
+      self.checkbox_frame.grid(row=2, column=0)
+      self.button_frame.grid(row=3, column=0)
     except Exception as e: 
       print(f"[LayoutDefault] Exception: {e}")
 
@@ -562,7 +564,7 @@ class App(threading.Thread):
     try:
       self.clearLayout()
       self.side_frame.grid(row=0, column=0)
-      self.image_frame.grid(row=1, column=0, columnspan=4)
+      self.image_frame.grid(row=1, column=0)
 
       # Within the side frame
       self.manual_input_frame.grid()
@@ -891,10 +893,10 @@ class App(threading.Thread):
     send_data_loop.start()
 
     # Create Canvas to show the current bearing of the camera
-    self.canvas = tk.Canvas(self.root, bg="white", height=400, width=300)
+    self.canvas = tk.Canvas(self.side_frame, bg="white", height=200, width=150)
     filename = os.getcwd() + "\\RobotTopDown.png" # 300 x 400
     robotImage = Image.open(filename)
-    robotImage = robotImage.resize((300, 400), Image.ANTIALIAS)
+    robotImage = robotImage.resize((150, 200), Image.ANTIALIAS)
     robotImagetk = ImageTk.PhotoImage(robotImage)
     robotImage = self.canvas.create_image(0, 0, image=robotImagetk, anchor='nw', tags="IMG")
 
