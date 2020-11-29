@@ -111,6 +111,8 @@ class App(threading.Thread):
       return val
 
   inputQueriesPerSecond = 100
+  isSpeedControlEnabled = True
+  isInCruiseControl = False
   SENSITIVITY = 0.001 * 10
   SENSITIVITY_HORIZONTAL_ANGLE = 0.001 * 750 * 1.5  # This is magic
   SENSITIVITY_VERTICAL_ANGLE = 0.001 * 750 * 1.5
@@ -155,6 +157,8 @@ class App(threading.Thread):
       dPadX = controller.getDPadXState()
       dPadY = controller.getDPadYState()
 
+      cruiseControlButtonPressed = False
+
       if bPressed:
         if DEBUG:
           print("B was pressed!")
@@ -164,87 +168,100 @@ class App(threading.Thread):
       if not self.getUseController():
         continue
 
-      # If it's not in the deadzone, then we'll update
-      if not self.isInDeadZone(joystickLX, joystickLY):
-        # print(f"LX: {joystickLX} | LX: {joystickLY} | RX: {joystickRX} | RY: {joystickRY}")
-        # changeInSpeed = 1.0*joystickLY/self.MAX_JOYSTICK * self.SENSITIVITY
-        # motorLeftSpeed = float(self.getLeftMotorSpeed())
-        # motorLeftSpeed += changeInSpeed
-        # motorLeftSpeed = self.clampAbsolute(motorLeftSpeed, 1.0)
-        # motorRightSpeed = float(self.getRightMotorSpeed())
-        # motorRightSpeed += changeInSpeed
-        # motorRightSpeed = self.clampAbsolute(motorRightSpeed, 1.0)
+      # [ROBOT SPEED]
+      # <LEFT STICK>
+      # Only update speed if the controls are not disabled
+      if self.isSpeedControlEnabled:
+        # If it's not in the deadzone, then we'll update
+        if not self.isInDeadZone(joystickLX, joystickLY):
+          # print(f"LX: {joystickLX} | LX: {joystickLY} | RX: {joystickRX} | RY: {joystickRY}")
+          # changeInSpeed = 1.0*joystickLY/self.MAX_JOYSTICK * self.SENSITIVITY
+          # motorLeftSpeed = float(self.getLeftMotorSpeed())
+          # motorLeftSpeed += changeInSpeed
+          # motorLeftSpeed = self.clampAbsolute(motorLeftSpeed, 1.0)
+          # motorRightSpeed = float(self.getRightMotorSpeed())
+          # motorRightSpeed += changeInSpeed
+          # motorRightSpeed = self.clampAbsolute(motorRightSpeed, 1.0)
 
-        # # print(f"Left: {motorLeftSpeed} | Right: {motorRightSpeed} | change{changeInSpeed}")
+          # # print(f"Left: {motorLeftSpeed} | Right: {motorRightSpeed} | change{changeInSpeed}")
 
-        # self.setLeftMotor(motorLeftSpeed)
-        # self.setRightMotor(motorRightSpeed)
-        # Relative LY and relative LX
-        relX = 1.0*joystickLX/self.MAX_JOYSTICK
-        relY = 1.0*joystickLY/self.MAX_JOYSTICK
-        relX = self.clamp(relX, -1, 1)
-        relY = self.clamp(relY, -1, 1)
-        radius = math.sqrt(relX*relX + relY*relY)
-        radius = self.clamp(radius, 0, 1)
+          # self.setLeftMotor(motorLeftSpeed)
+          # self.setRightMotor(motorRightSpeed)
+          # Relative LY and relative LX
+          relX = 1.0*joystickLX/self.MAX_JOYSTICK
+          relY = 1.0*joystickLY/self.MAX_JOYSTICK
+          relX = self.clamp(relX, -1, 1)
+          relY = self.clamp(relY, -1, 1)
+          radius = math.sqrt(relX*relX + relY*relY)
+          radius = self.clamp(radius, 0, 1)
 
-        angle = numpy.arctan2(relY, relX)
-        # self.setLights(angle)
+          angle = numpy.arctan2(relY, relX)
+          # self.setLights(angle)
 
-        # If going directly up/directly down within VERTICAL_ANGLE_OFFSET in either direction
-        if self.withinInterval(angle, math.pi/2, VERTICAL_ANGLE_OFFSET) or self.withinInterval(angle, -math.pi/2, VERTICAL_ANGLE_OFFSET):
-          # Going straight forward/backwards
-          newSpeed = relY
-          newSpeed *= maxPower
-          # newSpeed = self.clampAbsolute(newSpeed, maxPower)
-          self.setLeftMotor(f"{newSpeed:.3f}")
-          self.setRightMotor(f"{newSpeed:.3f}")
-        else:
-          # We are turning
-          newSpeed = radius
-          newSpeed *= maxPower
-          x = math.cos(angle)
-          y = math.sin(angle)
-          if y > 0:
-            fullSpeed = newSpeed
-            signy = 1
+          # If going directly up/directly down within VERTICAL_ANGLE_OFFSET in either direction
+          if self.withinInterval(angle, math.pi/2, VERTICAL_ANGLE_OFFSET) or self.withinInterval(angle, -math.pi/2, VERTICAL_ANGLE_OFFSET):
+            # Going straight forward/backwards
+            newSpeed = relY
+            newSpeed *= maxPower
+            # newSpeed = self.clampAbsolute(newSpeed, maxPower)
+            self.setLeftMotor(f"{newSpeed:.3f}")
+            self.setRightMotor(f"{newSpeed:.3f}")
           else:
-            fullSpeed = -newSpeed 
-            signy = -1
-
-          otherSideSpeed = abs(y)-HALFWAY_HEIGHT # Want the halfway to be the new 0
-          # otherSideSpeed *= signy # Add back signs
-          otherSideSpeed /= HALFWAY_HEIGHT # Want it to be from -1 to 1
-          otherSideSpeed = self.clamp(otherSideSpeed, -1, 1) 
-          otherSideSpeed *= fullSpeed # Weigh it by how far from center you are
-          # self.setLights(otherSideSpeed)
-
-          if x > 0:
-            # Turning right
-            signx = 1
+            # We are turning
+            newSpeed = radius
+            newSpeed *= maxPower
+            x = math.cos(angle)
+            y = math.sin(angle)
             if y > 0:
-              leftSpeed = fullSpeed
-              rightSpeed = otherSideSpeed
+              fullSpeed = newSpeed
+              signy = 1
             else:
-              leftSpeed = otherSideSpeed 
-              rightSpeed = fullSpeed
-          else: 
-            # Turning left
-            signx = -1
-            if y > 0:
-              leftSpeed = otherSideSpeed
-              rightSpeed = fullSpeed
-            else:
-              leftSpeed = fullSpeed
-              rightSpeed = otherSideSpeed
+              fullSpeed = -newSpeed 
+              signy = -1
 
-          self.setLeftMotor(f"{leftSpeed:.3f}")
-          self.setRightMotor(f"{rightSpeed:.3f}")
+            otherSideSpeed = abs(y)-HALFWAY_HEIGHT # Want the halfway to be the new 0
+            # otherSideSpeed *= signy # Add back signs
+            otherSideSpeed /= HALFWAY_HEIGHT # Want it to be from -1 to 1
+            otherSideSpeed = self.clamp(otherSideSpeed, -1, 1) 
+            otherSideSpeed *= fullSpeed # Weigh it by how far from center you are
+            # self.setLights(otherSideSpeed)
 
-      else:
-        # If in the deadzone for the joysticks, we come to a stop
-        self.setLeftMotor(0)
-        self.setRightMotor(0)
+            if x > 0:
+              # Turning right
+              signx = 1
+              if y > 0:
+                leftSpeed = fullSpeed
+                rightSpeed = otherSideSpeed
+              else:
+                leftSpeed = otherSideSpeed 
+                rightSpeed = fullSpeed
+            else: 
+              # Turning left
+              signx = -1
+              if y > 0:
+                leftSpeed = otherSideSpeed
+                rightSpeed = fullSpeed
+              else:
+                leftSpeed = fullSpeed
+                rightSpeed = otherSideSpeed
+
+            self.setLeftMotor(f"{leftSpeed:.3f}")
+            self.setRightMotor(f"{rightSpeed:.3f}")
+
+
+        else:          
+          # If in the deadzone for the joysticks, we come to a stop
+          if not self.isInCruiseControl:
+            self.setLeftMotor(0)
+            self.setRightMotor(0)
+          # If cruise control is enabled, and we're in the deadzone, we won't update speed
+
       
+      # If cruise control is pressed, we'll disable the input
+      # if cruiseControlButtonPressed:
+      #   self.setCruiseControlCheckbox(True)
+
+
       # [SERVO ANGLES]
       # <RIGHT STICK>
       if not self.isInDeadZone(joystickRX, joystickRY):
