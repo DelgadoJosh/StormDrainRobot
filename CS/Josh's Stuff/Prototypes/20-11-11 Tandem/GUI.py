@@ -140,7 +140,7 @@ class App(threading.Thread):
       #  - emergency stop
       time.sleep(inputQueryDelay)
 
-
+      # Please rename to "<action>buttonPressed" so we just change one line
       joystickLX = self.removeDeadZone(controller.getLeftJoystickX())
       joystickLY = self.removeDeadZone(controller.getLeftJoystickY())
 
@@ -155,6 +155,12 @@ class App(threading.Thread):
       dPadX = controller.getDPadXState()
       dPadY = controller.getDPadYState()
 
+      if bPressed:
+        if DEBUG:
+          print("B was pressed!")
+        self.emergencyStop()
+
+      # All controls below this are disabled
       if not self.getUseController():
         continue
 
@@ -268,11 +274,6 @@ class App(threading.Thread):
 
         self.setServosHorizontal(servoHorizontalAngle)
         self.setServosVertical(servoVerticalAngle)
-      
-      if bPressed:
-        if DEBUG:
-          print("B was pressed!")
-        self.emergencyStop()
       
       if leftBumperPressed:
         newMax = maxPower - INCREMENT
