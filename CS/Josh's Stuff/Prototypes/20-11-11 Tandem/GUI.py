@@ -855,39 +855,11 @@ class App(threading.Thread):
     submit_data_button = tk.Button(
       self.manual_input_frame,
       text="Submit Data",
-      # command = lambda 
-      #   lights_percent=lights_entry.get(), 
-      #   motor_left_percent=motors_left_entry.get(), 
-      #   motor_right_percent=motors_right_entry.get(), 
-      #   servo_horizontal_angle=servos_horizontal_entry.get(), 
-      #   servo_vertical_angle=servos_vertical_entry.get(): 
-      #     self.submitData(lights_percent, 
-      #       motor_left_percent, 
-      #       motor_right_percent, 
-      #       servo_horizontal_angle, 
-      #       servo_vertical_angle)
       command = self.submitData
-      # command = lambda
-      #   # lights_entry=lights_entry,
-      #   # motors_left_entry=motors_left_entry,
-      #   # motors_right_entry=motors_right_entry,
-      #   # # servos_horizontal_entry=servos_horizontal_entry,
-      #   # # servos_vertical_entry=servos_vertical_entry:
-      #   # servos_horizontal_entry=servos_horizontal_slider,
-      #   # servos_vertical_entry=servos_vertical_slider:
-      #     self.submitData(
-      #       # lights_entry,
-      #       # motors_left_entry,
-      #       # motors_right_entry,
-      #       # servos_horizontal_entry,
-      #       # servos_vertical_entry
-      #     )
     )
-    # submit_data_button.grid(row=1, column=5)
     submit_data_button.grid(row=1, column=6)
 
     self.button_frame = tk.Frame(self.side_frame, relief=tk.FLAT, borderwidth=2)
-    # self.button_frame.grid(row=0, column=6)
     self.button_frame.grid(row=0, column=1)
     create_shapefile_button = tk.Button(
       self.button_frame,
@@ -1045,85 +1017,13 @@ class App(threading.Thread):
       )
       controller_loop.start()
 
-    # Todo: add a place where you put the current run info (pipe start id, pipe end id)
-
     self.root.mainloop()
 
-    # lights_entry.pack()
-    # lights_text = lights_entry.get()
-
-
-
-    # entry = tk.Entry(
-    #   fg="yellow",
-    #   bg="blue",
-    #   width=50
-    # )
-    # entry.pack()
-
-    # for row in range(len(ids)):
-    #   nameFrame = tk.Frame(
-    #     master=window,
-    #     relief=tk.FLAT,
-    #     borderwidth = 1
-    #   )
-    #   nameFrame.grid(row=row, column=0, padx=2, pady=2, sticky="w")
-    #   label = tk.Label(master=nameFrame, text=f"{ids[row]}")
-    #   label.pack(fill = tk.BOTH)
-
-    #   for col in range(1, len(vals)+1):
-    #     frame = tk.Frame(
-    #       master=window,
-    #       relief=tk.RAISED,
-    #       borderwidth = 1
-    #     )
-    #     frame.grid(row=row, column=col, padx=2, pady=2) 
-    #     # label = tk.Label(master=frame, text=f"Row {row}\nColumn {col}")
-    #     # label = tk.Label(master=frame, text=f"{vals[col-1]}")
-    #     # label.pack() 
-
-    #     # https://stackoverflow.com/questions/7299955/tkinter-binding-a-function-with-arguments-to-a-widget
-    #     button = tk.Button(
-    #       master=frame,
-    #       text = f"{vals[col-1]}",
-    #       command = lambda row=row, col=col: self.handle_click(row, col)
-    #       # width = 25,
-    #       # height = 5,
-    #       # bg = "blue",
-    #       # fg = "yellow"
-    #     )
-        
-    #     # button.bind("<Button-1>", handle_click)
-    #     # <Button-1> = left click
-    #     # <Button-2> = middle click
-    #     # <Button-3> = right click
-    #     button.pack()
-
-    # stopButton = tk.Button(
-    #   master=window,
-    #   text = f"Set speed to 0",
-    #   command = lambda leftSpeed=0, rightSpeed=0: self.setSpeed(leftSpeed, rightSpeed)
-    # )
-    # stopButton.grid(row=len(ids), column=1, columnspan=len(vals), sticky="WE")
-
-    # # Begin the main loop
-    # self.root.mainloop()
 
 
 
 # https://stackoverflow.com/questions/459083/how-do-you-run-your-own-code-alongside-tkinters-event-loop
 # Begins the loop on a separate thread
-# thread = threading.Thread(target=begin)
-# thread.start()
 
 app = App()
-
-# def init():
-#   app = App()
-#   print("GUI has begun")
-
-# def getApp():
-#   app = App()
-#   print("GUI has begun")
-#   return app
 
