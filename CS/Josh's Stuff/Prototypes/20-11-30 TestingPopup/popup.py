@@ -39,6 +39,15 @@ class App(threading.Thread):
   def createWarning(self):
     tk.messagebox.showwarning("Warning Title", "Uh oh. you sure about that?")
 
+  def createCustomPopup(self):
+    window = tk.Toplevel() 
+    window.wm_title("Window Title Go here ree")
+
+    label = tk.Label(window, text="Stuff go here lol m8. Let's see how looooong we can get")
+    label.grid(row=0, column=0) 
+
+    
+
   def run(self):
     window = tk.Tk() 
     window.title("Test")
@@ -53,6 +62,9 @@ class App(threading.Thread):
 
     warningButton = tk.Button(self.root, text="Create Warning", command=self.createWarning)
     warningButton.grid(row=2, column=0)
+
+    customPopupButton = tk.Button(self.root, text="Create Custom Popup (New window)", command=self.createCustomPopup)
+    customPopupButton.grid(row=3, column=0)
 
     self.root.mainloop()
 
