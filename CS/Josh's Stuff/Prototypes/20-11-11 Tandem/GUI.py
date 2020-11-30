@@ -66,8 +66,13 @@ class App(threading.Thread):
   #   print(outputString)
   #   self.queue.put(outputString)
 
+  def inputDataWindow(self):
+    print("Input Data Run")
+    self.setInputDataLayout()
+
   def startRun(self):
     print("Starting run")
+    # TODO: Add check to ensure the data is good
     self.setLayoutDefault()
 
   def downloadVideo(self):
@@ -584,6 +589,14 @@ class App(threading.Thread):
       self.welcome_frame.grid(row=1, column=0)
     except Exception as e:
       print(f"[WelcomeLayout] Exception: {e}")
+  
+  def setInputDataLayout(self):
+    try:
+      self.clearLayout()
+      self.image_frame.grid(row=0, column=0)
+      self.input_data_frame.grid(row=1, column=0)
+    except Exception as e:
+      print(f"[InputDataLayout] Exception: {e}")
 
   def setLayoutDefault(self):
     try: 
@@ -1044,7 +1057,7 @@ class App(threading.Thread):
     self.welcome_start_run_button = tk.Button(
       self.welcome_button_frame,
       text="Start Run",
-      command=self.startRun
+      command=self.inputDataWindow
     )
     self.welcome_start_run_button.grid(row=0, column=0, padx=5)
     self._welcome_download_video_button = tk.Button(
@@ -1054,6 +1067,36 @@ class App(threading.Thread):
     )
     self._welcome_download_video_button.grid(row=0, column=1, padx=5)
 
+
+    # INPUT DATA GUI
+    self.input_data_frame = tk.Frame(self.root) 
+    pipe_name_label = tk.Label(self.input_data_frame, text="Pipe Name:")
+    pipe_name_label.grid(row=0, column=0)
+    self.pipe_name_text = tk.StringVar()
+    pipe_name_entry = tk.Entry(self.input_data_frame, textvariable=self.pipe_name_text)
+    pipe_name_entry.grid(row=0, column=1)
+    start_latitude_label = tk.Label(self.input_data_frame, text="Start Latitude")
+    start_latitude_label.grid(row=1, column=0)
+    self.start_latitude_text = tk.StringVar() 
+    start_latitude_entry = tk.Entry(self.input_data_frame, textvariable=self.start_latitude_text)
+    start_latitude_entry.grid(row=1, column=1)
+    start_longitude_label = tk.Label(self.input_data_frame, text="Start Longitude")
+    start_longitude_label.grid(row=2, column=0)
+    self.start_longitude_text = tk.StringVar() 
+    start_longitude_entry = tk.Entry(self.input_data_frame, textvariable=self.start_longitude_text)
+    start_longitude_entry.grid(row=2, column=1)
+    end_latitude_label = tk.Label(self.input_data_frame, text="End Latitude")
+    end_latitude_label.grid(row=3, column=0)
+    self.end_latitude_text = tk.StringVar() 
+    end_latitude_entry = tk.Entry(self.input_data_frame, textvariable=self.end_latitude_text)
+    end_latitude_entry.grid(row=3, column=1)
+    end_longitude_label = tk.Label(self.input_data_frame, text="End Longitude")
+    end_longitude_label.grid(row=4, column=0)
+    self.end_longitude_text = tk.StringVar() 
+    end_longitude_entry = tk.Entry(self.input_data_frame, textvariable=self.end_longitude_text)
+    end_longitude_entry.grid(row=4, column=1)
+    input_data_start_run_button = tk.Button(self.input_data_frame, command=self.startRun, text="Start Run")
+    input_data_start_run_button.grid(row=5, column=0, columnspan=2)
 
 
     # To default layout
