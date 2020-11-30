@@ -4,6 +4,8 @@
 # https://stackoverflow.com/questions/459083/how-do-you-run-your-own-code-alongside-tkinters-event-loop
 # Multithreading is great
 
+# Creating a popup window
+# https://stackoverflow.com/questions/41946222/how-do-i-create-a-popup-window-in-tkinter
 # https://docs.python.org/3/library/tkinter.messagebox.html
 
 import tkinter as tk 
