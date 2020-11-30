@@ -66,6 +66,14 @@ class App(threading.Thread):
   #   print(outputString)
   #   self.queue.put(outputString)
 
+  def startRun(self):
+    print("Starting run")
+    self.setLayoutDefault()
+
+  def downloadVideo(self):
+    print("Downloading data") 
+    self.setLayoutDefault()
+
   # X, Y axes are on a 16 bit number (0-16k)
   DEAD_ZONE = 2000
   def isInDeadZone(self, lx, ly):
@@ -565,8 +573,17 @@ class App(threading.Thread):
       self.checkbox_frame.grid_remove()
       self.image_frame.grid_remove()
       self.canvas.grid_remove()
+      self.welcome_frame.grid_remove()
     except Exception as e:
       print(f"[ClearLayout] Exception: {e}")
+
+  def setWelcomeLayout(self):
+    try:
+      self.clearLayout()
+      self.image_frame.grid(row=0, column=0)
+      self.welcome_frame.grid(row=1, column=0)
+    except Exception as e:
+      print(f"[WelcomeLayout] Exception: {e}")
 
   def setLayoutDefault(self):
     try: 
@@ -969,8 +986,6 @@ class App(threading.Thread):
     self.lmain = tk.Label(self.image_frame, image=defaultWallpapertk)
     self.lmain.grid(row=0, column=0)
 
-    # To default layout
-    self.setLayoutDefault()
 
     # Start thread to refresh the video frame
     # refresh_frame_loop = threading.Thread(
@@ -1016,6 +1031,35 @@ class App(threading.Thread):
         daemon=True
       )
       controller_loop.start()
+
+
+    # WELCOME GUI
+    self.welcome_frame = tk.Frame(self.root)
+    self.welcome_label = tk.Label(
+      self.welcome_frame,
+      text="Please select what you would like to do:")
+    self.welcome_label.grid(row=0, column=0)
+    self.welcome_button_frame = tk.Frame(self.welcome_frame)
+    self.welcome_button_frame.grid(row=1, column=0, pady=3) 
+    self.welcome_start_run_button = tk.Button(
+      self.welcome_button_frame,
+      text="Start Run",
+      command=self.startRun
+    )
+    self.welcome_start_run_button.grid(row=0, column=0, padx=5)
+    self._welcome_download_video_button = tk.Button(
+      self.welcome_button_frame,
+      text="Download Video from Past Runs",
+      command=self.downloadVideo
+    )
+    self._welcome_download_video_button.grid(row=0, column=1, padx=5)
+
+
+
+    # To default layout
+    # self.setLayoutDefault()
+
+    self.setWelcomeLayout()
 
     self.root.mainloop()
 
