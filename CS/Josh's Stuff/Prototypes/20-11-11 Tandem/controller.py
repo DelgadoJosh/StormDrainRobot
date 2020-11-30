@@ -133,31 +133,6 @@ class Controller(object):
                 self.btn_pressed_and_released[abbv] = True
                 self.btn_pressed[abbv] = False
 
-            # # Update the state of the B Button
-            # if abbv == 'E':
-            #     if event.state == 1:
-            #         self.bPressed = True 
-            #     else: 
-            #         if self.bPressed:
-            #             self.bPressedAndReleased = True 
-            #             self.bPressed = False
-
-            # # Update the state of the Left Bumper
-            # if abbv == 'TL':
-            #     if event.state == 1:
-            #         self.leftBumperPressed = True 
-            #     else:
-            #         if self.leftBumperPressed:
-            #             self.leftBumperPressedAndReleased = True 
-            #             self.leftBumperPressed = False
-            # # Update the state of the Right bumper
-            # if abbv == 'TR':
-            #     if event.state == 1:
-            #         self.rightBumperPressed = True 
-            #     else:
-            #         if self.rightBumperPressed:
-            #             self.rightBumperPressedAndReleased = True 
-            #             self.rightBumperPressed = False
         if event.ev_type == 'Absolute':
             self.old_abs_state[abbv] = self.abs_state[abbv]
             self.abs_state[abbv] = event.state
@@ -238,41 +213,24 @@ class Controller(object):
             self.dPadXLastNonZeroResult = 0
             return val 
         return 0
-    # bPressed = False
-    # bPressedAndReleased = False 
+
     def getBPressedAndReleased(self):
         if self.btn_pressed_and_released['E']:
             self.btn_pressed_and_released['E'] = False 
             return True 
         return False
-        # if self.bPressedAndReleased:
-        #     self.bPressedAndReleased = False 
-        #     return True
-        # return False
 
-    # leftBumperPressed = False
-    # leftBumperPressedAndReleased = False 
     def getLeftBumperPressedAndReleased(self):
         if self.btn_pressed_and_released['TL']:
             self.btn_pressed_and_released['TL'] = False
             return True 
         return False
-        # if self.leftBumperPressedAndReleased:
-        #     self.leftBumperPressedAndReleased = False 
-        #     return True 
-        # return False
 
-    # rightBumperPressed = False
-    # rightBumperPressedAndReleased = False
     def getRightBumperPressedAndReleased(self):
         if self.btn_pressed_and_released['TR']:
             self.btn_pressed_and_released['TR'] = False 
             return True 
         return False
-        # if self.rightBumperPressedAndReleased:
-        #     self.rightBumperPressedAndReleased = False 
-        #     return True 
-        # return False
 
 def main():
     """Process all events forever."""
