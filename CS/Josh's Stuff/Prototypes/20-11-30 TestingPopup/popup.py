@@ -39,14 +39,24 @@ class App(threading.Thread):
   def createWarning(self):
     tk.messagebox.showwarning("Warning Title", "Uh oh. you sure about that?")
 
+  window = None
+  def closeWindow(self):
+    if self.window == None:
+      return 
+    self.window.destroy() 
+    self.window = None
+
   def createCustomPopup(self):
-    window = tk.Toplevel() 
-    window.wm_title("Window Title Go here ree")
+    if self.window != None:
+      return
+    self.window = tk.Toplevel() 
+    self.window.wm_title("Window Title Go here ree")
+    self.window.protocol("WM_DELETE_WINDOW", self.closeWindow)
 
-    label = tk.Label(window, text="Stuff go here lol m8. Let's see how looooong we can get")
-    label.grid(row=0, column=0) 
+    label = tk.Label(self.window, text="Stuff go here lol m8. Let's see how looooong we can get")
+    label.grid(row=0, column=0)
 
-    
+  
 
   def run(self):
     window = tk.Tk() 
