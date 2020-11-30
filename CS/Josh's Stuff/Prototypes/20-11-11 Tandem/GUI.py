@@ -79,6 +79,27 @@ class App(threading.Thread):
     print("Downloading data") 
     self.setLayoutDefault()
 
+  help_window = None
+  controllerImageTk = None
+  def closeHelpWindow(self):
+    if self.help_window == None:
+      return 
+    self.help_window.destroy()
+    self.help_window = None 
+  
+  def openHelpWindow(self):
+    try:
+      if self.help_window != None:
+        return 
+      self.help_window = tk.Toplevel()
+      self.help_window.wm_title("Help")
+      self.help_window.protocol("WM_DELETE_WINDOW", self.closeHelpWindow)
+      controller_image_label = tk.Label(self.help_window, image=self.controllerImageTk)
+      controller_image_label.grid(row=0, column=0)
+    except Exception as e:
+      print(f"[OpenHelpWindow] Exception: {e}")
+      return
+
   # X, Y axes are on a 16 bit number (0-16k)
   DEAD_ZONE = 2000
   def isInDeadZone(self, lx, ly):
@@ -579,6 +600,7 @@ class App(threading.Thread):
       self.image_frame.grid_remove()
       self.canvas.grid_remove()
       self.welcome_frame.grid_remove()
+      self.input_data_frame.grid_remove()
     except Exception as e:
       print(f"[ClearLayout] Exception: {e}")
 
@@ -917,6 +939,14 @@ class App(threading.Thread):
     # emergency_stop_button.grid(row=0, column=6)
     emergency_stop_button.grid(row=0, column=0)
 
+    help_button = tk.Button(
+      self.button_frame,
+      text = "Help",
+      command = self.openHelpWindow
+    )
+    help_button.grid(row=3, column=0)
+
+
     # Todo: Add a checkbox for constantly send the data every x seconds
     self.checkbox_frame = tk.Frame(self.side_frame, relief=tk.RAISED, borderwidth=2)
     # self.checkbox_frame.grid(row=1, column=7)
@@ -1097,6 +1127,15 @@ class App(threading.Thread):
     end_longitude_entry.grid(row=4, column=1)
     input_data_start_run_button = tk.Button(self.input_data_frame, command=self.startRun, text="Start Run")
     input_data_start_run_button.grid(row=5, column=0, columnspan=2)
+
+
+    # HELP
+    # Grab image
+    filename = os.getcwd() + "\\controllerLayout.png" # 300 x 400
+    controllerImage = Image.open(filename)
+    controllerImage = controllerImage.resize((1280, 720), Image.ANTIALIAS)
+    self.controllerImageTk = ImageTk.PhotoImage(controllerImage)
+    
 
 
     # To default layout
