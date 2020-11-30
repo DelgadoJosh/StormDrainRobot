@@ -213,6 +213,12 @@ class Controller(object):
             self.dPadXLastNonZeroResult = 0
             return val 
         return 0
+        
+    def getButtonPressed(self, abbv):
+        if self.btn_pressed_and_released[abbv]:
+            self.btn_pressed_and_released[abbv] = False 
+            return True 
+        return False
 
     def getBPressedAndReleased(self):
         if self.btn_pressed_and_released['E']:
