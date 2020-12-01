@@ -29,6 +29,14 @@ except:
 
 DEBUG = False
 
+defaultConfig = {}
+defaultConfig["EmergencyStop"] = "E"
+defaultConfig["CenterAngle"] = "W"
+defaultConfig["ConnectController"] = "SLCT"
+defaultConfig["ShowHelp"] = "STRT"
+defaultConfig["IncreaseMotorMaxPower"] = "TR"
+defaultConfig["DecreaseMotorMaxPower"] = "TL"
+
 class App(threading.Thread):
   def __init__(self):
     threading.Thread.__init__(self)
@@ -56,6 +64,14 @@ class App(threading.Thread):
   ids = ["Foward", "Reverse", "Left turn in place", "Right turn in place"]
   multipliers = [[1, 1], [-1, -1], [-1, 1], [1, -1]]
   vals = [10, 25, 50, 75, 100]
+
+  global defaultConfig
+  filename = os.getcwd() + "/config.json"
+  try:
+    config = open(filename)
+  except: 
+    config = defaultConfig
+    # Save the default config to disk
 
   # def setSpeed(self, leftSpeed, rightSpeed):
   #   print(f"Changing left to {leftSpeed} and changing right to {rightSpeed}")
@@ -206,6 +222,12 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       print("Invalid val")
       return val
 
+  def getConfig(self, abbv):
+    try: 
+      return self.config[abbv]
+    except: 
+      return self.defaultConfig[abbv]
+
   inputQueriesPerSecond = 100
   isSpeedControlEnabled = True
   isInCruiseControl = False
@@ -245,14 +267,14 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       joystickRX = self.removeDeadZone(controller.getRightJoystickX())
       joystickRY = self.removeDeadZone(controller.getRightJoystickY())
 
-      emergencyStopPressed = controller.getBPressedAndReleased()
+      emergencyStopPressed = controller.getButtonPressed(self.getConfig("EmergencyStop")) # controller.getBPressedAndReleased() # E
 
-      centerAnglePressed = controller.getButtonPressed("W")
-      connectControllerPressed = controller.getButtonPressed("SLCT") # Start = Select on the controller. idk why
-      showHelpMenuPressed = controller.getButtonPressed("STRT") # STRT = Select button on controller
+      centerAnglePressed = controller.getButtonPressed(self.getConfig("CenterAngle"))
+      connectControllerPressed = controller.getButtonPressed(self.getConfig("ConnectController")) # Start = Select on the controller. idk why
+      showHelpMenuPressed = controller.getButtonPressed(self.getConfig("ShowHelp")) # STRT = Select button on controller
 
-      maxSpeedDecreasePressed = controller.getLeftBumperPressedAndReleased()
-      maxSpeedIncreasePressed = controller.getRightBumperPressedAndReleased()
+      maxSpeedDecreasePressed = controller.getButtonPressed(self.getConfig("DecreaseMotorMaxPower")) # controller.getLeftBumperPressedAndReleased() # TL = left bumper
+      maxSpeedIncreasePressed = controller.getButtonPressed(self.getConfig("IncreaseMotorMaxPower")) # controller.getRightBumperPressedAndReleased()
 
       dPadX = controller.getDPadXState()
       dPadY = controller.getDPadYState()
