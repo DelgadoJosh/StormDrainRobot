@@ -568,10 +568,10 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       if self.programEnd:
         break
       doConstantlySend = checkbox.get()
+      if not doConstantlySend:
+        time.sleep(dTime)
+        continue
       time.sleep(dTime)
-      # if not doConstantlySend:
-      #   time.sleep(0.01)
-      #   continue
       # if time.time() < nextTimeAvailable:
       #   continue 
       # nextTimeAvailable = time.time() + dTime 
