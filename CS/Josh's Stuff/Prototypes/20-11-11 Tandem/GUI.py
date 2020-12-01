@@ -393,7 +393,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         newMax = self.clamp(newMax, 0, 1.0)
         maxPower = newMax
         self.setJoystickMaxPower(maxPower)
-        print(f"Left Bumper pressed, new maxpower = {maxPower}")
+        if DEBUG:
+          print(f"Left Bumper pressed, new maxpower = {maxPower}")
       
       
       if maxSpeedIncreasePressed:
@@ -404,7 +405,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         maxPower = newMax 
         self.setJoystickMaxPower(maxPower)
         # print(f"  new max: {maxPower}")
-        print(f"Right bumper pressed, new maxpower = {maxPower}")
+        if DEBUG:
+          print(f"Right bumper pressed, new maxpower = {maxPower}")
 
       if dPadX != 0:
         try: 
@@ -416,7 +418,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
           print("AttachmentPower invalid")
 
       if dPadY != 0:
-        print(f"dPadY: {dPadY}")
+        if DEBUG:
+          print(f"dPadY: {dPadY}")
         try: 
           lightsPower = float(self.getLights()) 
           lightsPower += dPadY * LIGHT_INCREMENT
