@@ -156,7 +156,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       print(f"[OpenAboutWindow] Exception {e}")
 
   # X, Y axes are on a 16 bit number (0-16k)
-  DEAD_ZONE = 2000
+  DEAD_ZONE = 3000
   def isInDeadZone(self, lx, ly):
     return abs(lx) < self.DEAD_ZONE \
       and abs(ly) < self.DEAD_ZONE
