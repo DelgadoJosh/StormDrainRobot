@@ -83,6 +83,12 @@ class App(threading.Thread):
   def startRun(self):
     print("Starting run")
     # TODO: Add check to ensure the data is good
+    pipeName = self.getPipeName()
+    if pipeName == "":
+      # Empty name, send a warning
+      msgBox = messagebox.showerror("Blank Name Error", "Sorry, you can't have a blank pipe name. Please fill in a name.")
+      self.queue.put(f"NAME {pipeName}")
+      return
     self.setLayoutDefault()
 
   def downloadVideo(self):
@@ -544,6 +550,12 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     if self.use_controller_checkbox_val == None:
       return
     self.use_controller_checkbox_val.set(val)
+
+  pipe_name_text = None
+  def getPipeName(self):
+    if self.pipe_name_text == None:
+      return ""
+    return self.pipe_name_text.get()
 
   def emergencyStop(self):
     self.setLeftMotor(0)
