@@ -89,9 +89,12 @@ class App(threading.Thread):
       # Empty name, send a warning
       messagebox.showerror("Blank Name Error", "Sorry, you can't have a blank pipe name. Please fill in a name.")
       return
+
     # Otherwise we have good data, submit it
     command = f"NAME|{pipeName}|{str(datetime.now())}"
     print(command)
+    self.startTime = time.time()
+    self.numFrames = 0
     self.queue.put(command)
     self.setLayoutDefault()
 
