@@ -1144,7 +1144,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     self.welcome_start_run_button.grid(row=0, column=0, padx=5)
     self._welcome_download_video_button = tk.Button(
       self.welcome_button_frame,
-      text="Download Video from Past Runs",
+      text="Settings",
       command=self.downloadVideo
     )
     self._welcome_download_video_button.grid(row=0, column=1, padx=5)
