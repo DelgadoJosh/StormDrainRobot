@@ -17,7 +17,7 @@ myKit = ServoKit(channels=16, frequency=60, address=0x41)
 for pin in PINS:
     # For the TGY-50090W, the actuation_range = 195, and the pulse_width_range is 5000, 2850
     myKit.servo[pin].actuation_range=195
-    myKit.servo[pin].set_pulse_width_range(500, 2650)  #2850
+    myKit.servo[pin].set_pulse_width_range(1000, 2650)  #500, 2850
 
 def setAngle(angle, pin):
     print(f"Setting Pin {pin} to angle {angle}")
@@ -26,8 +26,12 @@ def setAngle(angle, pin):
 def setHorizontalAngle(angle):
     setAngle(angle, HORIZONTAL_PIN) 
 
+curVerticalAngle = 90
 def setVerticalAngle(angle):
-    setAngle(angle, VERTICAL_PIN)
+    # setAngle(angle, VERTICAL_PIN)
+    # while angle < curVerticalAngle:
+
+    myKit.servo[VERTICAL_PIN].throttle = angle
 
 def testServos():
     print("Beginning Servo Test")
@@ -51,5 +55,18 @@ def testServos():
 
     print("Ending Servo Test")
     print()
+
+def runTestLoop():
+    print("Beginning test loop for servos")
+    while True:
+        inputRaw = input()
+        try:
+            val = int(inputRaw)
+            print(f"Val input: {val}")
+            setVerticalAngle(val)
+            # setHorizontalAngle(val)
+        except Exception as e:
+            print(e)
+    
 
 # testServos()

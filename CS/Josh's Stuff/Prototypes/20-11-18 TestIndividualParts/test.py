@@ -1,6 +1,6 @@
-import adc 
-import lights 
-import motors
+# import adc 
+# import lights 
+# import motors
 import servos 
 import teensy 
 import time
@@ -13,8 +13,10 @@ def testTeensy():
         time.sleep(.1)
     print("\nCompleted Teensy Testing\n")
 
-adc.testADC()
-lights.testLights()
-motors.testMotors()
-servos.testServos() 
-testTeensy()
+print("Beginning test")
+# adc.testADC()
+# lights.testLights()
+# motors.testMotors()
+# servos.testServos()
+servos.runTestLoop() 
+# testTeensy()
