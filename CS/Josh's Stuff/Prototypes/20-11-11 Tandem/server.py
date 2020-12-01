@@ -28,7 +28,8 @@ import servos
 import adc
 from queue import Queue
 from datetime import datetime
-# import teensy
+import teensy
+import attachment
 
 port = 5000
 ip_address = ""
@@ -108,11 +109,15 @@ frame = None
 folderName = './videos/'
 date_split = str(datetime.now()).split(" ")
 date = date_split[0]
-name = date
+timeStartedRunString = date_split[1]
+timeStartedRunString = timeStartedRunString.replace('.', " ")
+timeStartedRunString = timeStartedRunString.split(" ")[0]  # Throwing away the milliseconds
+timeStartedRunString = timeStartedRunString.replace(":", "-")
+name = date + "_" + timeStartedRunString
 extension = '.mp4'
 filename = folderName + name + extension 
 fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-out = cv2.VideoWriter(filename, fourcc, 20.0, (1280, 720))
+out = cv2.VideoWriter(filename, fourcc, 11.0, (1280, 720))
 
 # A parallel thread
 def constantlyReadVideoFeed():
@@ -128,19 +133,29 @@ def constantlyReadVideoFeed():
         frameQueue.put(frame)
     print("Ending the video feed loop")
 
-saveVideoFrameQueue = Queue(maxsize=1)
+saveVideoFrameQueue = Queue(maxsize=10)
 def loopToSaveVideo():
     startTimeSaved = time.time()
     numFramesSaved = 0
     while True:
-        time.sleep(0.01)
-        if saveVideoFrameQueue.empty():
-            continue
-        numFramesSaved += 1
-        durationSaved = time.time() - startTimeSaved 
-        print(f"    FPS: {numFramesSaved/durationSaved:.3f}")
-        frameToSave = saveVideoFrameQueue.get()
-        out.write(frameToSave)
+        try: 
+            time.sleep(0.01)
+            if saveVideoFrameQueue.empty():
+                continue
+            numFramesSaved += 1
+            durationSaved = time.time() - startTimeSaved 
+            if numFramesSaved % 10 == 0:
+                print(f"    FPS: {numFramesSaved/durationSaved:.3f}")
+            frameToSave = saveVideoFrameQueue.get()
+            if out.isOpened():
+                out.write(frameToSave)
+            else:
+                print("[SaveVideo] Out is not opened")
+                break
+        except:
+            print("[SaveVideo] Exception")
+            out.release()
+    print("[SaveVideo] Ended")
 
 # Loop to send the video, frame by frame.
 def broadcastVideo():
@@ -190,17 +205,16 @@ def broadcastVideo():
 
             # Grab the voltage data
             voltage = adc.getVoltage()
-            # data = voltage.to_bytes(10, 'big')
             voltage_int = int(voltage*100)
             data = voltage_int.to_bytes(10, 'big')
             message_size = struct.pack("L", len(data))
             s.Client.sendall(message_size + data)
 
             # Grab the rotation data
-            # numRotationsRaw = teensy.readEncoder()
-            # data = numRotationsRaw.to_bytes(10, 'big')
-            # message_size = struct.pack("L", len(data))
-            # s.Client.sendall(message_size + data)
+            numRotationsRaw = teensy.readEncoder()
+            data = numRotationsRaw.to_bytes(10, 'big')
+            message_size = struct.pack("L", len(data))
+            s.Client.sendall(message_size + data)
 
 
             # Record the current time needed
@@ -208,37 +222,48 @@ def broadcastVideo():
             elapsedTime = curTime - startTime
             dTime = curTime - prevTime 
             prevTime = curTime
-            print(f"Frame {frameIndex} | fps: {frameIndex/elapsedTime:.3f} | Voltage: {voltage:.3f}")
+            if frameIndex % 10 == 0:
+                print(f"Frame {frameIndex} | fps: {frameIndex/elapsedTime:.3f} | Voltage: {voltage:.3f}")
             frameIndex += 1
 
         
-        except KeyboardInterrupt:
-            s.s.close((ip_address, port))
-            camera.release()
-            cv2.destroyAllWindows()
+        except Exception as e:
+            print(f"[Broadcast] Exception: {e}")
+            # s.s.close((ip_address, port))
+            # camera.release()
+            # out.release()
+            # cv2.destroyAllWindows()
             break
     
+    print("[Broadcast] Ending")
+    # camera.release()
     out.release()
     print("Ending")
 
 def awaitInput():
     # Wait for the data, print it, and send it back
     while True:
-        data = s.Client.recv(1024) # Recieve the data from the client
-        print(data)
+        try:
+            data = s.Client.recv(1024) # Recieve the data from the client
+            print(data)
 
-        if not data:
+            if not data:
+                break
+
+            # Use the data received
+            splitData = utils.parse(utils.cleanup(str(data)))
+            if splitData is not None:
+                # print(f"Split Data: {splitData[0]} {splitData[1]} {splitData[2]} {splitData[3]} {splitData[4]}")
+                lights.setPWM(splitData[utils.LIGHTS_INDEX])
+                motors.setLeftSpeed(splitData[utils.MOTOR_LEFT_INDEX])
+                motors.setRightSpeed(splitData[utils.MOTOR_RIGHT_INDEX])
+                servos.setHorizontalAngle(splitData[utils.SERVO_HORIZONTAL_INDEX])
+                servos.setVerticalAngle(splitData[utils.SERVO_VERTICAL_INDEX])
+                attachment.setPWM(splitData[utils.ATTACHMENT_INDEX])
+        except: 
+            print("[InputLoop] Exception")
             break
-
-        # Use the data received
-        splitData = utils.parse(utils.cleanup(str(data)))
-        if splitData is not None:
-            lights.setPWM(splitData[utils.LIGHTS_INDEX])
-            motors.setLeftSpeed(splitData[utils.MOTOR_LEFT_INDEX])
-            motors.setRightSpeed(splitData[utils.MOTOR_RIGHT_INDEX])
-            servos.setHorizontalAngle(splitData[utils.SERVO_HORIZONTAL_INDEX])
-            servos.setVerticalAngle(splitData[utils.SERVO_VERTICAL_INDEX])
-
+    print("[InputLoop] Ended")
 
 # Trying using threading
 # read_video = Process(target=constantlyReadVideoFeed, daemon=True)
