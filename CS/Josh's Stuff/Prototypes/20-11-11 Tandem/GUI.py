@@ -235,8 +235,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       emergencyStopPressed = controller.getBPressedAndReleased()
 
       centerAnglePressed = controller.getButtonPressed("W")
-      connectControllerPressed = controller.getButtonPressed("ST")
-      showHelpMenuPressed = controller.getButtonPressed("M")
+      connectControllerPressed = controller.getButtonPressed("SLCT") # Start = Select on the controller. idk why
+      showHelpMenuPressed = controller.getButtonPressed("STRT") # STRT = Select button on controller
 
       maxSpeedDecreasePressed = controller.getLeftBumperPressedAndReleased()
       maxSpeedIncreasePressed = controller.getRightBumperPressedAndReleased()
@@ -250,7 +250,12 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         self.emergencyStop()
 
       # All controls below this are disabled
-      if not self.getUseController():
+      useController = self.getUseController()
+      if connectControllerPressed:
+        useController = not useController
+        self.setUseController(useController)
+
+      if not useController:
         continue
 
       # [ROBOT SPEED]
@@ -418,7 +423,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         self.centerAngle()
       
       if showHelpMenuPressed:
-        self.toggleHelpMenu()
+        self.toggleHelpWindow()
 
   motors_left_entry_text = None
   def getLeftMotorSpeed(self):
