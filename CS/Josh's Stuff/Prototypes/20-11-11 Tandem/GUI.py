@@ -19,6 +19,7 @@ import math
 import numpy
 import shapeFile_Frontend
 import os
+from datetime import datetime
 
 try:
   from controller import Controller
@@ -87,8 +88,11 @@ class App(threading.Thread):
     if pipeName == "":
       # Empty name, send a warning
       messagebox.showerror("Blank Name Error", "Sorry, you can't have a blank pipe name. Please fill in a name.")
-      self.queue.put(f"NAME {pipeName}")
       return
+    # Otherwise we have good data, submit it
+    command = f"NAME|{pipeName}|{str(datetime.now())}"
+    print(command)
+    self.queue.put(command)
     self.setLayoutDefault()
 
   def downloadVideo(self):
