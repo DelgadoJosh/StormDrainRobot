@@ -456,6 +456,12 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     try:
       val = float(val)
       self.lights_entry_text.set(f"{val:.3}")
+      if self.lights_power_label != None:
+        try:
+          power = int(val*100 + 0.5)
+          self.lights_power_label["text"] = f"Lights Power: {power:3d}%"
+        except Exception as e:
+          print("[LightsPower] Exception {e}")
     except: 
       self.lights_entry_text.set(val)
 
@@ -504,6 +510,12 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     try:
       val = float(val)
       self.attachment_entry_text.set(f"{val:.3}")
+      if self.attachment_power_label != None:
+        try:
+          power = int(val*100 + 0.5)
+          self.attachment_power_label["text"] = f"Attachment Power: {power:3d}%"
+        except Exception as e:
+          print("[LightsPower] Exception {e}")
     except: 
       self.attachment_entry_text.set(val)
   
@@ -584,11 +596,11 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     # Saves video to the directory
     # out.write(frame)
 
-    # global lmain
-    lmain.imgtk = imgTk
-    lmain.configure(image=imgTk)
-    lmain.image = imgTk
-    # lmain.after(1, self.showFrame)
+    # global image_label
+    image_label.imgtk = imgTk
+    image_label.configure(image=imgTk)
+    image_label.image = imgTk
+    # image_label.after(1, self.showFrame)
 
   voltage_label = None
   def setVoltage(self, voltage):
@@ -616,7 +628,27 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     if self.encoder_label == None:
       return
     self.encoder_label["text"] = f"Rotations: {numRotations}"
-  
+
+  # lights_power_label = None
+  # def setLights(self, power):
+  #   if self.lights_power_label == None:
+  #     return 
+  #   try:
+  #     power = int(power*100 + 0.5)
+  #     self.lights_power_label["text"] = f"Lights Power: {power:3d}%"
+  #   except Exception as e:
+  #     print("[LightsPower] Exception {e}")
+
+  # attachment_power_label = None
+  # def setAttachmentPower(self, power):
+  #   if self.attachment_power_label == None:
+  #     return 
+  #   try:
+  #     power = int(power*100 + 0.5)
+  #     self.attachment_power_label["text"] = f"Attachment Power: {power:3d}%"
+  #   except Exception as e:
+  #     print("[LightsPower] Exception {e}")
+
   encoderQueue = Queue(maxsize=1)
   def loopToShowEncoder(self):
     while True:
@@ -631,7 +663,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     if self.joystick_max_power_label == None:
       return 
     try:
-      maxPower = int(maxPower*100)
+      maxPower = int(maxPower*100 + 0.5)
       self.joystick_max_power_label["text"] = f"Max Power: {maxPower:3d}%"
     except:
       print("Bad max power for joystick label")
@@ -701,16 +733,16 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     self.defaultWallpaper = self.defaultWallpaper.resize((16*70, 9*70), Image.ANTIALIAS)
     defaultWallpapertk = ImageTk.PhotoImage(self.defaultWallpaper)
     if self.imgTkQueue.empty():
-      self.lmain.imgtk = defaultWallpapertk 
-      self.lmain.configure(image=defaultWallpapertk)
+      self.image_label.imgtk = defaultWallpapertk 
+      self.image_label.configure(image=defaultWallpapertk)
   
   def setVideoSizeDefault(self):
     self.smallerFrame = False
     self.defaultWallpaper = self.defaultWallpaper.resize((1280, 720), Image.ANTIALIAS)
     defaultWallpapertk = ImageTk.PhotoImage(self.defaultWallpaper)
     if self.imgTkQueue.empty():
-      self.lmain.imgtk = defaultWallpapertk 
-      self.lmain.configure(image=defaultWallpapertk) 
+      self.image_label.imgtk = defaultWallpapertk 
+      self.image_label.configure(image=defaultWallpapertk) 
 
   # Function to parse a frame into an image and imgtk
   def parseFrame(self, frame):
@@ -823,9 +855,9 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         imgTk = self.imgTkQueue.get()
 
         # Update the image
-        self.lmain.imgtk = imgTk 
-        self.lmain.configure(image=imgTk) 
-        self.lmain.image = imgTk  
+        self.image_label.imgtk = imgTk 
+        self.image_label.configure(image=imgTk) 
+        self.image_label.image = imgTk  
         # https://effbot.org/tkinterbook/photoimage.htm
         # Although the .image = imgTk seems redundant, it's necessary
         # To avoid it being cleared due to garbage collection
@@ -858,9 +890,9 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         imgTk = self.parseFrameJpg(self.curFrame)
 
         # Update the image
-        self.lmain.imgtk = imgTk 
-        self.lmain.configure(image=imgTk) 
-        self.lmain.image = imgTk 
+        self.image_label.imgtk = imgTk 
+        self.image_label.configure(image=imgTk) 
+        self.image_label.image = imgTk 
         
         # Update the framerate
         self.numFrames += 1
@@ -875,7 +907,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       
 
   
-  lmain = None
+  image_label = None
   def run(self):
     root = tk.Tk() 
     root.title("Storm Drain Robot")
@@ -1011,6 +1043,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     use_controller_checkbox = tk.Checkbutton(self.checkbox_frame, text="Use Controller", variable=self.use_controller_checkbox_val)
     use_controller_checkbox.grid(row=1, column=0)
 
+
     # DATA BOX
     self.data_frame = tk.Frame(self.side_frame, relief=tk.RAISED, borderwidth=2)
     # self.data_frame.grid(row=0, column=8, rowspan=2, padx=2)
@@ -1022,8 +1055,13 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     self.voltage_label.grid(row=1, column=0)
     self.encoder_label = tk.Label(self.data_frame, text="Rotations: 0")
     self.encoder_label.grid(row=2, column=0)
-    self.joystick_max_power_label = tk.Label(self.data_frame, text="Max Power:  50%")
+    self.joystick_max_power_label = tk.Label(self.data_frame, text="Max Motor Power:  50%")
     self.joystick_max_power_label.grid(row=3, column=0)
+    self.lights_power_label = tk.Label(self.data_frame, text="Lights Power:    0%")
+    self.lights_power_label.grid(row=4, column=0)
+    self.attachment_power_label = tk.Label(self.data_frame, text="Attachment Power:    0%")
+    self.attachment_power_label.grid(row=5, column=0)
+    
 
     # Threads to refresh the data
     voltage_data_loop = threading.Thread(
@@ -1053,6 +1091,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       daemon=True,) 
     send_data_loop.start()
 
+
+    # CAMERA BEARING CANVAS
     # Create Canvas to show the current bearing of the camera
     self.canvas = tk.Canvas(self.side_frame, bg="white", height=self.canvas_height, width=self.canvas_width)
     filename = os.getcwd() + "\\RobotTopDown.png" # 300 x 400
@@ -1072,14 +1112,16 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     self.image_frame = tk.Frame(self.root)
     self.image_frame.grid(row=1, column=0)
     
+
+    # IMAGE FRAME
     # Capture video frames
     # Create a default image for the frame before streaming
     defaultWallpaperFileName = os.getcwd() + "\\UCF Wallpaper.png"
     self.defaultWallpaper = Image.open(defaultWallpaperFileName)
     self.defaultWallpaper = self.defaultWallpaper.resize((1280, 720), Image.ANTIALIAS)
     defaultWallpapertk = ImageTk.PhotoImage(self.defaultWallpaper)
-    self.lmain = tk.Label(self.image_frame, image=defaultWallpapertk)
-    self.lmain.grid(row=0, column=0)
+    self.image_label = tk.Label(self.image_frame, image=defaultWallpapertk)
+    self.image_label.grid(row=0, column=0)
 
 
     # Start thread to refresh the video frame
