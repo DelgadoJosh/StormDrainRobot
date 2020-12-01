@@ -19,6 +19,7 @@ import math
 import numpy
 import shapeFile_Frontend
 import os
+from datetime import datetime
 
 try:
   from controller import Controller
@@ -83,6 +84,15 @@ class App(threading.Thread):
   def startRun(self):
     print("Starting run")
     # TODO: Add check to ensure the data is good
+    pipeName = self.getPipeName()
+    if pipeName == "":
+      # Empty name, send a warning
+      messagebox.showerror("Blank Name Error", "Sorry, you can't have a blank pipe name. Please fill in a name.")
+      return
+    # Otherwise we have good data, submit it
+    command = f"NAME|{pipeName}|{str(datetime.now())}"
+    print(command)
+    self.queue.put(command)
     self.setLayoutDefault()
 
   def downloadVideo(self):
@@ -150,7 +160,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       print(f"[OpenAboutWindow] Exception {e}")
 
   # X, Y axes are on a 16 bit number (0-16k)
-  DEAD_ZONE = 2000
+  DEAD_ZONE = 3000
   def isInDeadZone(self, lx, ly):
     return abs(lx) < self.DEAD_ZONE \
       and abs(ly) < self.DEAD_ZONE
@@ -387,7 +397,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         newMax = self.clamp(newMax, 0, 1.0)
         maxPower = newMax
         self.setJoystickMaxPower(maxPower)
-        print(f"Left Bumper pressed, new maxpower = {maxPower}")
+        if DEBUG:
+          print(f"Left Bumper pressed, new maxpower = {maxPower}")
       
       
       if maxSpeedIncreasePressed:
@@ -398,7 +409,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         maxPower = newMax 
         self.setJoystickMaxPower(maxPower)
         # print(f"  new max: {maxPower}")
-        print(f"Right bumper pressed, new maxpower = {maxPower}")
+        if DEBUG:
+          print(f"Right bumper pressed, new maxpower = {maxPower}")
 
       if dPadX != 0:
         try: 
@@ -410,7 +422,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
           print("AttachmentPower invalid")
 
       if dPadY != 0:
-        print(f"dPadY: {dPadY}")
+        if DEBUG:
+          print(f"dPadY: {dPadY}")
         try: 
           lightsPower = float(self.getLights()) 
           lightsPower += dPadY * LIGHT_INCREMENT
@@ -545,6 +558,12 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       return
     self.use_controller_checkbox_val.set(val)
 
+  pipe_name_text = None
+  def getPipeName(self):
+    if self.pipe_name_text == None:
+      return ""
+    return self.pipe_name_text.get()
+
   def emergencyStop(self):
     self.setLeftMotor(0)
     self.setRightMotor(0)
@@ -568,10 +587,10 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       if self.programEnd:
         break
       doConstantlySend = checkbox.get()
+      if not doConstantlySend:
+        time.sleep(dTime)
+        continue
       time.sleep(dTime)
-      # if not doConstantlySend:
-      #   time.sleep(0.01)
-      #   continue
       # if time.time() < nextTimeAvailable:
       #   continue 
       # nextTimeAvailable = time.time() + dTime 
@@ -724,9 +743,11 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
       # Setup their grid in their data frame
       self.canvas.grid(row=0, column=0)
-      self.data_frame.grid(row=1, column=0, pady=2)
-      self.checkbox_frame.grid(row=2, column=0)
-      self.button_frame.grid(row=3, column=0)
+      # Not sure why we have to skip row 1, but it's necessary to maintain
+      # the data_frame when switching to debug layout and back
+      self.data_frame.grid(row=2, column=0)
+      self.checkbox_frame.grid(row=3, column=0)
+      self.button_frame.grid(row=4, column=0)
     except Exception as e: 
       print(f"[LayoutDefault] Exception: {e}")
 

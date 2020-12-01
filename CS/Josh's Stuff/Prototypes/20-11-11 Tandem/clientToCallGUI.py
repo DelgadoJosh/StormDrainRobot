@@ -200,6 +200,7 @@ def showVideo():
       # if not frameQueue.full():
       #   frameQueue.put(frame)
 
+      time.sleep(0.005)
     except KeyboardInterrupt:
       cv2.destroyAllWindows()
       break
