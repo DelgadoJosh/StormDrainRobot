@@ -553,11 +553,13 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       if self.programEnd:
         break
       doConstantlySend = checkbox.get()
-      if not doConstantlySend:
-        continue
-      if time.time() < nextTimeAvailable:
-        continue 
-      nextTimeAvailable = time.time() + dTime 
+      time.sleep(dTime)
+      # if not doConstantlySend:
+      #   time.sleep(0.01)
+      #   continue
+      # if time.time() < nextTimeAvailable:
+      #   continue 
+      # nextTimeAvailable = time.time() + dTime 
 
       self.submitData()
       # self.submitData(lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry)
@@ -817,7 +819,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
   imgTkQueue = Queue(maxsize=1)
   smallerFrame = False
   videoMaxFramerate = 60
-  frameRefreshDelay = int(1 / videoMaxFramerate)
+  frameRefreshDelay = (1 / videoMaxFramerate)
   def loopToEncodeImg(self):
     while True:
       if not self.frameQueue.empty():
@@ -1004,14 +1006,14 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         root=self.root:
         shapeFile_Frontend.create_shape_file_dialog(root),
     )
-    create_shapefile_button.grid(row=2, column=0)
+    create_shapefile_button.grid(row=2, column=0, pady=2)
 
     center_angle_button = tk.Button(
       self.button_frame, 
       text="Center Angle",
       command = self.centerAngle,
     )
-    center_angle_button.grid(row=1, column=0)
+    center_angle_button.grid(row=1, column=0, pady=2)
 
     emergency_stop_button = tk.Button(
       # self.manual_input_frame,
@@ -1021,14 +1023,14 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       background = 'red'
     )
     # emergency_stop_button.grid(row=0, column=6)
-    emergency_stop_button.grid(row=0, column=0)
+    emergency_stop_button.grid(row=0, column=0, pady=2)
 
     help_button = tk.Button(
       self.button_frame,
       text = "Help",
       command = self.openHelpWindow
     )
-    help_button.grid(row=3, column=0)
+    help_button.grid(row=3, column=0, pady=2)
 
 
     # Todo: Add a checkbox for constantly send the data every x seconds
