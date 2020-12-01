@@ -86,7 +86,7 @@ class App(threading.Thread):
     pipeName = self.getPipeName()
     if pipeName == "":
       # Empty name, send a warning
-      msgBox = messagebox.showerror("Blank Name Error", "Sorry, you can't have a blank pipe name. Please fill in a name.")
+      messagebox.showerror("Blank Name Error", "Sorry, you can't have a blank pipe name. Please fill in a name.")
       self.queue.put(f"NAME {pipeName}")
       return
     self.setLayoutDefault()
