@@ -7,6 +7,7 @@
 # Note that padding is measured in pixels, *not* text units.
 
 import tkinter as tk 
+import tkinter.messagebox as messagebox
 from queue import Queue 
 import threading
 import time
@@ -34,10 +35,19 @@ class App(threading.Thread):
   
   programEnd = False
   def callback(self):
-    self.programEnd = True
-    time.sleep(0.2) # To let the loop close
-    # threading._shutdown()
-    self.root.quit()
+    msgBox = messagebox.askquestion(
+      "Exit Application", 
+      "Are you sure you want to exit the application?", 
+      icon='warning')
+
+    if msgBox == 'yes':
+      self.programEnd = True
+      time.sleep(0.2) # To let the loop close
+      # threading._shutdown()
+      self.root.quit()
+    else:
+      # messagebox.showinfo('Return', 'You will now return to the application screen')
+      return
 
   # Create a concurrency-safe queue for the client to read
   queue = Queue(maxsize=1000)
