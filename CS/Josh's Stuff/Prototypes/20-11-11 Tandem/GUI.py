@@ -81,6 +81,12 @@ class App(threading.Thread):
 
   help_window = None
   controllerImageTk = None
+  def toggleHelpWindow(self):
+    if self.help_window == None:
+      self.openHelpWindow()
+    else:
+      self.closeHelpWindow()
+
   def closeHelpWindow(self):
     if self.help_window == None:
       return 
@@ -99,6 +105,39 @@ class App(threading.Thread):
     except Exception as e:
       print(f"[OpenHelpWindow] Exception: {e}")
       return
+
+  about_window = None
+  about_text = """UCF Stormwater Drain Robot
+
+UCF Team Black 2020
+
+Mechanical Engineers:
+Andrew Davis 
+Brian Hohl
+Ryan Hoover 
+Joshua Layland 
+Everett Periman
+
+Computer Science: 
+Josh Delgado 
+Ruman Rashid 
+Wilfredo Vega
+
+For view of the source code & CAD model:
+https://github.com/DelgadoJosh/StormDrainRobot"""
+
+  def openAboutWindow(self):
+    try:
+      if self.about_window != None:
+        return 
+      self.about_window = tk.Toplevel()
+      self.about_window.wm_title("About")
+      
+
+      about_window_label = tk.Label(self.about_window, text=self.about_text)
+      about_window_label.grid(row=0, column=0)
+    except Exception as e:
+      print(f"[OpenAboutWindow] Exception {e}")
 
   # X, Y axes are on a 16 bit number (0-16k)
   DEAD_ZONE = 2000
@@ -183,19 +222,21 @@ class App(threading.Thread):
       joystickRX = self.removeDeadZone(controller.getRightJoystickX())
       joystickRY = self.removeDeadZone(controller.getRightJoystickY())
 
-      bPressed = controller.getBPressedAndReleased()
+      emergencyStopPressed = controller.getBPressedAndReleased()
 
-      leftBumperPressed = controller.getLeftBumperPressedAndReleased()
-      rightBumperPressed = controller.getRightBumperPressedAndReleased()
+      centerAnglePressed = controller.getButtonPressed("W")
+      connectControllerPressed = controller.getButtonPressed("ST")
+      showHelpMenuPressed = controller.getButtonPressed("M")
+
+      maxSpeedDecreasePressed = controller.getLeftBumperPressedAndReleased()
+      maxSpeedIncreasePressed = controller.getRightBumperPressedAndReleased()
 
       dPadX = controller.getDPadXState()
       dPadY = controller.getDPadYState()
 
       cruiseControlButtonPressed = False
 
-      if bPressed:
-        if DEBUG:
-          print("B was pressed!")
+      if emergencyStopPressed:
         self.emergencyStop()
 
       # All controls below this are disabled
@@ -326,7 +367,7 @@ class App(threading.Thread):
         self.setServosHorizontal(servoHorizontalAngle)
         self.setServosVertical(servoVerticalAngle)
       
-      if leftBumperPressed:
+      if maxSpeedDecreasePressed:
         newMax = maxPower - INCREMENT
         newMax = self.clamp(newMax, 0, 1.0)
         maxPower = newMax
@@ -334,7 +375,7 @@ class App(threading.Thread):
         print(f"Left Bumper pressed, new maxpower = {maxPower}")
       
       
-      if rightBumperPressed:
+      if maxSpeedIncreasePressed:
         # print(f"right bumper pressed: maxpower = {maxPower}")
         newMax = maxPower + INCREMENT
         # print(f"  Temp: {newMax}")
@@ -362,6 +403,12 @@ class App(threading.Thread):
           self.setLights(lightsPower)
         except:
           print("Lights invalid")
+
+      if centerAnglePressed:
+        self.centerAngle()
+      
+      if showHelpMenuPressed:
+        self.toggleHelpMenu()
 
   motors_left_entry_text = None
   def getLeftMotorSpeed(self):
@@ -853,6 +900,11 @@ class App(threading.Thread):
     menubar.add_cascade(label="Layouts", menu=layoutMenu)
 
     # Rinse and repeat with other menus
+    # HELP Tab
+    helpMenu = tk.Menu(menubar, tearoff=0)
+    helpMenu.add_command(label="Help", command=self.openHelpWindow)
+    helpMenu.add_command(label="About...", command=self.openAboutWindow)
+    menubar.add_cascade(label="Help", menu=helpMenu)
 
     # Add menubar to the root frame
     self.root.config(menu=menubar)
