@@ -3,6 +3,7 @@
 from adafruit_servokit import ServoKit
 import time 
 
+DEBUG = False
 HORIZONTAL_PIN = 0 # 4 
 VERTICAL_PIN = 1 # 5
 PINS = [HORIZONTAL_PIN, VERTICAL_PIN]
@@ -20,7 +21,8 @@ for pin in PINS:
     myKit.servo[pin].set_pulse_width_range(500, 2650)  #2850
 
 def setAngle(angle, pin):
-    print(f"Setting Pin {pin} to angle {angle}")
+    if DEBUG:
+        print(f"Setting Pin {pin} to angle {angle}")
     myKit.servo[pin].angle = angle
 
 def setHorizontalAngle(angle):

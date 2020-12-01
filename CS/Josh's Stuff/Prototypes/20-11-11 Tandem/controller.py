@@ -36,7 +36,8 @@ EVENT_ABB = (
     ('Key-BTN_TL2', 'TL2'),
     ('Key-BTN_TR2', 'TR3'),
     ('Key-BTN_MODE', 'M'),
-    ('Key-BTN_START', 'ST'),
+    ('Key-BTN_START', 'STRT'),
+    ('Key-BTN_SELECT', 'SLCT'),
 
     # PiHUT SNES style controller buttons
     ('Key-BTN_TRIGGER', 'N'),

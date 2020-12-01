@@ -6,6 +6,7 @@ import busio
 from adafruit_pca9685 import PCA9685 
 import time
 
+DEBUG = False
 LIGHTS_PIN = 6
 MAX = 0xFFFF
 
@@ -21,5 +22,6 @@ pca.frequency = 369
 
 def setPWM(percentPower):
     power = abs(int(MAX*percentPower))
-    print(f"Setting power to {power}")
+    if DEBUG:
+        print(f"Setting power to {power}")
     pca.channels[LIGHTS_PIN].duty_cycle = power

@@ -7,6 +7,7 @@
 # Note that padding is measured in pixels, *not* text units.
 
 import tkinter as tk 
+import tkinter.messagebox as messagebox
 from queue import Queue 
 import threading
 import time
@@ -34,10 +35,19 @@ class App(threading.Thread):
   
   programEnd = False
   def callback(self):
-    self.programEnd = True
-    time.sleep(0.2) # To let the loop close
-    # threading._shutdown()
-    self.root.quit()
+    msgBox = messagebox.askquestion(
+      "Exit Application", 
+      "Are you sure you want to exit the application?", 
+      icon='warning')
+
+    if msgBox == 'yes':
+      self.programEnd = True
+      time.sleep(0.2) # To let the loop close
+      # threading._shutdown()
+      self.root.quit()
+    else:
+      # messagebox.showinfo('Return', 'You will now return to the application screen')
+      return
 
   # Create a concurrency-safe queue for the client to read
   queue = Queue(maxsize=1000)
@@ -81,6 +91,12 @@ class App(threading.Thread):
 
   help_window = None
   controllerImageTk = None
+  def toggleHelpWindow(self):
+    if self.help_window == None:
+      self.openHelpWindow()
+    else:
+      self.closeHelpWindow()
+
   def closeHelpWindow(self):
     if self.help_window == None:
       return 
@@ -99,6 +115,39 @@ class App(threading.Thread):
     except Exception as e:
       print(f"[OpenHelpWindow] Exception: {e}")
       return
+
+  about_window = None
+  about_text = """UCF Stormwater Drain Robot
+
+UCF Team Black 2020
+
+Mechanical Engineers:
+Andrew Davis 
+Brian Hohl
+Ryan Hoover 
+Joshua Layland 
+Everett Periman
+
+Computer Science: 
+Josh Delgado 
+Ruman Rashid 
+Wilfredo Vega
+
+For view of the source code & CAD model:
+https://github.com/DelgadoJosh/StormDrainRobot"""
+
+  def openAboutWindow(self):
+    try:
+      if self.about_window != None:
+        return 
+      self.about_window = tk.Toplevel()
+      self.about_window.wm_title("About")
+      
+
+      about_window_label = tk.Label(self.about_window, text=self.about_text)
+      about_window_label.grid(row=0, column=0)
+    except Exception as e:
+      print(f"[OpenAboutWindow] Exception {e}")
 
   # X, Y axes are on a 16 bit number (0-16k)
   DEAD_ZONE = 2000
@@ -183,23 +232,30 @@ class App(threading.Thread):
       joystickRX = self.removeDeadZone(controller.getRightJoystickX())
       joystickRY = self.removeDeadZone(controller.getRightJoystickY())
 
-      bPressed = controller.getBPressedAndReleased()
+      emergencyStopPressed = controller.getBPressedAndReleased()
 
-      leftBumperPressed = controller.getLeftBumperPressedAndReleased()
-      rightBumperPressed = controller.getRightBumperPressedAndReleased()
+      centerAnglePressed = controller.getButtonPressed("W")
+      connectControllerPressed = controller.getButtonPressed("SLCT") # Start = Select on the controller. idk why
+      showHelpMenuPressed = controller.getButtonPressed("STRT") # STRT = Select button on controller
+
+      maxSpeedDecreasePressed = controller.getLeftBumperPressedAndReleased()
+      maxSpeedIncreasePressed = controller.getRightBumperPressedAndReleased()
 
       dPadX = controller.getDPadXState()
       dPadY = controller.getDPadYState()
 
       cruiseControlButtonPressed = False
 
-      if bPressed:
-        if DEBUG:
-          print("B was pressed!")
+      if emergencyStopPressed:
         self.emergencyStop()
 
       # All controls below this are disabled
-      if not self.getUseController():
+      useController = self.getUseController()
+      if connectControllerPressed:
+        useController = not useController
+        self.setUseController(useController)
+
+      if not useController:
         continue
 
       # [ROBOT SPEED]
@@ -326,7 +382,7 @@ class App(threading.Thread):
         self.setServosHorizontal(servoHorizontalAngle)
         self.setServosVertical(servoVerticalAngle)
       
-      if leftBumperPressed:
+      if maxSpeedDecreasePressed:
         newMax = maxPower - INCREMENT
         newMax = self.clamp(newMax, 0, 1.0)
         maxPower = newMax
@@ -334,7 +390,7 @@ class App(threading.Thread):
         print(f"Left Bumper pressed, new maxpower = {maxPower}")
       
       
-      if rightBumperPressed:
+      if maxSpeedIncreasePressed:
         # print(f"right bumper pressed: maxpower = {maxPower}")
         newMax = maxPower + INCREMENT
         # print(f"  Temp: {newMax}")
@@ -362,6 +418,12 @@ class App(threading.Thread):
           self.setLights(lightsPower)
         except:
           print("Lights invalid")
+
+      if centerAnglePressed:
+        self.centerAngle()
+      
+      if showHelpMenuPressed:
+        self.toggleHelpWindow()
 
   motors_left_entry_text = None
   def getLeftMotorSpeed(self):
@@ -409,6 +471,12 @@ class App(threading.Thread):
     try:
       val = float(val)
       self.lights_entry_text.set(f"{val:.3}")
+      if self.lights_power_label != None:
+        try:
+          power = int(val*100 + 0.5)
+          self.lights_power_label["text"] = f"Lights Power: {power:3d}%"
+        except Exception as e:
+          print("[LightsPower] Exception {e}")
     except: 
       self.lights_entry_text.set(val)
 
@@ -457,6 +525,12 @@ class App(threading.Thread):
     try:
       val = float(val)
       self.attachment_entry_text.set(f"{val:.3}")
+      if self.attachment_power_label != None:
+        try:
+          power = int(val*100 + 0.5)
+          self.attachment_power_label["text"] = f"Attachment Power: {power:3d}%"
+        except Exception as e:
+          print("[LightsPower] Exception {e}")
     except: 
       self.attachment_entry_text.set(val)
   
@@ -494,11 +568,13 @@ class App(threading.Thread):
       if self.programEnd:
         break
       doConstantlySend = checkbox.get()
-      if not doConstantlySend:
-        continue
-      if time.time() < nextTimeAvailable:
-        continue 
-      nextTimeAvailable = time.time() + dTime 
+      time.sleep(dTime)
+      # if not doConstantlySend:
+      #   time.sleep(0.01)
+      #   continue
+      # if time.time() < nextTimeAvailable:
+      #   continue 
+      # nextTimeAvailable = time.time() + dTime 
 
       self.submitData()
       # self.submitData(lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry)
@@ -537,11 +613,11 @@ class App(threading.Thread):
     # Saves video to the directory
     # out.write(frame)
 
-    # global lmain
-    lmain.imgtk = imgTk
-    lmain.configure(image=imgTk)
-    lmain.image = imgTk
-    # lmain.after(1, self.showFrame)
+    # global image_label
+    image_label.imgtk = imgTk
+    image_label.configure(image=imgTk)
+    image_label.image = imgTk
+    # image_label.after(1, self.showFrame)
 
   voltage_label = None
   def setVoltage(self, voltage):
@@ -569,7 +645,27 @@ class App(threading.Thread):
     if self.encoder_label == None:
       return
     self.encoder_label["text"] = f"Rotations: {numRotations}"
-  
+
+  # lights_power_label = None
+  # def setLights(self, power):
+  #   if self.lights_power_label == None:
+  #     return 
+  #   try:
+  #     power = int(power*100 + 0.5)
+  #     self.lights_power_label["text"] = f"Lights Power: {power:3d}%"
+  #   except Exception as e:
+  #     print("[LightsPower] Exception {e}")
+
+  # attachment_power_label = None
+  # def setAttachmentPower(self, power):
+  #   if self.attachment_power_label == None:
+  #     return 
+  #   try:
+  #     power = int(power*100 + 0.5)
+  #     self.attachment_power_label["text"] = f"Attachment Power: {power:3d}%"
+  #   except Exception as e:
+  #     print("[LightsPower] Exception {e}")
+
   encoderQueue = Queue(maxsize=1)
   def loopToShowEncoder(self):
     while True:
@@ -584,7 +680,7 @@ class App(threading.Thread):
     if self.joystick_max_power_label == None:
       return 
     try:
-      maxPower = int(maxPower*100)
+      maxPower = int(maxPower*100 + 0.5)
       self.joystick_max_power_label["text"] = f"Max Power: {maxPower:3d}%"
     except:
       print("Bad max power for joystick label")
@@ -654,16 +750,16 @@ class App(threading.Thread):
     self.defaultWallpaper = self.defaultWallpaper.resize((16*70, 9*70), Image.ANTIALIAS)
     defaultWallpapertk = ImageTk.PhotoImage(self.defaultWallpaper)
     if self.imgTkQueue.empty():
-      self.lmain.imgtk = defaultWallpapertk 
-      self.lmain.configure(image=defaultWallpapertk)
+      self.image_label.imgtk = defaultWallpapertk 
+      self.image_label.configure(image=defaultWallpapertk)
   
   def setVideoSizeDefault(self):
     self.smallerFrame = False
     self.defaultWallpaper = self.defaultWallpaper.resize((1280, 720), Image.ANTIALIAS)
     defaultWallpapertk = ImageTk.PhotoImage(self.defaultWallpaper)
     if self.imgTkQueue.empty():
-      self.lmain.imgtk = defaultWallpapertk 
-      self.lmain.configure(image=defaultWallpapertk) 
+      self.image_label.imgtk = defaultWallpapertk 
+      self.image_label.configure(image=defaultWallpapertk) 
 
   # Function to parse a frame into an image and imgtk
   def parseFrame(self, frame):
@@ -738,7 +834,7 @@ class App(threading.Thread):
   imgTkQueue = Queue(maxsize=1)
   smallerFrame = False
   videoMaxFramerate = 60
-  frameRefreshDelay = int(1 / videoMaxFramerate)
+  frameRefreshDelay = (1 / videoMaxFramerate)
   def loopToEncodeImg(self):
     while True:
       if not self.frameQueue.empty():
@@ -776,9 +872,9 @@ class App(threading.Thread):
         imgTk = self.imgTkQueue.get()
 
         # Update the image
-        self.lmain.imgtk = imgTk 
-        self.lmain.configure(image=imgTk) 
-        self.lmain.image = imgTk  
+        self.image_label.imgtk = imgTk 
+        self.image_label.configure(image=imgTk) 
+        self.image_label.image = imgTk  
         # https://effbot.org/tkinterbook/photoimage.htm
         # Although the .image = imgTk seems redundant, it's necessary
         # To avoid it being cleared due to garbage collection
@@ -811,9 +907,9 @@ class App(threading.Thread):
         imgTk = self.parseFrameJpg(self.curFrame)
 
         # Update the image
-        self.lmain.imgtk = imgTk 
-        self.lmain.configure(image=imgTk) 
-        self.lmain.image = imgTk 
+        self.image_label.imgtk = imgTk 
+        self.image_label.configure(image=imgTk) 
+        self.image_label.image = imgTk 
         
         # Update the framerate
         self.numFrames += 1
@@ -828,7 +924,7 @@ class App(threading.Thread):
       
 
   
-  lmain = None
+  image_label = None
   def run(self):
     root = tk.Tk() 
     root.title("Storm Drain Robot")
@@ -853,6 +949,11 @@ class App(threading.Thread):
     menubar.add_cascade(label="Layouts", menu=layoutMenu)
 
     # Rinse and repeat with other menus
+    # HELP Tab
+    helpMenu = tk.Menu(menubar, tearoff=0)
+    helpMenu.add_command(label="Help", command=self.openHelpWindow)
+    helpMenu.add_command(label="About...", command=self.openAboutWindow)
+    menubar.add_cascade(label="Help", menu=helpMenu)
 
     # Add menubar to the root frame
     self.root.config(menu=menubar)
@@ -920,14 +1021,14 @@ class App(threading.Thread):
         root=self.root:
         shapeFile_Frontend.create_shape_file_dialog(root),
     )
-    create_shapefile_button.grid(row=2, column=0)
+    create_shapefile_button.grid(row=2, column=0, pady=2)
 
     center_angle_button = tk.Button(
       self.button_frame, 
       text="Center Angle",
       command = self.centerAngle,
     )
-    center_angle_button.grid(row=1, column=0)
+    center_angle_button.grid(row=1, column=0, pady=2)
 
     emergency_stop_button = tk.Button(
       # self.manual_input_frame,
@@ -937,14 +1038,14 @@ class App(threading.Thread):
       background = 'red'
     )
     # emergency_stop_button.grid(row=0, column=6)
-    emergency_stop_button.grid(row=0, column=0)
+    emergency_stop_button.grid(row=0, column=0, pady=2)
 
     help_button = tk.Button(
       self.button_frame,
       text = "Help",
       command = self.openHelpWindow
     )
-    help_button.grid(row=3, column=0)
+    help_button.grid(row=3, column=0, pady=2)
 
 
     # Todo: Add a checkbox for constantly send the data every x seconds
@@ -952,12 +1053,13 @@ class App(threading.Thread):
     # self.checkbox_frame.grid(row=1, column=7)
     self.checkbox_frame.grid(row=0, column=2)
     constantly_submit_checkbox_val = tk.IntVar()
-    constantly_submit_checkbox = tk.Checkbutton(self.checkbox_frame, text="Constantly Submit", variable=constantly_submit_checkbox_val)
+    constantly_submit_checkbox = tk.Checkbutton(self.checkbox_frame, text="Send Instructions", variable=constantly_submit_checkbox_val)
     # constantly_submit_checkbox.grid(row=1, column=6)
     constantly_submit_checkbox.grid(row=0, column=0)
     self.use_controller_checkbox_val = tk.IntVar()
     use_controller_checkbox = tk.Checkbutton(self.checkbox_frame, text="Use Controller", variable=self.use_controller_checkbox_val)
     use_controller_checkbox.grid(row=1, column=0)
+
 
     # DATA BOX
     self.data_frame = tk.Frame(self.side_frame, relief=tk.RAISED, borderwidth=2)
@@ -970,8 +1072,13 @@ class App(threading.Thread):
     self.voltage_label.grid(row=1, column=0)
     self.encoder_label = tk.Label(self.data_frame, text="Rotations: 0")
     self.encoder_label.grid(row=2, column=0)
-    self.joystick_max_power_label = tk.Label(self.data_frame, text="Max Power:  50%")
+    self.joystick_max_power_label = tk.Label(self.data_frame, text="Max Motor Power:  50%")
     self.joystick_max_power_label.grid(row=3, column=0)
+    self.lights_power_label = tk.Label(self.data_frame, text="Lights Power:    0%")
+    self.lights_power_label.grid(row=4, column=0)
+    self.attachment_power_label = tk.Label(self.data_frame, text="Attachment Power:    0%")
+    self.attachment_power_label.grid(row=5, column=0)
+    
 
     # Threads to refresh the data
     voltage_data_loop = threading.Thread(
@@ -1001,6 +1108,8 @@ class App(threading.Thread):
       daemon=True,) 
     send_data_loop.start()
 
+
+    # CAMERA BEARING CANVAS
     # Create Canvas to show the current bearing of the camera
     self.canvas = tk.Canvas(self.side_frame, bg="white", height=self.canvas_height, width=self.canvas_width)
     filename = os.getcwd() + "\\RobotTopDown.png" # 300 x 400
@@ -1020,14 +1129,16 @@ class App(threading.Thread):
     self.image_frame = tk.Frame(self.root)
     self.image_frame.grid(row=1, column=0)
     
+
+    # IMAGE FRAME
     # Capture video frames
     # Create a default image for the frame before streaming
     defaultWallpaperFileName = os.getcwd() + "\\UCF Wallpaper.png"
     self.defaultWallpaper = Image.open(defaultWallpaperFileName)
     self.defaultWallpaper = self.defaultWallpaper.resize((1280, 720), Image.ANTIALIAS)
     defaultWallpapertk = ImageTk.PhotoImage(self.defaultWallpaper)
-    self.lmain = tk.Label(self.image_frame, image=defaultWallpapertk)
-    self.lmain.grid(row=0, column=0)
+    self.image_label = tk.Label(self.image_frame, image=defaultWallpapertk)
+    self.image_label.grid(row=0, column=0)
 
 
     # Start thread to refresh the video frame
@@ -1092,7 +1203,7 @@ class App(threading.Thread):
     self.welcome_start_run_button.grid(row=0, column=0, padx=5)
     self._welcome_download_video_button = tk.Button(
       self.welcome_button_frame,
-      text="Download Video from Past Runs",
+      text="Settings",
       command=self.downloadVideo
     )
     self._welcome_download_video_button.grid(row=0, column=1, padx=5)

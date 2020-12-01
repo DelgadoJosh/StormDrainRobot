@@ -116,5 +116,6 @@ def testMotors():
     setLeftSpeed(0)
     setRightSpeed(0)
 
-# runTest()
+if __name__ == "__main__":
+    testMotors()
 
