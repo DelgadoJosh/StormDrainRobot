@@ -46,19 +46,27 @@ class Video_Sender():
   def WaitForConnection(self):
     self.Client, self.Adr = (self.s.accept())
     print(f"Got a connection from: {str(self.Client)}.")
-  
-# Send ping that setup is done
-lights.setPWM(0.005)
-time.sleep(0.5)
-lights.setPWM(0)
-time.sleep(0.5)
-lights.setPWM(0.005)
-time.sleep(0.5)
-lights.setPWM(0)
+
+
+flashLights = True
+def loopToFlashLights():
+    global flashLights
+    while flashLights:
+        lights.setPWM(0.005)
+        time.sleep(0.5)
+        lights.setPWM(0)
+        time.sleep(0.5)
+    print("[FlashLights] Ending")
+
+# Flash Lights that setup is done
+flash_lights_thread = threading.Thread(target=loopToFlashLights, daemon=True)
+flash_lights_thread.start()
 
 s = Video_Sender()
 print("Video Sender initialized. Waiting for connection before sending video.")
 s.WaitForConnection()
+flashLights = False
+
 
 
 # Based off of https://github.com/JetsonHacksNano/CSI-Camera/blob/master/simple_camera.py
@@ -172,9 +180,26 @@ def loopToSaveVideo():
     print("[SaveVideo] Ended")
     out.release()
 
+sentImage = True
+def loopToCheckTimeout():
+    global sentImage
+    global saveVideo
+    global stopFlag
+    while True:
+        time.sleep(10)
+        if sentImage: 
+            sentImage = False
+        else:
+            # We timed out as the other thread hasn't sent an image for 10 secs
+            saveVideo = False 
+            time.sleep(1)
+            stopFlag = True
+            break 
+
 # Loop to send the video, frame by frame.
 def broadcastVideo():
     global frame
+    global sendImage
     # global camera
     # global frameQueue
     # read_video = threading.Thread(target=constantlyReadVideoFeed, daemon=True)
@@ -216,7 +241,9 @@ def broadcastVideo():
 
             # Then data
             s.Client.sendall(message_size + data)
-
+            
+            # Let the timeout loop know we haven't timed out
+            sendImage = True
 
             # Grab the voltage data
             voltage = adc.getVoltage()
@@ -254,7 +281,7 @@ def broadcastVideo():
     camera.release()
     global saveVideo
     saveVideo = False
-    time.sleep(0.05)
+    time.sleep(1)
     # out.release()
     print("Ending")
 
@@ -325,6 +352,7 @@ def awaitInput():
 send_video = threading.Thread(target=broadcastVideo)
 # save_video = threading.Thread(target=loopToSaveVideo, daemon=True)
 get_input = threading.Thread(target=awaitInput)
+timeout_loop = threading.Thread(target=loopToCheckTimeout, daemon=True)
 
 
 # send_video = Process(target=broadcastVideo, daemon=True)
@@ -334,6 +362,7 @@ get_input = threading.Thread(target=awaitInput)
 send_video.start()
 # save_video.start()
 get_input.start()
+timeout_loop.start()
 
 
 # Trying using multiprocessing
