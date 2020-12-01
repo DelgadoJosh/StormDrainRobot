@@ -30,6 +30,7 @@ from queue import Queue
 from datetime import datetime
 import teensy
 import attachment
+import os
 
 port = 5000
 ip_address = ""
@@ -46,6 +47,15 @@ class Video_Sender():
     self.Client, self.Adr = (self.s.accept())
     print(f"Got a connection from: {str(self.Client)}.")
   
+# Send ping that setup is done
+lights.setPWM(0.005)
+time.sleep(0.5)
+lights.setPWM(0)
+time.sleep(0.5)
+lights.setPWM(0.005)
+time.sleep(0.5)
+lights.setPWM(0)
+
 s = Video_Sender()
 print("Video Sender initialized. Waiting for connection before sending video.")
 s.WaitForConnection()
@@ -106,7 +116,9 @@ frameQueue = Queue(maxsize=100)
 stopFlag = False
 frame = None 
 
-folderName = './videos/'
+# folderName = './videos/'
+# folderName = os.getcwd()
+folderName = "/home/teamblack/Desktop/Videos"
 date_split = str(datetime.now()).split(" ")
 date = date_split[0]
 timeStartedRunString = date_split[1]
@@ -115,9 +127,11 @@ timeStartedRunString = timeStartedRunString.split(" ")[0]  # Throwing away the m
 timeStartedRunString = timeStartedRunString.replace(":", "-")
 name = date + "_" + timeStartedRunString
 extension = '.mp4'
-filename = folderName + name + extension 
+filename = folderName + "/" + name + extension 
 fourcc = cv2.VideoWriter_fourcc(*'MP4V')
 out = cv2.VideoWriter(filename, fourcc, 11.0, (1280, 720))
+
+saveVideo = True
 
 # A parallel thread
 def constantlyReadVideoFeed():
@@ -137,7 +151,8 @@ saveVideoFrameQueue = Queue(maxsize=10)
 def loopToSaveVideo():
     startTimeSaved = time.time()
     numFramesSaved = 0
-    while True:
+    global saveVideo
+    while saveVideo:
         try: 
             time.sleep(0.01)
             if saveVideoFrameQueue.empty():
@@ -154,8 +169,8 @@ def loopToSaveVideo():
                 break
         except:
             print("[SaveVideo] Exception")
-            out.release()
     print("[SaveVideo] Ended")
+    out.release()
 
 # Loop to send the video, frame by frame.
 def broadcastVideo():
@@ -236,8 +251,11 @@ def broadcastVideo():
             break
     
     print("[Broadcast] Ending")
-    # camera.release()
-    out.release()
+    camera.release()
+    global saveVideo
+    saveVideo = False
+    time.sleep(0.05)
+    # out.release()
     print("Ending")
 
 def awaitInput():
