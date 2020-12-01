@@ -118,18 +118,18 @@ frame = None
 
 # folderName = './videos/'
 # folderName = os.getcwd()
-folderName = "/home/teamblack/Desktop/Videos"
-date_split = str(datetime.now()).split(" ")
-date = date_split[0]
-timeStartedRunString = date_split[1]
-timeStartedRunString = timeStartedRunString.replace('.', " ")
-timeStartedRunString = timeStartedRunString.split(" ")[0]  # Throwing away the milliseconds
-timeStartedRunString = timeStartedRunString.replace(":", "-")
-name = date + "_" + timeStartedRunString
-extension = '.mp4'
-filename = folderName + "/" + name + extension 
-fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-out = cv2.VideoWriter(filename, fourcc, 11.0, (1280, 720))
+# folderName = "/home/teamblack/Desktop/Videos"
+# date_split = str(datetime.now()).split(" ")
+# date = date_split[0]
+# timeStartedRunString = date_split[1]
+# timeStartedRunString = timeStartedRunString.replace('.', " ")
+# timeStartedRunString = timeStartedRunString.split(" ")[0]  # Throwing away the milliseconds
+# timeStartedRunString = timeStartedRunString.replace(":", "-")
+# name = date + "_" + timeStartedRunString
+# extension = '.mp4'
+# filename = folderName + "/" + name + extension 
+# fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+# out = cv2.VideoWriter(filename, fourcc, 11.0, (1280, 720))
 
 saveVideo = True
 
@@ -258,7 +258,10 @@ def broadcastVideo():
     # out.release()
     print("Ending")
 
+out = None
+
 def awaitInput():
+    global out
     # Wait for the data, print it, and send it back
     while True:
         try:
@@ -278,6 +281,40 @@ def awaitInput():
                 servos.setHorizontalAngle(splitData[utils.SERVO_HORIZONTAL_INDEX])
                 servos.setVerticalAngle(splitData[utils.SERVO_VERTICAL_INDEX])
                 attachment.setPWM(splitData[utils.ATTACHMENT_INDEX])
+            else:
+                # Check if we have a command to start
+                splitData = utils.parseTitle(utils.cleanup(str(data)))
+
+                if splitData is not None:
+                    # Then we start saving the stream
+                    pipe_name = splitData[0]
+                    name = splitData[1]
+
+                    folderName = "/home/teamblack/Desktop/Videos"
+                    folderName += "/" + pipe_name
+
+                    # Create folder if it doesn't exist
+                    if not os.path.exists(folderName):
+                        os.makedirs(folderName)
+
+                    # date_split = str(date_ti).split(" ")
+                    # date = date_split[0]
+                    # timeStartedRunString = date_split[1]
+                    # timeStartedRunString = timeStartedRunString.replace('.', " ")
+                    # timeStartedRunString = timeStartedRunString.split(" ")[0]  # Throwing away the milliseconds
+                    # timeStartedRunString = timeStartedRunString.replace(":", "-")
+                    # name = date + "_" + timeStartedRunString
+                    extension = '.mp4'
+                    filename = folderName + "/" + name + extension 
+                    fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+                    out = cv2.VideoWriter(filename, fourcc, 11.0, (1280, 720))
+
+                    global saveVideo 
+                    saveVideo = True 
+
+                    save_video = threading.Thread(target=loopToSaveVideo, daemon=True)
+                    save_video.start()
+
         except: 
             print("[InputLoop] Exception")
             break
@@ -286,16 +323,16 @@ def awaitInput():
 # Trying using threading
 # read_video = Process(target=constantlyReadVideoFeed, daemon=True)
 send_video = threading.Thread(target=broadcastVideo)
-save_video = threading.Thread(target=loopToSaveVideo, daemon=True)
-# get_input = threading.Thread(target=awaitInput)
+# save_video = threading.Thread(target=loopToSaveVideo, daemon=True)
+get_input = threading.Thread(target=awaitInput)
 
 
 # send_video = Process(target=broadcastVideo, daemon=True)
-get_input = Process(target=awaitInput, daemon=True)
+# get_input = Process(target=awaitInput, daemon=True)
 
 # read_video.start()
 send_video.start()
-save_video.start()
+# save_video.start()
 get_input.start()
 
 

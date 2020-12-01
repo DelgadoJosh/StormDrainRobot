@@ -80,6 +80,29 @@ def parse(data):
         # print(f"{data} is not formatted")
         return None
 
+def parseTitle(data):
+    try:
+        splitData = data.split("|")
+        command = splitData[0]
+
+        if command == 'NAME':
+            pipe_name = splitData[1]
+
+            datetimenow = splitData[2]
+            date_split = str(datetimenow).split(" ")
+            date = date_split[0]
+            timeStartedRunString = date_split[1]
+            timeStartedRunString = timeStartedRunString.replace('.', " ")
+            timeStartedRunString = timeStartedRunString.split(" ")[0]  # Throwing away the milliseconds
+            timeStartedRunString = timeStartedRunString.replace(":", "-")
+            name = date + "_" + timeStartedRunString
+
+            splitData[0] = pipe_name
+            splitData[1] = name
+            return splitData
+    except: 
+        return None
+
 def cleanup(byteData):
     # Taking in a string of b'string'
     # Scrape off the begining 2 characters, and the end '
