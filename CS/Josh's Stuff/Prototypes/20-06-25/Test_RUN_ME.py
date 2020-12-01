@@ -14,7 +14,7 @@ lbl_dud = tk.Label(text="UCF Team Black.\nPlaceholder GUI goes here",
 lbl_dud.pack()
 
 # Runs the command in front_end
-btn_test = tk.Button(text="Create Shape File", command=create_shape_file_dialog)
+btn_test = tk.Button(text="Create Shape File", command=shapeFile_Frontend.create_shape_file_dialog)
 btn_test.pack() 
 
 root.mainloop()

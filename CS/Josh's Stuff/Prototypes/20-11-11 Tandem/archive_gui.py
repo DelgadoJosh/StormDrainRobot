@@ -7,7 +7,6 @@
 # Note that padding is measured in pixels, *not* text units.
 
 import tkinter as tk 
-import tkinter.messagebox as messagebox
 from queue import Queue 
 import threading
 import time
@@ -35,19 +34,10 @@ class App(threading.Thread):
   
   programEnd = False
   def callback(self):
-    msgBox = messagebox.askquestion(
-      "Exit Application", 
-      "Are you sure you want to exit the application?", 
-      icon='warning')
-
-    if msgBox == 'yes':
-      self.programEnd = True
-      time.sleep(0.2) # To let the loop close
-      # threading._shutdown()
-      self.root.quit()
-    else:
-      # messagebox.showinfo('Return', 'You will now return to the application screen')
-      return
+    self.programEnd = True
+    time.sleep(0.2) # To let the loop close
+    # threading._shutdown()
+    self.root.quit()
 
   # Create a concurrency-safe queue for the client to read
   queue = Queue(maxsize=1000)
@@ -75,79 +65,6 @@ class App(threading.Thread):
   #   outputString = f"{lights_percent} {motor_left_percent} {motor_right_percent} {servo_horizontal_angle} {servo_vertical_angle}"
   #   print(outputString)
   #   self.queue.put(outputString)
-
-  def inputDataWindow(self):
-    print("Input Data Run")
-    self.setInputDataLayout()
-
-  def startRun(self):
-    print("Starting run")
-    # TODO: Add check to ensure the data is good
-    self.setLayoutDefault()
-
-  def downloadVideo(self):
-    print("Downloading data") 
-    self.setLayoutDefault()
-
-  help_window = None
-  controllerImageTk = None
-  def toggleHelpWindow(self):
-    if self.help_window == None:
-      self.openHelpWindow()
-    else:
-      self.closeHelpWindow()
-
-  def closeHelpWindow(self):
-    if self.help_window == None:
-      return 
-    self.help_window.destroy()
-    self.help_window = None 
-  
-  def openHelpWindow(self):
-    try:
-      if self.help_window != None:
-        return 
-      self.help_window = tk.Toplevel()
-      self.help_window.wm_title("Help")
-      self.help_window.protocol("WM_DELETE_WINDOW", self.closeHelpWindow)
-      controller_image_label = tk.Label(self.help_window, image=self.controllerImageTk)
-      controller_image_label.grid(row=0, column=0)
-    except Exception as e:
-      print(f"[OpenHelpWindow] Exception: {e}")
-      return
-
-  about_window = None
-  about_text = """UCF Stormwater Drain Robot
-
-UCF Team Black 2020
-
-Mechanical Engineers:
-Andrew Davis 
-Brian Hohl
-Ryan Hoover 
-Joshua Layland 
-Everett Periman
-
-Computer Science: 
-Josh Delgado 
-Ruman Rashid 
-Wilfredo Vega
-
-For view of the source code & CAD model:
-https://github.com/DelgadoJosh/StormDrainRobot"""
-
-  def openAboutWindow(self):
-    try:
-      if self.about_window != None:
-        return 
-      self.about_window = tk.Toplevel()
-      self.about_window.wm_title("About")
-      
-
-      about_window_label = tk.Label(self.about_window, text=self.about_text)
-      about_window_label.grid(row=0, column=0)
-    except Exception as e:
-      print(f"[OpenAboutWindow] Exception {e}")
 
   # X, Y axes are on a 16 bit number (0-16k)
   DEAD_ZONE = 2000
@@ -232,30 +149,23 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       joystickRX = self.removeDeadZone(controller.getRightJoystickX())
       joystickRY = self.removeDeadZone(controller.getRightJoystickY())
 
-      emergencyStopPressed = controller.getBPressedAndReleased()
+      bPressed = controller.getBPressedAndReleased()
 
-      centerAnglePressed = controller.getButtonPressed("W")
-      connectControllerPressed = controller.getButtonPressed("SLCT") # Start = Select on the controller. idk why
-      showHelpMenuPressed = controller.getButtonPressed("STRT") # STRT = Select button on controller
-
-      maxSpeedDecreasePressed = controller.getLeftBumperPressedAndReleased()
-      maxSpeedIncreasePressed = controller.getRightBumperPressedAndReleased()
+      leftBumperPressed = controller.getLeftBumperPressedAndReleased()
+      rightBumperPressed = controller.getRightBumperPressedAndReleased()
 
       dPadX = controller.getDPadXState()
       dPadY = controller.getDPadYState()
 
       cruiseControlButtonPressed = False
 
-      if emergencyStopPressed:
+      if bPressed:
+        if DEBUG:
+          print("B was pressed!")
         self.emergencyStop()
 
       # All controls below this are disabled
-      useController = self.getUseController()
-      if connectControllerPressed:
-        useController = not useController
-        self.setUseController(useController)
-
-      if not useController:
+      if not self.getUseController():
         continue
 
       # [ROBOT SPEED]
@@ -382,7 +292,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         self.setServosHorizontal(servoHorizontalAngle)
         self.setServosVertical(servoVerticalAngle)
       
-      if maxSpeedDecreasePressed:
+      if leftBumperPressed:
         newMax = maxPower - INCREMENT
         newMax = self.clamp(newMax, 0, 1.0)
         maxPower = newMax
@@ -390,7 +300,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         print(f"Left Bumper pressed, new maxpower = {maxPower}")
       
       
-      if maxSpeedIncreasePressed:
+      if rightBumperPressed:
         # print(f"right bumper pressed: maxpower = {maxPower}")
         newMax = maxPower + INCREMENT
         # print(f"  Temp: {newMax}")
@@ -418,12 +328,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
           self.setLights(lightsPower)
         except:
           print("Lights invalid")
-
-      if centerAnglePressed:
-        self.centerAngle()
-      
-      if showHelpMenuPressed:
-        self.toggleHelpWindow()
 
   motors_left_entry_text = None
   def getLeftMotorSpeed(self):
@@ -471,12 +375,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     try:
       val = float(val)
       self.lights_entry_text.set(f"{val:.3}")
-      if self.lights_power_label != None:
-        try:
-          power = int(val*100 + 0.5)
-          self.lights_power_label["text"] = f"Lights Power: {power:3d}%"
-        except Exception as e:
-          print("[LightsPower] Exception {e}")
     except: 
       self.lights_entry_text.set(val)
 
@@ -525,12 +423,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     try:
       val = float(val)
       self.attachment_entry_text.set(f"{val:.3}")
-      if self.attachment_power_label != None:
-        try:
-          power = int(val*100 + 0.5)
-          self.attachment_power_label["text"] = f"Attachment Power: {power:3d}%"
-        except Exception as e:
-          print("[LightsPower] Exception {e}")
     except: 
       self.attachment_entry_text.set(val)
   
@@ -568,13 +460,11 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       if self.programEnd:
         break
       doConstantlySend = checkbox.get()
-      time.sleep(dTime)
-      # if not doConstantlySend:
-      #   time.sleep(0.01)
-      #   continue
-      # if time.time() < nextTimeAvailable:
-      #   continue 
-      # nextTimeAvailable = time.time() + dTime 
+      if not doConstantlySend:
+        continue
+      if time.time() < nextTimeAvailable:
+        continue 
+      nextTimeAvailable = time.time() + dTime 
 
       self.submitData()
       # self.submitData(lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry)
@@ -613,11 +503,11 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     # Saves video to the directory
     # out.write(frame)
 
-    # global image_label
-    image_label.imgtk = imgTk
-    image_label.configure(image=imgTk)
-    image_label.image = imgTk
-    # image_label.after(1, self.showFrame)
+    # global lmain
+    lmain.imgtk = imgTk
+    lmain.configure(image=imgTk)
+    lmain.image = imgTk
+    # lmain.after(1, self.showFrame)
 
   voltage_label = None
   def setVoltage(self, voltage):
@@ -645,27 +535,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     if self.encoder_label == None:
       return
     self.encoder_label["text"] = f"Rotations: {numRotations}"
-
-  # lights_power_label = None
-  # def setLights(self, power):
-  #   if self.lights_power_label == None:
-  #     return 
-  #   try:
-  #     power = int(power*100 + 0.5)
-  #     self.lights_power_label["text"] = f"Lights Power: {power:3d}%"
-  #   except Exception as e:
-  #     print("[LightsPower] Exception {e}")
-
-  # attachment_power_label = None
-  # def setAttachmentPower(self, power):
-  #   if self.attachment_power_label == None:
-  #     return 
-  #   try:
-  #     power = int(power*100 + 0.5)
-  #     self.attachment_power_label["text"] = f"Attachment Power: {power:3d}%"
-  #   except Exception as e:
-  #     print("[LightsPower] Exception {e}")
-
+  
   encoderQueue = Queue(maxsize=1)
   def loopToShowEncoder(self):
     while True:
@@ -680,7 +550,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     if self.joystick_max_power_label == None:
       return 
     try:
-      maxPower = int(maxPower*100 + 0.5)
+      maxPower = int(maxPower*100)
       self.joystick_max_power_label["text"] = f"Max Power: {maxPower:3d}%"
     except:
       print("Bad max power for joystick label")
@@ -695,26 +565,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       self.checkbox_frame.grid_remove()
       self.image_frame.grid_remove()
       self.canvas.grid_remove()
-      self.welcome_frame.grid_remove()
-      self.input_data_frame.grid_remove()
     except Exception as e:
       print(f"[ClearLayout] Exception: {e}")
-
-  def setWelcomeLayout(self):
-    try:
-      self.clearLayout()
-      self.image_frame.grid(row=0, column=0)
-      self.welcome_frame.grid(row=1, column=0)
-    except Exception as e:
-      print(f"[WelcomeLayout] Exception: {e}")
-  
-  def setInputDataLayout(self):
-    try:
-      self.clearLayout()
-      self.image_frame.grid(row=0, column=0)
-      self.input_data_frame.grid(row=1, column=0)
-    except Exception as e:
-      print(f"[InputDataLayout] Exception: {e}")
 
   def setLayoutDefault(self):
     try: 
@@ -750,16 +602,16 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     self.defaultWallpaper = self.defaultWallpaper.resize((16*70, 9*70), Image.ANTIALIAS)
     defaultWallpapertk = ImageTk.PhotoImage(self.defaultWallpaper)
     if self.imgTkQueue.empty():
-      self.image_label.imgtk = defaultWallpapertk 
-      self.image_label.configure(image=defaultWallpapertk)
+      self.lmain.imgtk = defaultWallpapertk 
+      self.lmain.configure(image=defaultWallpapertk)
   
   def setVideoSizeDefault(self):
     self.smallerFrame = False
     self.defaultWallpaper = self.defaultWallpaper.resize((1280, 720), Image.ANTIALIAS)
     defaultWallpapertk = ImageTk.PhotoImage(self.defaultWallpaper)
     if self.imgTkQueue.empty():
-      self.image_label.imgtk = defaultWallpapertk 
-      self.image_label.configure(image=defaultWallpapertk) 
+      self.lmain.imgtk = defaultWallpapertk 
+      self.lmain.configure(image=defaultWallpapertk) 
 
   # Function to parse a frame into an image and imgtk
   def parseFrame(self, frame):
@@ -834,7 +686,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
   imgTkQueue = Queue(maxsize=1)
   smallerFrame = False
   videoMaxFramerate = 60
-  frameRefreshDelay = (1 / videoMaxFramerate)
+  frameRefreshDelay = int(1 / videoMaxFramerate)
   def loopToEncodeImg(self):
     while True:
       if not self.frameQueue.empty():
@@ -872,9 +724,9 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         imgTk = self.imgTkQueue.get()
 
         # Update the image
-        self.image_label.imgtk = imgTk 
-        self.image_label.configure(image=imgTk) 
-        self.image_label.image = imgTk  
+        self.lmain.imgtk = imgTk 
+        self.lmain.configure(image=imgTk) 
+        self.lmain.image = imgTk  
         # https://effbot.org/tkinterbook/photoimage.htm
         # Although the .image = imgTk seems redundant, it's necessary
         # To avoid it being cleared due to garbage collection
@@ -907,9 +759,9 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         imgTk = self.parseFrameJpg(self.curFrame)
 
         # Update the image
-        self.image_label.imgtk = imgTk 
-        self.image_label.configure(image=imgTk) 
-        self.image_label.image = imgTk 
+        self.lmain.imgtk = imgTk 
+        self.lmain.configure(image=imgTk) 
+        self.lmain.image = imgTk 
         
         # Update the framerate
         self.numFrames += 1
@@ -924,7 +776,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       
 
   
-  image_label = None
+  lmain = None
   def run(self):
     root = tk.Tk() 
     root.title("Storm Drain Robot")
@@ -949,11 +801,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     menubar.add_cascade(label="Layouts", menu=layoutMenu)
 
     # Rinse and repeat with other menus
-    # HELP Tab
-    helpMenu = tk.Menu(menubar, tearoff=0)
-    helpMenu.add_command(label="Help", command=self.openHelpWindow)
-    helpMenu.add_command(label="About...", command=self.openAboutWindow)
-    menubar.add_cascade(label="Help", menu=helpMenu)
 
     # Add menubar to the root frame
     self.root.config(menu=menubar)
@@ -1008,11 +855,39 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     submit_data_button = tk.Button(
       self.manual_input_frame,
       text="Submit Data",
+      # command = lambda 
+      #   lights_percent=lights_entry.get(), 
+      #   motor_left_percent=motors_left_entry.get(), 
+      #   motor_right_percent=motors_right_entry.get(), 
+      #   servo_horizontal_angle=servos_horizontal_entry.get(), 
+      #   servo_vertical_angle=servos_vertical_entry.get(): 
+      #     self.submitData(lights_percent, 
+      #       motor_left_percent, 
+      #       motor_right_percent, 
+      #       servo_horizontal_angle, 
+      #       servo_vertical_angle)
       command = self.submitData
+      # command = lambda
+      #   # lights_entry=lights_entry,
+      #   # motors_left_entry=motors_left_entry,
+      #   # motors_right_entry=motors_right_entry,
+      #   # # servos_horizontal_entry=servos_horizontal_entry,
+      #   # # servos_vertical_entry=servos_vertical_entry:
+      #   # servos_horizontal_entry=servos_horizontal_slider,
+      #   # servos_vertical_entry=servos_vertical_slider:
+      #     self.submitData(
+      #       # lights_entry,
+      #       # motors_left_entry,
+      #       # motors_right_entry,
+      #       # servos_horizontal_entry,
+      #       # servos_vertical_entry
+      #     )
     )
+    # submit_data_button.grid(row=1, column=5)
     submit_data_button.grid(row=1, column=6)
 
     self.button_frame = tk.Frame(self.side_frame, relief=tk.FLAT, borderwidth=2)
+    # self.button_frame.grid(row=0, column=6)
     self.button_frame.grid(row=0, column=1)
     create_shapefile_button = tk.Button(
       self.button_frame,
@@ -1021,14 +896,14 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         root=self.root:
         shapeFile_Frontend.create_shape_file_dialog(root),
     )
-    create_shapefile_button.grid(row=2, column=0, pady=2)
+    create_shapefile_button.grid(row=2, column=0)
 
     center_angle_button = tk.Button(
       self.button_frame, 
       text="Center Angle",
       command = self.centerAngle,
     )
-    center_angle_button.grid(row=1, column=0, pady=2)
+    center_angle_button.grid(row=1, column=0)
 
     emergency_stop_button = tk.Button(
       # self.manual_input_frame,
@@ -1038,15 +913,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       background = 'red'
     )
     # emergency_stop_button.grid(row=0, column=6)
-    emergency_stop_button.grid(row=0, column=0, pady=2)
-
-    help_button = tk.Button(
-      self.button_frame,
-      text = "Help",
-      command = self.openHelpWindow
-    )
-    help_button.grid(row=3, column=0, pady=2)
-
+    emergency_stop_button.grid(row=0, column=0)
 
     # Todo: Add a checkbox for constantly send the data every x seconds
     self.checkbox_frame = tk.Frame(self.side_frame, relief=tk.RAISED, borderwidth=2)
@@ -1060,7 +927,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     use_controller_checkbox = tk.Checkbutton(self.checkbox_frame, text="Use Controller", variable=self.use_controller_checkbox_val)
     use_controller_checkbox.grid(row=1, column=0)
 
-
     # DATA BOX
     self.data_frame = tk.Frame(self.side_frame, relief=tk.RAISED, borderwidth=2)
     # self.data_frame.grid(row=0, column=8, rowspan=2, padx=2)
@@ -1072,13 +938,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     self.voltage_label.grid(row=1, column=0)
     self.encoder_label = tk.Label(self.data_frame, text="Rotations: 0")
     self.encoder_label.grid(row=2, column=0)
-    self.joystick_max_power_label = tk.Label(self.data_frame, text="Max Motor Power:  50%")
+    self.joystick_max_power_label = tk.Label(self.data_frame, text="Max Power:  50%")
     self.joystick_max_power_label.grid(row=3, column=0)
-    self.lights_power_label = tk.Label(self.data_frame, text="Lights Power:    0%")
-    self.lights_power_label.grid(row=4, column=0)
-    self.attachment_power_label = tk.Label(self.data_frame, text="Attachment Power:    0%")
-    self.attachment_power_label.grid(row=5, column=0)
-    
 
     # Threads to refresh the data
     voltage_data_loop = threading.Thread(
@@ -1108,8 +969,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       daemon=True,) 
     send_data_loop.start()
 
-
-    # CAMERA BEARING CANVAS
     # Create Canvas to show the current bearing of the camera
     self.canvas = tk.Canvas(self.side_frame, bg="white", height=self.canvas_height, width=self.canvas_width)
     filename = os.getcwd() + "\\RobotTopDown.png" # 300 x 400
@@ -1129,17 +988,17 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     self.image_frame = tk.Frame(self.root)
     self.image_frame.grid(row=1, column=0)
     
-
-    # IMAGE FRAME
     # Capture video frames
     # Create a default image for the frame before streaming
     defaultWallpaperFileName = os.getcwd() + "\\UCF Wallpaper.png"
     self.defaultWallpaper = Image.open(defaultWallpaperFileName)
     self.defaultWallpaper = self.defaultWallpaper.resize((1280, 720), Image.ANTIALIAS)
     defaultWallpapertk = ImageTk.PhotoImage(self.defaultWallpaper)
-    self.image_label = tk.Label(self.image_frame, image=defaultWallpapertk)
-    self.image_label.grid(row=0, column=0)
+    self.lmain = tk.Label(self.image_frame, image=defaultWallpapertk)
+    self.lmain.grid(row=0, column=0)
 
+    # To default layout
+    self.setLayoutDefault()
 
     # Start thread to refresh the video frame
     # refresh_frame_loop = threading.Thread(
@@ -1186,81 +1045,85 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       )
       controller_loop.start()
 
-
-    # WELCOME GUI
-    self.welcome_frame = tk.Frame(self.root)
-    self.welcome_label = tk.Label(
-      self.welcome_frame,
-      text="Please select what you would like to do:")
-    self.welcome_label.grid(row=0, column=0)
-    self.welcome_button_frame = tk.Frame(self.welcome_frame)
-    self.welcome_button_frame.grid(row=1, column=0, pady=3) 
-    self.welcome_start_run_button = tk.Button(
-      self.welcome_button_frame,
-      text="Start Run",
-      command=self.inputDataWindow
-    )
-    self.welcome_start_run_button.grid(row=0, column=0, padx=5)
-    self._welcome_download_video_button = tk.Button(
-      self.welcome_button_frame,
-      text="Settings",
-      command=self.downloadVideo
-    )
-    self._welcome_download_video_button.grid(row=0, column=1, padx=5)
-
-
-    # INPUT DATA GUI
-    self.input_data_frame = tk.Frame(self.root) 
-    pipe_name_label = tk.Label(self.input_data_frame, text="Pipe Name:")
-    pipe_name_label.grid(row=0, column=0)
-    self.pipe_name_text = tk.StringVar()
-    pipe_name_entry = tk.Entry(self.input_data_frame, textvariable=self.pipe_name_text)
-    pipe_name_entry.grid(row=0, column=1)
-    start_latitude_label = tk.Label(self.input_data_frame, text="Start Latitude")
-    start_latitude_label.grid(row=1, column=0)
-    self.start_latitude_text = tk.StringVar() 
-    start_latitude_entry = tk.Entry(self.input_data_frame, textvariable=self.start_latitude_text)
-    start_latitude_entry.grid(row=1, column=1)
-    start_longitude_label = tk.Label(self.input_data_frame, text="Start Longitude")
-    start_longitude_label.grid(row=2, column=0)
-    self.start_longitude_text = tk.StringVar() 
-    start_longitude_entry = tk.Entry(self.input_data_frame, textvariable=self.start_longitude_text)
-    start_longitude_entry.grid(row=2, column=1)
-    end_latitude_label = tk.Label(self.input_data_frame, text="End Latitude")
-    end_latitude_label.grid(row=3, column=0)
-    self.end_latitude_text = tk.StringVar() 
-    end_latitude_entry = tk.Entry(self.input_data_frame, textvariable=self.end_latitude_text)
-    end_latitude_entry.grid(row=3, column=1)
-    end_longitude_label = tk.Label(self.input_data_frame, text="End Longitude")
-    end_longitude_label.grid(row=4, column=0)
-    self.end_longitude_text = tk.StringVar() 
-    end_longitude_entry = tk.Entry(self.input_data_frame, textvariable=self.end_longitude_text)
-    end_longitude_entry.grid(row=4, column=1)
-    input_data_start_run_button = tk.Button(self.input_data_frame, command=self.startRun, text="Start Run")
-    input_data_start_run_button.grid(row=5, column=0, columnspan=2)
-
-
-    # HELP
-    # Grab image
-    filename = os.getcwd() + "\\controllerLayout.png" # 300 x 400
-    controllerImage = Image.open(filename)
-    controllerImage = controllerImage.resize((1280, 720), Image.ANTIALIAS)
-    self.controllerImageTk = ImageTk.PhotoImage(controllerImage)
-    
-
-
-    # To default layout
-    # self.setLayoutDefault()
-
-    self.setWelcomeLayout()
+    # Todo: add a place where you put the current run info (pipe start id, pipe end id)
 
     self.root.mainloop()
 
+    # lights_entry.pack()
+    # lights_text = lights_entry.get()
+
+
+
+    # entry = tk.Entry(
+    #   fg="yellow",
+    #   bg="blue",
+    #   width=50
+    # )
+    # entry.pack()
+
+    # for row in range(len(ids)):
+    #   nameFrame = tk.Frame(
+    #     master=window,
+    #     relief=tk.FLAT,
+    #     borderwidth = 1
+    #   )
+    #   nameFrame.grid(row=row, column=0, padx=2, pady=2, sticky="w")
+    #   label = tk.Label(master=nameFrame, text=f"{ids[row]}")
+    #   label.pack(fill = tk.BOTH)
+
+    #   for col in range(1, len(vals)+1):
+    #     frame = tk.Frame(
+    #       master=window,
+    #       relief=tk.RAISED,
+    #       borderwidth = 1
+    #     )
+    #     frame.grid(row=row, column=col, padx=2, pady=2) 
+    #     # label = tk.Label(master=frame, text=f"Row {row}\nColumn {col}")
+    #     # label = tk.Label(master=frame, text=f"{vals[col-1]}")
+    #     # label.pack() 
+
+    #     # https://stackoverflow.com/questions/7299955/tkinter-binding-a-function-with-arguments-to-a-widget
+    #     button = tk.Button(
+    #       master=frame,
+    #       text = f"{vals[col-1]}",
+    #       command = lambda row=row, col=col: self.handle_click(row, col)
+    #       # width = 25,
+    #       # height = 5,
+    #       # bg = "blue",
+    #       # fg = "yellow"
+    #     )
+        
+    #     # button.bind("<Button-1>", handle_click)
+    #     # <Button-1> = left click
+    #     # <Button-2> = middle click
+    #     # <Button-3> = right click
+    #     button.pack()
+
+    # stopButton = tk.Button(
+    #   master=window,
+    #   text = f"Set speed to 0",
+    #   command = lambda leftSpeed=0, rightSpeed=0: self.setSpeed(leftSpeed, rightSpeed)
+    # )
+    # stopButton.grid(row=len(ids), column=1, columnspan=len(vals), sticky="WE")
+
+    # # Begin the main loop
+    # self.root.mainloop()
 
 
 
 # https://stackoverflow.com/questions/459083/how-do-you-run-your-own-code-alongside-tkinters-event-loop
 # Begins the loop on a separate thread
+# thread = threading.Thread(target=begin)
+# thread.start()
 
 app = App()
+
+# def init():
+#   app = App()
+#   print("GUI has begun")
+
+# def getApp():
+#   app = App()
+#   print("GUI has begun")
+#   return app
 

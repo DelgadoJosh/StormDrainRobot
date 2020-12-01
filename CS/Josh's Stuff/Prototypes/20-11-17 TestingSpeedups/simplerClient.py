@@ -30,6 +30,8 @@ def getInput():
     print("Ended input loop")
 
 camera = cv2.VideoCapture(0)
+# camera.set(3, 600)
+# camera.set(4, 400)
 def showVideo():
 
   # Loop for showing images images
@@ -64,13 +66,15 @@ def showVideo():
       
       # Receiving data
       frame_data = data
+      # img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
+      # frame = cv2.imdecode(img_as_np, flags=1)
+
+      # if not frameQueue.full():
+        # frameQueue.put(frame)
+
       frameBytes = base64.b64decode(frame_data) 
-      img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
-      frame = cv2.imdecode(img_as_np, flags=1)
-
       if not frameQueue.full():
-        frameQueue.put(frame)
-
+        frameQueue.put(frameBytes)
     except KeyboardInterrupt:
       cv2.destroyAllWindows()
       break
