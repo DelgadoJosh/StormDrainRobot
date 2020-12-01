@@ -1053,7 +1053,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     # self.checkbox_frame.grid(row=1, column=7)
     self.checkbox_frame.grid(row=0, column=2)
     constantly_submit_checkbox_val = tk.IntVar()
-    constantly_submit_checkbox = tk.Checkbutton(self.checkbox_frame, text="Constantly Submit", variable=constantly_submit_checkbox_val)
+    constantly_submit_checkbox = tk.Checkbutton(self.checkbox_frame, text="Send Instructions", variable=constantly_submit_checkbox_val)
     # constantly_submit_checkbox.grid(row=1, column=6)
     constantly_submit_checkbox.grid(row=0, column=0)
     self.use_controller_checkbox_val = tk.IntVar()
