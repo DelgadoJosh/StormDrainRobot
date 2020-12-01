@@ -739,9 +739,11 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
       # Setup their grid in their data frame
       self.canvas.grid(row=0, column=0)
-      self.data_frame.grid(row=1, column=0, pady=2)
-      self.checkbox_frame.grid(row=2, column=0)
-      self.button_frame.grid(row=3, column=0)
+      # Not sure why we have to skip row 1, but it's necessary to maintain
+      # the data_frame when switching to debug layout and back
+      self.data_frame.grid(row=2, column=0)
+      self.checkbox_frame.grid(row=3, column=0)
+      self.button_frame.grid(row=4, column=0)
     except Exception as e: 
       print(f"[LayoutDefault] Exception: {e}")
 
