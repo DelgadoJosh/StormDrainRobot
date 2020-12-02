@@ -32,8 +32,8 @@ DEBUG = False
 defaultConfig = {}
 defaultConfig["EmergencyStop"] = "E"
 defaultConfig["CenterAngle"] = "W"
-defaultConfig["ConnectController"] = "SLCT"
-defaultConfig["ShowHelp"] = "STRT"
+defaultConfig["ConnectController"] = "SLCT" # SLCT = right menu button
+defaultConfig["ShowHelp"] = "STRT" # STRT = left menu button on the controller
 defaultConfig["IncreaseMotorMaxPower"] = "TR"
 defaultConfig["DecreaseMotorMaxPower"] = "TL"
 
@@ -1058,14 +1058,28 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     )
     submit_data_button.grid(row=1, column=6)
 
+    self.start_latitude_text = tk.StringVar() 
+    self.start_longitude_text = tk.StringVar() 
+    self.end_latitude_text = tk.StringVar() 
+    self.end_longitude_text = tk.StringVar() 
     self.button_frame = tk.Frame(self.side_frame, relief=tk.FLAT, borderwidth=2)
     self.button_frame.grid(row=0, column=1)
     create_shapefile_button = tk.Button(
       self.button_frame,
       text = "Create ShapeFile",
       command = lambda 
-        root=self.root:
-        shapeFile_Frontend.create_shape_file_dialog(root),
+        root=self.root,
+        start_latitude_text=self.start_latitude_text,
+        start_longitude_text=self.start_longitude_text,
+        end_latitude_text=self.end_latitude_text,
+        end_longitude_text=self.end_longitude_text:
+        shapeFile_Frontend.create_shape_file_dialog(
+          root=root, 
+          start_latitude_text=start_latitude_text,
+          start_longitude_text=start_longitude_text,
+          end_latitude_text=end_latitude_text,
+          end_longitude_text=end_longitude_text          
+        ),
     )
     create_shapefile_button.grid(row=2, column=0, pady=2)
 
@@ -1264,22 +1278,18 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     pipe_name_entry.grid(row=0, column=1)
     start_latitude_label = tk.Label(self.input_data_frame, text="Start Latitude")
     start_latitude_label.grid(row=1, column=0)
-    self.start_latitude_text = tk.StringVar() 
     start_latitude_entry = tk.Entry(self.input_data_frame, textvariable=self.start_latitude_text)
     start_latitude_entry.grid(row=1, column=1)
     start_longitude_label = tk.Label(self.input_data_frame, text="Start Longitude")
     start_longitude_label.grid(row=2, column=0)
-    self.start_longitude_text = tk.StringVar() 
     start_longitude_entry = tk.Entry(self.input_data_frame, textvariable=self.start_longitude_text)
     start_longitude_entry.grid(row=2, column=1)
     end_latitude_label = tk.Label(self.input_data_frame, text="End Latitude")
     end_latitude_label.grid(row=3, column=0)
-    self.end_latitude_text = tk.StringVar() 
     end_latitude_entry = tk.Entry(self.input_data_frame, textvariable=self.end_latitude_text)
     end_latitude_entry.grid(row=3, column=1)
     end_longitude_label = tk.Label(self.input_data_frame, text="End Longitude")
     end_longitude_label.grid(row=4, column=0)
-    self.end_longitude_text = tk.StringVar() 
     end_longitude_entry = tk.Entry(self.input_data_frame, textvariable=self.end_longitude_text)
     end_longitude_entry.grid(row=4, column=1)
     input_data_start_run_button = tk.Button(self.input_data_frame, command=self.startRun, text="Start Run")

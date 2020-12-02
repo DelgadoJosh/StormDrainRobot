@@ -17,35 +17,43 @@ import shapeFile_Backend
 
 debug = True
 
-def create_shape_file_dialog(root):
+def feetToLatitude(feet):
+  # https://www.usgs.gov/faqs/how-much-distance-does-a-degree-minute-and-second-cover-your-maps?qt-news_science_products=0#qt-news_science_products
+  # At 38 degrees North Latitude:
+  # 1 degree of latitude = 364,000 feet
+  return feet/364000.0
+
+def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_text=None, end_latitude_text=None, end_longitude_text=None):
   def save_file():
-    # Saves the current input as a new shapefile
-    nameOfFile = ent_name.get()
-    xs = [float(ent_x.get())]
-    ys = [float(ent_y.get())]
-    date = datetime.datetime.strptime(cal_date.get(), "%m/%d/%y").date()
-    dates = [date]
+    try:
+      # Saves the current input as a new shapefile
+      nameOfFile = ent_name.get()
+      xs = [float(ent_x.get())]
+      ys = [float(ent_y.get())]
+      date = datetime.datetime.strptime(cal_date.get(), "%m/%d/%y").date()
+      dates = [date]
 
 
 
-    # TODO: Add check to ensure data is good
-    
+      # TODO: Add check to ensure data is good
+      
 
-    # Pulls up dialog box
-    filepath = askdirectory()
+      # Pulls up dialog box
+      filepath = askdirectory()
 
-    if not filepath:
-      return 
+      if not filepath:
+        return 
 
-    if debug: 
-      print(f"Filepath: {filepath}")
-      print(f"nameOfFile: {nameOfFile}")
-      print(f"xs: {xs}")
-      print(f"ys: {ys}")
-      print(f"Date: {dates}")
-    
-    shapeFile_Backend.create_shapefile(filepath, nameOfFile, xs, ys, dates)
-  
+      if debug: 
+        print(f"Filepath: {filepath}")
+        print(f"nameOfFile: {nameOfFile}")
+        print(f"xs: {xs}")
+        print(f"ys: {ys}")
+        print(f"Date: {dates}")
+      
+      shapeFile_Backend.create_shapefile(filepath, nameOfFile, xs, ys, dates)
+    except:
+      return
   
   top = tk.Toplevel(root)
   top.title("Creating a shape file")
@@ -63,22 +71,50 @@ def create_shape_file_dialog(root):
   ent_name.grid(row=0, column=1, sticky="ew")
 
 
-  # Creates the row for x
-  lbl_x = tk.Label(top, text="X:")
-  ent_x = tk.Entry(top) 
+  # Creates the row for start Latitude
+  lbl_start_latitude = tk.Label(top, text="Start Latitude:")
+  if start_latitude_text == None:
+    start_latitude_text = tk.StringVar()
+  ent_start_latitude = tk.Entry(top, textvariable=start_latitude_text) 
   
   # Places into grid
-  lbl_x.grid(row=1, column=0, padx=5, sticky="e")
-  ent_x.grid(row=1, column=1, sticky="ew")
+  lbl_start_latitude.grid(row=1, column=0, padx=5, sticky="e")
+  ent_start_latitude.grid(row=1, column=1, sticky="ew")
 
 
-  # Creates the row for y
-  lbl_y = tk.Label(top, text="Y:")
-  ent_y = tk.Entry(top) 
+  # Creates the row for start longitude
+  lbl_start_longitude = tk.Label(top, text="Start Longitude:")
+  if start_longitude_text == None:
+    start_longitude_text = tk.StringVar()
+  ent_start_longitude = tk.Entry(top, textvariable=start_longitude_text) 
   
   # Places into grid
-  lbl_y.grid(row=2, column=0, padx=5, sticky="e")
-  ent_y.grid(row=2, column=1, sticky="ew")
+  lbl_start_longitude.grid(row=2, column=0, padx=5, sticky="e")
+  ent_start_longitude.grid(row=2, column=1, sticky="ew")
+
+
+  # Creates the row for end Latitude
+  lbl_end_latitude = tk.Label(top, text="End Latitude:")
+  if end_latitude_text == None:
+    end_latitude_text = tk.StringVar()
+  ent_end_latitude = tk.Entry(top, textvariable=end_latitude_text) 
+  
+  # Places into grid
+  lbl_end_latitude.grid(row=3, column=0, padx=5, sticky="e")
+  ent_end_latitude.grid(row=3, column=1, sticky="ew")
+
+
+  # Creates the row for end longitude
+  lbl_end_longitude = tk.Label(top, text="End Longitude:")
+  if end_longitude_text == None:
+    end_longitude_text = tk.StringVar()
+  ent_end_longitude = tk.Entry(top, textvariable=end_longitude_text) 
+  
+  # Places into grid
+  lbl_end_longitude.grid(row=4, column=0, padx=5, sticky="e")
+  ent_end_longitude.grid(row=4, column=1, sticky="ew")
+
+
 
 
   # Creates the frame for date
@@ -87,8 +123,8 @@ def create_shape_file_dialog(root):
                       foreground="white", borderwidth=2, firstweekday="sunday")
   
   # Places into the grid
-  lbl_date.grid(row=3, column=0, padx=5, sticky="e")
-  cal_date.grid(row=3, column=1, sticky="w")
+  lbl_date.grid(row=5, column=0, padx=5, sticky="e")
+  cal_date.grid(row=5, column=1, sticky="w")
 
 
   # Creates the final row of save as
@@ -98,7 +134,7 @@ def create_shape_file_dialog(root):
   numButtons = 1
   btn_saveas.grid(row=0, column=numButtons-1, sticky="e", padx=5, pady=5)
   
-  frm_buttons.grid(row=4, column=1, sticky="ew")
+  frm_buttons.grid(row=6, column=1, sticky="ew")
 
 
 if __name__ == '__main__':
