@@ -238,8 +238,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     "Center Angle", 
     "Connect Controller", 
     "Show Help",
-    "Increase Motor Max Speed",
-    "Decrease Motor Max Speed"}
+    "Increase Motor Max Power",
+    "Decrease Motor Max Power"}
 
   inputQueriesPerSecond = 100
   isSpeedControlEnabled = True
@@ -1011,7 +1011,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         time.sleep(self.frameRefreshDelay)
 
       
-
+  button_text = {}
   distance_traveled_feet = None
   image_label = None
   def run(self):
@@ -1349,19 +1349,40 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
     # CONFIG
     self.config_frame = tk.Frame(self.root)
-    emergency_stop_button_label = tk.Label(self.config_frame, text="Emergency Stop:")
-    emergency_stop_button_label.grid(row=0, column=0)
-    self.emergency_stop_button_text = tk.StringVar()
-    self.emergency_stop_button_text.set("B")
-    emergency_stop_button_dropdown = tk.OptionMenu(self.config_frame, self.emergency_stop_button_text, *self.controller_buttons)
-    emergency_stop_button_dropdown.grid(row=0, column=1)    
+    # emergency_stop_button_label = tk.Label(self.config_frame, text="Emergency Stop:")
+    # emergency_stop_button_label.grid(row=0, column=0)
+    # self.emergency_stop_button_text = tk.StringVar()
+    # self.emergency_stop_button_text.set("B")
+    # emergency_stop_button_dropdown = tk.OptionMenu(self.config_frame, self.emergency_stop_button_text, *self.controller_buttons)
+    # emergency_stop_button_dropdown.grid(row=0, column=1)    
 
-    center_angle_button_label = tk.Label(self.config_frame, text="Center Camera")
-    center_angle_button_label.grid(row=1, column=0)
-    self.center_angle_button_text = tk.StringVar()
-    center_angle_button_dropdown = tk.OptionMenu(self.config_frame, self.emergency_stop_button_text, *self.controller_buttons)
-    center_angle_button_dropdown.grid(row=1, column=1)
+    # center_angle_button_label = tk.Label(self.config_frame, text="Center Camera:")
+    # center_angle_button_label.grid(row=1, column=0)
+    # self.center_angle_button_text = tk.StringVar()
+    # center_angle_button_dropdown = tk.OptionMenu(self.config_frame, self.emergency_stop_button_text, *self.controller_buttons)
+    # center_angle_button_dropdown.grid(row=1, column=1)
 
+    index = 0
+    button_labels = {}
+    button_dropdown = {}
+    dropdown_width = 150
+    self.config_frame.columnconfigure(1, minsize=dropdown_width)
+    self.config_frame.columnconfigure(3, minsize=dropdown_width)
+    for name in self.controller_configurable:
+      button_labels[name] = tk.Label(self.config_frame, text=f"{name}:")
+      button_labels[name].grid(row=index//2, column=2*(index%2), sticky="w")
+      self.button_text[name] = tk.StringVar()
+      self.button_text[name].set(self.getConfig(name))
+      button_dropdown[name] = tk.OptionMenu(self.config_frame, self.button_text[name], *self.controller_buttons)
+      button_dropdown[name].grid(row=index//2, column=2*(index%2)+1, padx=2, sticky="e")
+      index += 1
+
+    config_button_frame = tk.Frame(self.config_frame)
+    config_button_frame.grid(row=index, column=3, sticky="e", pady=2)
+    save_config_button = tk.Button(config_button_frame, text="Save")
+    save_config_button.grid(row=0, column=0, padx=4)
+    cancel_config_button = tk.Button(config_button_frame, text="Cancel")
+    cancel_config_button.grid(row=0, column=1)
 
     # To default layout
     # self.setLayoutDefault()
