@@ -28,8 +28,12 @@ def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_tex
     try:
       # Saves the current input as a new shapefile
       nameOfFile = ent_name.get()
-      xs = [float(ent_x.get())]
-      ys = [float(ent_y.get())]
+      # xs = [float(ent_x.get())]
+      # ys = [float(ent_y.get())]
+      x = float(start_longitude_text.get())
+      y = float(start_latitude_text.get())
+      xs = [x]
+      ys = [y]
       date = datetime.datetime.strptime(cal_date.get(), "%m/%d/%y").date()
       dates = [date]
 
