@@ -725,7 +725,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       return 
     try:
       maxPower = int(maxPower*100 + 0.5)
-      self.joystick_max_power_label["text"] = f"Max Power: {maxPower:3d}%"
+      self.joystick_max_power_label["text"] = f"Max Motor Power: {maxPower:3d}%"
     except:
       print("Bad max power for joystick label")
       return
