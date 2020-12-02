@@ -20,6 +20,7 @@ import numpy
 import shapeFile_Frontend
 import os
 from datetime import datetime
+import json
 
 try:
   from controller import Controller
@@ -68,7 +69,9 @@ class App(threading.Thread):
   global defaultConfig
   filename = os.getcwd() + "/config.json"
   try:
-    config = open(filename)
+    file_json = open(filename)
+    json_text = file_json.read() 
+    config = json.load(json_text)
   except: 
     config = defaultConfig
     # Save the default config to disk
@@ -232,6 +235,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     val = self.getConfig(abbv)
     return Controller.GET_ABBV[val]
 
+
+
   controller_buttons = ["A", "B", "X", "Y", "Start", "Select", "Right Bumper", "Left Bumper"]
   controller_configurable = {
     "Emergency Stop", 
@@ -240,6 +245,38 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     "Show Help",
     "Increase Motor Max Power",
     "Decrease Motor Max Power"}
+  button_text = {}
+  for name in controller_configurable:
+    button_text[name] = None
+  def saveConfig(self):
+    for name in self.controller_configurable:
+      if self.button_text[name] == None:
+        continue 
+      # Otherwise we save config
+      self.config[name] = self.button_text[name].get()
+  
+    # Save to file
+    json_text = json.dumps(self.config)
+    # print(json_text)
+    filename = os.getcwd() + "/" + "config.json"
+    json_file = open(filename, "r+")
+    json_file.write(json_text)
+    
+    # Change back to welcome screen
+    self.setWelcomeLayout()
+
+  def cancelConfig(self):
+    for name in self.controller_configurable:
+      self.button_text[name].set(self.getConfig(name))
+    
+    self.setWelcomeLayout()
+
+  def restoreDefaultConfig(self):
+    global defaultConfig
+    for name in self.controller_configurable:
+      self.button_text[name].set(defaultConfig[name])
+
+    self.saveConfig()
 
   inputQueriesPerSecond = 100
   isSpeedControlEnabled = True
@@ -1011,7 +1048,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         time.sleep(self.frameRefreshDelay)
 
       
-  button_text = {}
   distance_traveled_feet = None
   image_label = None
   def run(self):
@@ -1379,9 +1415,9 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
     config_button_frame = tk.Frame(self.config_frame)
     config_button_frame.grid(row=index, column=3, sticky="e", pady=2)
-    save_config_button = tk.Button(config_button_frame, text="Save")
+    save_config_button = tk.Button(config_button_frame, text="Save", command=self.saveConfig)
     save_config_button.grid(row=0, column=0, padx=4)
-    cancel_config_button = tk.Button(config_button_frame, text="Cancel")
+    cancel_config_button = tk.Button(config_button_frame, text="Cancel", command=self.cancelConfig)
     cancel_config_button.grid(row=0, column=1)
 
     # To default layout
