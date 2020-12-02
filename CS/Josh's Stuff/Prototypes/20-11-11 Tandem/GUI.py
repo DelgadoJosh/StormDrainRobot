@@ -930,7 +930,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         img = Image.open(io.BytesIO(frame)) 
 
         if self.smallerFrame:
-          img = img.resize((16*70, 9*70), Image.ANTIALIAS)
+          # img = img.resize((16*70, 9*70), Image.ANTIALIAS)
+          img = img.crop((0, 0, 16*70, 9*70))
 
         if not self.imgQueue.full():
           self.imgQueue.put(img)
