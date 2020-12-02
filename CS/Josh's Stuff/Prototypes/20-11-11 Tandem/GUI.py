@@ -260,6 +260,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     # print(json_text)
     filename = os.getcwd() + "/" + "config.json"
     json_file = open(filename, "r+")
+    # json.dump(self.config, json_file)
     json_file.write(json_text)
     
     # Change back to welcome screen
