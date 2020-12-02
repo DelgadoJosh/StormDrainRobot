@@ -71,7 +71,8 @@ class App(threading.Thread):
   try:
     file_json = open(filename)
     json_text = file_json.read() 
-    config = json.load(json_text)
+    print(json_text)
+    config = json.loads(json_text)
   except: 
     config = defaultConfig
     # Save the default config to disk
@@ -258,8 +259,12 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     # Save to file
     json_text = json.dumps(self.config)
     # print(json_text)
-    filename = os.getcwd() + "/" + "config.json"
-    json_file = open(filename, "r+")
+    # print(json_text)
+    filename = os.getcwd() + "\\" + "config.json"
+    # Overwrite it
+    # if os.path.exists(filename):
+    #   os.remove(filename)
+    json_file = open(filename, "w")
     # json.dump(self.config, json_file)
     json_file.write(json_text)
     
@@ -268,6 +273,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
   def cancelConfig(self):
     for name in self.controller_configurable:
+      print(f"{name} : {self.getConfig(name)}")
       self.button_text[name].set(self.getConfig(name))
     
     self.setWelcomeLayout()
@@ -1415,11 +1421,16 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       index += 1
 
     config_button_frame = tk.Frame(self.config_frame)
-    config_button_frame.grid(row=index, column=3, sticky="e", pady=2)
+    # config_button_frame.grid(row=index, column=3, sticky="e", pady=2)
+    config_button_frame.grid(row=0, column=5)
     save_config_button = tk.Button(config_button_frame, text="Save", command=self.saveConfig)
-    save_config_button.grid(row=0, column=0, padx=4)
+    save_config_button.grid(row=0, column=1, padx=4)
     cancel_config_button = tk.Button(config_button_frame, text="Cancel", command=self.cancelConfig)
-    cancel_config_button.grid(row=0, column=1)
+    cancel_config_button.grid(row=0, column=2)
+    default_config_button = tk.Button(config_button_frame, text="Defaults", command=self.restoreDefaultConfig)
+    default_config_button.grid(row=0, column=0)
+
+    self.cancelConfig() # Use this to restore the config to what it says in the file
 
     # To default layout
     # self.setLayoutDefault()
