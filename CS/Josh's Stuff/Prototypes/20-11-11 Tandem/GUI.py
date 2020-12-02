@@ -30,12 +30,12 @@ except:
 DEBUG = False
 
 defaultConfig = {}
-defaultConfig["EmergencyStop"] = "E"
-defaultConfig["CenterAngle"] = "W"
-defaultConfig["ConnectController"] = "SLCT" # SLCT = right menu button
-defaultConfig["ShowHelp"] = "STRT" # STRT = left menu button on the controller
-defaultConfig["IncreaseMotorMaxPower"] = "TR"
-defaultConfig["DecreaseMotorMaxPower"] = "TL"
+defaultConfig["Emergency Stop"] = "B" # "E"
+defaultConfig["Center Angle"] = "X" # "W"
+defaultConfig["Connect Controller"] = "Start"  # "SLCT" # SLCT = right menu button
+defaultConfig["Show Help"] = "Select" # "STRT" # STRT = left menu button on the controller
+defaultConfig["Increase Motor Max Power"] = "Right Bumper" # "TR"
+defaultConfig["Decrease Motor Max Power"] = "Left Bumper" # "TL"
 
 class App(threading.Thread):
   def __init__(self):
@@ -228,7 +228,18 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     except: 
       return defaultConfig[abbv]
 
+  def getConfigController(self, abbv):
+    val = self.getConfig(abbv)
+    return Controller.GET_ABBV[val]
+
   controller_buttons = ["A", "B", "X", "Y", "Start", "Select", "Right Bumper", "Left Bumper"]
+  controller_configurable = {
+    "Emergency Stop", 
+    "Center Angle", 
+    "Connect Controller", 
+    "Show Help",
+    "Increase Motor Max Speed",
+    "Decrease Motor Max Speed"}
 
   inputQueriesPerSecond = 100
   isSpeedControlEnabled = True
@@ -269,14 +280,34 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       joystickRX = self.removeDeadZone(controller.getRightJoystickX())
       joystickRY = self.removeDeadZone(controller.getRightJoystickY())
 
-      emergencyStopPressed = controller.getButtonPressed(self.getConfig("EmergencyStop")) # controller.getBPressedAndReleased() # E
+      emergencyStopPressed = controller.getButtonPressed(self.getConfigController("Emergency Stop")) # controller.getBPressedAndReleased() # E
 
-      centerAnglePressed = controller.getButtonPressed(self.getConfig("CenterAngle"))
-      connectControllerPressed = controller.getButtonPressed(self.getConfig("ConnectController")) # Start = Select on the controller. idk why
-      showHelpMenuPressed = controller.getButtonPressed(self.getConfig("ShowHelp")) # STRT = Select button on controller
+      centerAnglePressed = controller.getButtonPressed(self.getConfigController("Center Angle"))
+      connectControllerPressed = controller.getButtonPressed(self.getConfigController("Connect Controller")) # Start = Select on the controller. idk why
+      showHelpMenuPressed = controller.getButtonPressed(self.getConfigController("Show Help")) # STRT = Select button on controller
 
-      maxSpeedDecreasePressed = controller.getButtonPressed(self.getConfig("DecreaseMotorMaxPower")) # controller.getLeftBumperPressedAndReleased() # TL = left bumper
-      maxSpeedIncreasePressed = controller.getButtonPressed(self.getConfig("IncreaseMotorMaxPower")) # controller.getRightBumperPressedAndReleased()
+      maxSpeedDecreasePressed = controller.getButtonPressed(self.getConfigController("Decrease Motor Max Power")) # controller.getLeftBumperPressedAndReleased() # TL = left bumper
+      maxSpeedIncreasePressed = controller.getButtonPressed(self.getConfigController("Increase Motor Max Power")) # controller.getRightBumperPressedAndReleased()
+
+      # emergencyStopPressed = controller.getButtonPressed(self.getConfig("EmergencyStop")) # controller.getBPressedAndReleased() # E
+
+      # centerAnglePressed = controller.getButtonPressed(self.getConfig("CenterAngle"))
+      # connectControllerPressed = controller.getButtonPressed(self.getConfig("ConnectController")) # Start = Select on the controller. idk why
+      # showHelpMenuPressed = controller.getButtonPressed(self.getConfig("ShowHelp")) # STRT = Select button on controller
+
+      # maxSpeedDecreasePressed = controller.getButtonPressed(self.getConfig("DecreaseMotorMaxPower")) # controller.getLeftBumperPressedAndReleased() # TL = left bumper
+      # maxSpeedIncreasePressed = controller.getButtonPressed(self.getConfig("IncreaseMotorMaxPower")) # controller.getRightBumperPressedAndReleased()
+      
+      
+      # emergencyStopPressed = controller.getButtonPressed("E") # controller.getBPressedAndReleased() # E
+
+      # centerAnglePressed = controller.getButtonPressed("W")
+      # connectControllerPressed = controller.getButtonPressed("SLCT") # Start = Select on the controller. idk why
+      # showHelpMenuPressed = controller.getButtonPressed("STRT") # STRT = Select button on controller
+
+      # maxSpeedDecreasePressed = controller.getButtonPressed("TL") # controller.getLeftBumperPressedAndReleased() # TL = left bumper
+      # maxSpeedIncreasePressed = controller.getButtonPressed("TR") # controller.getRightBumperPressedAndReleased()
+
 
       dPadX = controller.getDPadXState()
       dPadY = controller.getDPadYState()
@@ -1323,6 +1354,12 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     self.emergency_stop_button_text.set("B")
     emergency_stop_button_dropdown = tk.OptionMenu(self.config_frame, self.emergency_stop_button_text, *self.controller_buttons)
     emergency_stop_button_dropdown.grid(row=0, column=1)    
+
+    center_angle_button_label = tk.Label(self.config_frame, text="Center Camera")
+    center_angle_button_label.grid(row=1, column=0)
+    self.center_angle_button_text = tk.StringVar()
+    center_angle_button_dropdown = tk.OptionMenu(self.config_frame, self.emergency_stop_button_text, *self.controller_buttons)
+    center_angle_button_dropdown.grid(row=1, column=1)
 
 
     # To default layout
