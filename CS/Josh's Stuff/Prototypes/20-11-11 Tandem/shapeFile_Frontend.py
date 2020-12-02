@@ -9,6 +9,7 @@
 # Python 3
 import tkinter as tk 
 import tkinter.ttk 
+import tkinter.messagebox as messagebox
 from tkcalendar import DateEntry
 from tkinter.filedialog import askdirectory
 import datetime
@@ -33,6 +34,10 @@ def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_tex
     try:
       # Saves the current input as a new shapefile
       nameOfFile = ent_name.get()
+      if nameOfFile == "":
+        messagebox.showerror("Error", "Name of this location cannot be empty")
+        top.destroy()
+        return
       # xs = [float(ent_x.get())]
       # ys = [float(ent_y.get())]
       x1 = float(start_longitude_text.get())
@@ -75,6 +80,8 @@ def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_tex
       
       shapeFile_Backend.create_shapefile(filepath, nameOfFile, xs, ys, dates)
     except:
+      messagebox.showerror("Error", "Invalid input")
+      top.destroy()
       return
   
   top = tk.Toplevel(root)
