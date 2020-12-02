@@ -969,7 +969,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
       
 
-  
+  distance_traveled_feet = tk.StringVar()
   image_label = None
   def run(self):
     root = tk.Tk() 
@@ -1085,7 +1085,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
     center_angle_button = tk.Button(
       self.button_frame, 
-      text="Center Angle",
+      text="Center Camera",
       command = self.centerAngle,
     )
     center_angle_button.grid(row=1, column=0, pady=2)
