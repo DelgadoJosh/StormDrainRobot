@@ -226,7 +226,9 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     try: 
       return self.config[abbv]
     except: 
-      return self.defaultConfig[abbv]
+      return defaultConfig[abbv]
+
+  controller_buttons = ["A", "B", "X", "Y", "Start", "Select", "Right Bumper", "Left Bumper"]
 
   inputQueriesPerSecond = 100
   isSpeedControlEnabled = True
@@ -741,6 +743,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       self.canvas.grid_remove()
       self.welcome_frame.grid_remove()
       self.input_data_frame.grid_remove()
+      self.config_frame.grid_remove()
     except Exception as e:
       print(f"[ClearLayout] Exception: {e}")
 
@@ -759,6 +762,14 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       self.input_data_frame.grid(row=1, column=0)
     except Exception as e:
       print(f"[InputDataLayout] Exception: {e}")
+  
+  def setConfigLayout(self):
+    try:
+      self.clearLayout()
+      self.image_frame.grid(row=0, column=0)
+      self.config_frame.grid(row=1, column=0)
+    except Exception as e:
+      print(f"[ConfigLayout] Exception: {e}")
 
   def setLayoutDefault(self):
     try: 
@@ -969,7 +980,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
       
 
-  distance_traveled_feet = tk.StringVar()
+  distance_traveled_feet = None
   image_label = None
   def run(self):
     root = tk.Tk() 
@@ -1264,7 +1275,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     self._welcome_download_video_button = tk.Button(
       self.welcome_button_frame,
       text="Settings",
-      command=self.downloadVideo
+      command=self.setConfigLayout
     )
     self._welcome_download_video_button.grid(row=0, column=1, padx=5)
 
@@ -1303,6 +1314,15 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     controllerImage = controllerImage.resize((1280, 720), Image.ANTIALIAS)
     self.controllerImageTk = ImageTk.PhotoImage(controllerImage)
     
+
+    # CONFIG
+    self.config_frame = tk.Frame(self.root)
+    emergency_stop_button_label = tk.Label(self.config_frame, text="Emergency Stop:")
+    emergency_stop_button_label.grid(row=0, column=0)
+    self.emergency_stop_button_text = tk.StringVar()
+    self.emergency_stop_button_text.set("B")
+    emergency_stop_button_dropdown = tk.OptionMenu(self.config_frame, self.emergency_stop_button_text, *self.controller_buttons)
+    emergency_stop_button_dropdown.grid(row=0, column=1)    
 
 
     # To default layout

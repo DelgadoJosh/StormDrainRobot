@@ -58,6 +58,16 @@ MIN_ABS_DIFFERENCE = 5
 
 class Controller(object):
     """Simple joystick test class."""
+    GET_ABBV = {
+        "A": "S",
+        "B": "E",
+        "X": "W",
+        "Y": "N",
+        "Start": "SLCT", # For some reason select is start on the controller
+        "Select": "STRT",
+        "Right Bumper": "TR",
+        "Left Bumper": "TL",
+    }
     def __init__(self, gamepad=None, abbrevs=EVENT_ABB):
         self.btn_state = {}
         self.old_btn_state = {}
