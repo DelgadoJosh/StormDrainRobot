@@ -80,7 +80,7 @@ def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_tex
       
       shapeFile_Backend.create_shapefile(filepath, nameOfFile, xs, ys, dates)
     except:
-      messagebox.showerror("Error", "Invalid input")
+      messagebox.showerror("Error", "Invalid input. \nMake sure all the longitudes and latitudes are numbers.")
       top.destroy()
       return
   
