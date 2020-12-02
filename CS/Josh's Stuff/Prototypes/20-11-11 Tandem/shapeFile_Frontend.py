@@ -12,6 +12,7 @@ import tkinter.ttk
 from tkcalendar import DateEntry
 from tkinter.filedialog import askdirectory
 import datetime
+import math
 
 import shapeFile_Backend
 
@@ -23,15 +24,32 @@ def feetToLatitude(feet):
   # 1 degree of latitude = 364,000 feet
   return feet/364000.0
 
-def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_text=None, end_latitude_text=None, end_longitude_text=None):
+def feetToLongitude(feet):
+  # One degree of longitude = 288,200 feet
+  return feet/288200.0
+
+def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_text=None, end_latitude_text=None, end_longitude_text=None, distInFeet=0):
   def save_file():
     try:
       # Saves the current input as a new shapefile
       nameOfFile = ent_name.get()
       # xs = [float(ent_x.get())]
       # ys = [float(ent_y.get())]
-      x = float(start_longitude_text.get())
-      y = float(start_latitude_text.get())
+      x1 = float(start_longitude_text.get())
+      y1 = float(start_latitude_text.get())
+      x2 = float(end_longitude_text.get())
+      y2 = float(end_longitude_text.get())
+      dx = x2-x1 
+      dy = y2-y1 
+      mag = math.sqrt(dx*dx + dy*dy)
+      dx /= mag 
+      dy /= mag 
+      distInLongitude = feetToLongitude(distInFeet)
+      distInLatitude = feetToLatitude(distInFeet)
+      dx *= distInLongitude
+      dy *= distInLatitude
+      x = x1 + dx 
+      y = y1 + dy
       xs = [x]
       ys = [y]
       date = datetime.datetime.strptime(cal_date.get(), "%m/%d/%y").date()
