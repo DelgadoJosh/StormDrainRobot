@@ -278,7 +278,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     json_text = json.dumps(self.config)
     # print(json_text)
     # print(json_text)
-    filename = os.getcwd() + "\\" + "config.json"
+    configFolderName = "\\config"
+    filename = os.getcwd() + configFolderName + "\\config.json"
     # Overwrite it
     # if os.path.exists(filename):
     #   os.remove(filename)
@@ -1277,7 +1278,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     # Create Canvas to show the current bearing of the camera
     self.canvas = tk.Canvas(self.side_frame, bg="white", height=self.canvas_height, width=self.canvas_width)
     imageFolderName = "\\images"
-    filename = os.getcwd() + imageFolderName + "\\RobotTopDown.png" # 300 x 400
+    filename = os.getcwd() + imageFolderName + "\\robotTopDown.png" # 300 x 400
     robotImage = Image.open(filename)
     robotImage = robotImage.resize((self.canvas_width, self.canvas_height), Image.ANTIALIAS)
     robotImagetk = ImageTk.PhotoImage(robotImage)
