@@ -1,7 +1,14 @@
 # UCF Stormdrain Robot 2020 - Team Black
 
 # Client
-# This should receive 
+# This should receive from the Jetson Nano:
+#   - Video Frames
+#   - Voltage Data
+#   - Encoder Data
+# This should send to the GUI:
+#   - All of the above data
+# This should be receive from the GUI:
+#   - Instructions to send to the Jetson Nano
 
 # Standard libraries
 import socket 
@@ -29,7 +36,6 @@ payload_size = struct.calcsize("Q")
 
 class Client():
   ip_address = "10.0.0.2" # The one you're connecting to
-  # ip_address = "localhost"
   port = 5000
   def __init__(self, Address=(ip_address,port)):
     self.s = socket.socket() 
@@ -38,11 +44,13 @@ class Client():
   def send(self, message):
     self.s.send(message)
 
+# TODO: Add error handling for this, and show that error on the GUI
 print("Initiating Client")
 c = Client()
 print("Client Connected")
 
 # Read the queue from the GUI to grab instructions to send
+# Can refactor this to use handlers instead
 queue = GUI.app.queue
 stopFlag = GUI.app.programEnd
 frameQueue = GUI.app.frameQueue
@@ -67,7 +75,7 @@ def retrieveData(data):
 
   return output_data, remainder_data
 
-# Loop for receiving instructions, the instructions is added to a queue from the GUI
+# Loop for receiving instructions from a the GUI queue
 def loopForReceivingInstructions():
     global stopFlag
     while not stopFlag:
@@ -76,30 +84,14 @@ def loopForReceivingInstructions():
       try: 
         if not queue.empty():
           command = queue.get()
-          # if DEBUG:
-          #   print(f"Sending {command}")
           c.send(command.encode('utf-8'))
       except:
         stopFlag = True
     print("[InstructionLoop] Ended")
 
-# def parseFrameFromBytes(frame_data):
-#   # If going the direct encode/decode to get frameBytes
-#   frameBytes = base64.b64decode(frame_data) 
-
-#   img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
-#   frame = cv2.imdecode(img_as_np, flags=1)
-
-#   return frame
-
 def parseFrameFromBytesJpg(frame_data):
   frame = base64.b64decode(frame_data)
   return frame
-
-# def getNumpyArray(frame_data):
-#   frameBytes = base64.b64decode(frame_data)
-#   img_as_np = np.frombuffer(frameBytes, dtype=np.uint8)
-#   return img_as_np
 
 frameDataQueue = Queue(maxsize=1)
 npArrayQueue = Queue(maxsize=1)
@@ -115,21 +107,6 @@ def loopToParseVideoData():
     if not frameQueue.full():
       frameQueue.put(frame)
 
-# def loopToDecodeData():
-#   while True:
-#     time.sleep(0.01)
-#     if npArrayQueue.empty():
-#       continue 
-
-#     img_as_np = npArrayQueue.get()
-#     frame = cv2.imdecode(img_as_np, flags=1)
-
-#     if not frameQueue.full():
-#       frameQueue.put(frame)
-  
-#   print("[DecodeDataLoop] Ended Successfully")
-
-
 def loopToReceiveData():
   global stopFlag
   data = b''
@@ -140,16 +117,21 @@ def loopToReceiveData():
       if stopFlag:
         break
 
-      # Currently we have a
+      # Currently we have a hard-coded order of data to receive:
+      # <Video Frame> <Voltage Data> <Encoder Data>
+      # This was done to prevent JSON overhead due to concerns of fps drops
+      # This can be refactored to use a JSON wrapper
 
       # Receive Frame
       frame_data, data = retrieveData(data)
+      if not frameDataQueue.full():
+        frameDataQueue.put(frame_data)
+
+      # Debug output for the FPS of the data being streamed (not necessarily displayed)
       numFramesReceived += 1
       duration = time.time() - startTime
       if numFramesReceived%10 == 0:
         print(f"Frame {numFramesReceived} | FPS: {numFramesReceived/duration:.3f}")
-      if not frameDataQueue.full():
-        frameDataQueue.put(frame_data)
 
       # Receive Voltage
       voltage_data, data = retrieveData(data)
@@ -172,7 +154,7 @@ def loopToReceiveData():
   print("[RecieveDataLoop] Ended Safely")
 
 if __name__ == '__main__':
-  input_thread = threading.Thread(target=getInput, daemon=True)
+  input_thread = threading.Thread(target=loopForReceivingInstructions, daemon=True)
   data_thread = threading.Thread(target=loopToReceiveData, daemon=True)
   parse_video_data_thread = threading.Thread(target=loopToParseVideoData, daemon=True)
 
