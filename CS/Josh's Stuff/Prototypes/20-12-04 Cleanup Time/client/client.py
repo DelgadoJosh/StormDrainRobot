@@ -3,6 +3,7 @@
 # Client
 # This should receive 
 
+# Standard libraries
 import socket 
 import struct
 import threading
@@ -17,7 +18,7 @@ from queue import Queue
 import GUI
 
 
-# DEBUG = False
+DEBUG = False
 
 # Note that how windows vs ubuntu calculates size can be different
 # This payload size is the size of the integer used to determine the size of 
