@@ -35,9 +35,9 @@ from datetime import datetime
 
 # Custom Libraries
 import shapeFile_Frontend
-# Currently, if the controller is not connected, the entire library sends an exception
-# This can later be refactored to allow for reconnecting the controller
 try:
+  # Currently, if the controller is not connected, the entire library sends an exception
+  # This can later be refactored to allow for reconnecting the controller
   from controller import Controller
   controllerConnected = True
 except:
@@ -71,10 +71,8 @@ class App(threading.Thread):
     if msgBox == 'yes':
       self.programEnd = True
       time.sleep(0.2) # To let the loop close
-      # threading._shutdown()
       self.root.quit()
     else:
-      # messagebox.showinfo('Return', 'You will now return to the application screen')
       return
 
   # Create a concurrency-safe queue for the client to read
@@ -93,27 +91,6 @@ class App(threading.Thread):
     config = json.loads(json_text)
   except: 
     config = defaultConfig
-    # Save the default config to disk
-
-  # def setSpeed(self, leftSpeed, rightSpeed):
-  #   print(f"Changing left to {leftSpeed} and changing right to {rightSpeed}")
-  #   speedString = f"{leftSpeed} {rightSpeed}"
-  #   self.queue.put(speedString)
-
-
-  # def handle_click(self, row, col):
-  #   # print(f"The button was clicked! by {row} {col}")
-  #   multipliers = self.multipliers 
-  #   vals = self.vals
-  #   leftSpeed = multipliers[row][0]*vals[col-1]
-  #   rightSpeed = multipliers[row][1]*vals[col-1]
-  #   self.setSpeed(leftSpeed, rightSpeed)
-  #   # testLoop.changeSpeed(leftSpeed, rightSpeed)
-
-  # def submitData(self, lights_percent, motor_left_percent, motor_right_percent, servo_horizontal_angle, servo_vertical_angle):
-  #   outputString = f"{lights_percent} {motor_left_percent} {motor_right_percent} {servo_horizontal_angle} {servo_vertical_angle}"
-  #   print(outputString)
-  #   self.queue.put(outputString)
 
   def inputDataWindow(self):
     print("Input Data Run")
@@ -121,7 +98,9 @@ class App(threading.Thread):
 
   def startRun(self):
     print("Starting run")
+
     # TODO: Add check to ensure the data is good
+    # At the moment only have a check for blank name.
     pipeName = self.getPipeName()
     if pipeName == "":
       # Empty name, send a warning
@@ -130,14 +109,10 @@ class App(threading.Thread):
 
     # Otherwise we have good data, submit it
     command = f"NAME|{pipeName}|{str(datetime.now())}"
-    print(command)
+    # print(command)
     self.startTime = time.time()
     self.numFrames = 0
     self.queue.put(command)
-    self.setLayoutDefault()
-
-  def downloadVideo(self):
-    print("Downloading data") 
     self.setLayoutDefault()
 
   help_window = None
@@ -255,7 +230,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     return Controller.GET_ABBV[val]
 
 
-
   controller_buttons = ["A", "B", "X", "Y", "Start", "Select", "Right Bumper", "Left Bumper"]
   controller_configurable = {
     "Emergency Stop", 
@@ -276,15 +250,11 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
   
     # Save to file
     json_text = json.dumps(self.config)
-    # print(json_text)
-    # print(json_text)
     configFolderName = "\\config"
     filename = os.getcwd() + configFolderName + "\\config.json"
+    
     # Overwrite it
-    # if os.path.exists(filename):
-    #   os.remove(filename)
     json_file = open(filename, "w")
-    # json.dump(self.config, json_file)
     json_file.write(json_text)
     
     # Change back to welcome screen
@@ -326,9 +296,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     VERTICAL_ANGLE_OFFSET = math.radians(30)
     MAX_HEIGHT = 0.8 # Technically should use height
     HALFWAY_HEIGHT = MAX_HEIGHT/2
-
-    # horizontalAngle = 90
-    # verticalAngle = 45
     while True:
       # Every inputQueryDelay, query to see 
       #  - if we increase/decrease the speed
@@ -622,20 +589,10 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     self.submitData()
     self.setUseController(False)
 
-
-  # camera = cv2.VideoCapture(0)   # TEMP
   dTime = 0.01
-  # def continuallySendData(self, checkbox, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
   def continuallySendData(self, checkbox):
     dTime = self.dTime
-    nextTimeAvailable = time.time() + dTime
-    # camera = self.camera # TEMP
     while True:
-      # print(self.programEnd)
-      # print("Should show new frame") #TEMP
-      # _, frame = camera.read() #TEMP
-      # self.showFrame(frame) #TEMP
-      # time.sleep(dTime)
       if self.programEnd:
         break
       doConstantlySend = checkbox.get()
@@ -643,24 +600,10 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         time.sleep(dTime)
         continue
       time.sleep(dTime)
-      # if time.time() < nextTimeAvailable:
-      #   continue 
-      # nextTimeAvailable = time.time() + dTime 
 
       self.submitData()
-      # self.submitData(lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry)
     print("Cleaned up loop")
     return
-
-  # def submitData(self, lights_entry, motors_left_entry, motors_right_entry, servos_horizontal_entry, servos_vertical_entry):
-  #   outputString = f"{lights_entry.get()} {motors_left_entry.get()} {motors_right_entry.get()} {servos_horizontal_entry.get()} {servos_vertical_entry.get()}"
-  #   print(outputString)
-  #   self.queue.put(outputString)
-
-  # def submitData(self, lights_entry, servos_horizontal_entry, servos_vertical_entry):
-  #   outputString = f"{lights_entry.get()} {self.getLeftMotorSpeed()} {self.getRightMotorSpeed()} {servos_horizontal_entry.get()} {servos_vertical_entry.get()}"
-  #   print(outputString)
-  #   self.queue.put(outputString)
 
   def submitData(self):
     servoHorizontal = self.getServosHorizontal()
@@ -681,14 +624,10 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     img = Image.fromarray(resizedImage)
     imgTk = ImageTk.PhotoImage(image=img)
 
-    # Saves video to the directory
-    # out.write(frame)
-
-    # global image_label
+    global image_label
     image_label.imgtk = imgTk
     image_label.configure(image=imgTk)
     image_label.image = imgTk
-    # image_label.after(1, self.showFrame)
 
   voltage_label = None
   def setVoltage(self, voltage):
@@ -716,26 +655,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     if self.encoder_label == None:
       return
     self.encoder_label["text"] = f"Rotations: {numRotations}"
-
-  # lights_power_label = None
-  # def setLights(self, power):
-  #   if self.lights_power_label == None:
-  #     return 
-  #   try:
-  #     power = int(power*100 + 0.5)
-  #     self.lights_power_label["text"] = f"Lights Power: {power:3d}%"
-  #   except Exception as e:
-  #     print("[LightsPower] Exception {e}")
-
-  # attachment_power_label = None
-  # def setAttachmentPower(self, power):
-  #   if self.attachment_power_label == None:
-  #     return 
-  #   try:
-  #     power = int(power*100 + 0.5)
-  #     self.attachment_power_label["text"] = f"Attachment Power: {power:3d}%"
-  #   except Exception as e:
-  #     print("[LightsPower] Exception {e}")
 
   encoderQueue = Queue(maxsize=1)
   def loopToShowEncoder(self):
@@ -796,6 +715,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     except Exception as e:
       print(f"[ConfigLayout] Exception: {e}")
 
+  # Changing layout makes it so we have to re-arrange the elements inside
+  # the side_frame
   def setLayoutDefault(self):
     try: 
       self.clearLayout()
@@ -823,7 +744,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       self.button_frame.grid(row=0, column=1)
       self.checkbox_frame.grid(row=0, column=2)
       self.data_frame.grid(row=0, column=3)
-      self.canvas.grid(row=0, column=4, rowspan=2) # TEMP
+      self.canvas.grid(row=0, column=4, rowspan=2)
     except Exception as e: 
       print(f"[LayoutManualInput] Exception: {e}")
 
@@ -853,9 +774,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
   def parseFrameJpg(self, frame):
     img = Image.open(io.BytesIO(frame))
-
-    # From bytes: mode, size, data, decodername
-    # img = Image.frombytes('jpg', (1280, 720), frame, 'raw')
     imgTk = ImageTk.PhotoImage(img)
     return imgTk
   
@@ -905,7 +823,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       time.sleep(0.04)
       if self.horizontalAngle == None: 
         continue 
-      # self.updateGUIAngle(self.horizontalAngle)
       self.updateGUIAngle(self.getServosHorizontal())
 
   startTime = 0
@@ -924,14 +841,10 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         img = Image.open(io.BytesIO(frame)) 
 
         if self.smallerFrame:
-          # img = img.resize((16*70, 9*70), Image.ANTIALIAS)
           img = img.crop((0, 0, 16*70, 9*70))
 
         if not self.imgQueue.full():
           self.imgQueue.put(img)
-          # print("                                                   AddingImg")
-        # else:
-        #   print("                                                          FullImg")
       else:
         time.sleep(0.01)
 
@@ -943,9 +856,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
         if not self.imgTkQueue.full():
           self.imgTkQueue.put(imgTk)
-        #   print("                                                                         AddingImgTk")
-        # else:
-        #   print("                                                                                   FullImgTk")
       else:
         time.sleep(0.01)
 
@@ -976,17 +886,9 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       if not self.frameQueue.empty():
         # Then we update the cur frame
         self.curFrame = self.frameQueue.get()
-        # duration = time.time() - self.startTime
-        # print(f"Frame {self.numFrames} | fps: {self.numFrames/duration:.3f} | type: {type(self.curFrame)}")
-
-      # if self.frameQueue.full():
-      #   # Then we empty out a few frames to improve latency
-      #   for i in range(10):
-      #     _ = self.frameQueue.get()
 
       if self.curFrame is not None:
         # Parse the image
-        # img, imgTk = self.parseFrame(self.curFrame)
         imgTk = self.parseFrameJpg(self.curFrame)
 
         # Update the image
@@ -1067,15 +969,11 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
     servos_horizontal_label = tk.Label(self.manual_input_frame, text="Horizontal\n Camera Angle")
     servos_horizontal_label.grid(row=0, column=3)
-    servos_horizontal_entry = tk.Entry(self.manual_input_frame, width=20)
-    # servos_horizontal_entry.grid(row=1, column=3, padx=2) 
     self.servos_horizontal_slider = tk.Scale(self.manual_input_frame, from_=0, to=180, orient=tk.HORIZONTAL) # Can optionally set tickInterval=10, length=something
     self.servos_horizontal_slider.set(90)
     self.servos_horizontal_slider.grid(row=1, column=3, padx=2)
     servos_vertical_label = tk.Label(self.manual_input_frame, text="Vertical\n Camera Angle")
     servos_vertical_label.grid(row=0, column=4)
-    servos_vertical_entry = tk.Entry(self.manual_input_frame, width=20)
-    # servos_vertical_entry.grid(row=1, column=4, padx=2)
     self.servos_vertical_slider = tk.Scale(self.manual_input_frame, from_=0, to=90, orient=tk.HORIZONTAL)
     self.servos_vertical_slider.set(45)
     self.servos_vertical_slider.grid(row=1, column=4, padx=2)
@@ -1086,7 +984,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     attachment_entry = tk.Entry(self.manual_input_frame, width=20, textvariable=self.attachment_entry_text)
     attachment_entry.grid(row=1, column=5, padx=2)
 
-    # Ahhhhh no multiline lambdas :(  Wait nvm.
     submit_data_button = tk.Button(
       self.manual_input_frame,
       text="Submit Data",
@@ -1127,13 +1024,11 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     center_angle_button.grid(row=1, column=0, pady=2)
 
     emergency_stop_button = tk.Button(
-      # self.manual_input_frame,
       self.button_frame,
       text="STOP MOTORS",
       command = self.emergencyStop,
       background = 'red'
     )
-    # emergency_stop_button.grid(row=0, column=6)
     emergency_stop_button.grid(row=0, column=0, pady=2)
 
     help_button = tk.Button(
@@ -1146,11 +1041,9 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
     # Todo: Add a checkbox for constantly send the data every x seconds
     self.checkbox_frame = tk.Frame(self.side_frame, relief=tk.RAISED, borderwidth=2)
-    # self.checkbox_frame.grid(row=1, column=7)
     self.checkbox_frame.grid(row=0, column=2)
     constantly_submit_checkbox_val = tk.IntVar()
     constantly_submit_checkbox = tk.Checkbutton(self.checkbox_frame, text="Send Instructions", variable=constantly_submit_checkbox_val)
-    # constantly_submit_checkbox.grid(row=1, column=6)
     constantly_submit_checkbox.grid(row=0, column=0)
     self.use_controller_checkbox_val = tk.IntVar()
     use_controller_checkbox = tk.Checkbutton(self.checkbox_frame, text="Use Controller", variable=self.use_controller_checkbox_val)
@@ -1159,9 +1052,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
     # DATA BOX
     self.data_frame = tk.Frame(self.side_frame, relief=tk.RAISED, borderwidth=2)
-    # self.data_frame.grid(row=0, column=8, rowspan=2, padx=2)
     self.data_frame.grid(row=0, column=3)
-    # Populate the box with data
     self.fps_label = tk.Label(self.data_frame, text="FPS: 0")
     self.fps_label.grid(row=0, column=0)
     self.voltage_label = tk.Label(self.data_frame, text="Voltage: 0")
@@ -1192,14 +1083,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     send_data_loop = threading.Thread(
       target=self.continuallySendData, 
       args=(
-        constantly_submit_checkbox_val, 
-        # lights_entry,
-        # motors_left_entry,
-        # motors_right_entry,
-        # # servos_horizontal_entry,
-        # # servos_vertical_entry
-        # servos_horizontal_slider,
-        # servos_vertical_slider
+        constantly_submit_checkbox_val,
       ),
       daemon=True,) 
     send_data_loop.start()
@@ -1221,8 +1105,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     canvas_update_loop.start()
 
     # Todo: Add a image for the info
-    # imageFrame = tk.Frame(width=1280, height=720)
-    # imageFrame.grid(row=2, column=0, columnspan=9)
     self.image_frame = tk.Frame(self.root)
     self.image_frame.grid(row=1, column=0)
     
@@ -1237,14 +1119,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     self.image_label = tk.Label(self.image_frame, image=defaultWallpapertk)
     self.image_label.grid(row=0, column=0)
 
-
-    # Start thread to refresh the video frame
-    # refresh_frame_loop = threading.Thread(
-    #   target=self.refreshFrame,
-    #   daemon=True
-    # )
-    # refresh_frame_loop.start()
-
     encode_image_loop = threading.Thread(
       target=self.loopToEncodeImg,
       daemon=True
@@ -1255,11 +1129,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       target=self.loopToTkImg,
       daemon=True
     )
-    # imageTk_loop = Process(
-    #   target=self.loopToTkImg,
-    #   daemon=True,
-    #   args=(self,),
-    # )
     imageTk_loop.start()
 
     display_loop = threading.Thread(
@@ -1267,13 +1136,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       daemon=True
     )
     display_loop.start()
-
-    # # Output Video, file type can be changed in future
-    # fourcc = cv2.VideoWriter_fourcc(*'XVID')
-    # out = cv2.VideoWriter('./videos/output.avi', fourcc, 20.0, (1280, 720))
-
-    # # Init img for screenshot function
-    # img = None
 
     # Begin loop for querying the controller
     if controllerConnected:
@@ -1343,19 +1205,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
     # CONFIG
     self.config_frame = tk.Frame(self.root)
-    # emergency_stop_button_label = tk.Label(self.config_frame, text="Emergency Stop:")
-    # emergency_stop_button_label.grid(row=0, column=0)
-    # self.emergency_stop_button_text = tk.StringVar()
-    # self.emergency_stop_button_text.set("B")
-    # emergency_stop_button_dropdown = tk.OptionMenu(self.config_frame, self.emergency_stop_button_text, *self.controller_buttons)
-    # emergency_stop_button_dropdown.grid(row=0, column=1)    
-
-    # center_angle_button_label = tk.Label(self.config_frame, text="Center Camera:")
-    # center_angle_button_label.grid(row=1, column=0)
-    # self.center_angle_button_text = tk.StringVar()
-    # center_angle_button_dropdown = tk.OptionMenu(self.config_frame, self.emergency_stop_button_text, *self.controller_buttons)
-    # center_angle_button_dropdown.grid(row=1, column=1)
-
     index = 0
     button_labels = {}
     button_dropdown = {}
@@ -1372,7 +1221,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       index += 1
 
     config_button_frame = tk.Frame(self.config_frame)
-    # config_button_frame.grid(row=index, column=3, sticky="e", pady=2)
     config_button_frame.grid(row=0, column=5)
     save_config_button = tk.Button(config_button_frame, text="Save", command=self.saveConfig)
     save_config_button.grid(row=0, column=1, padx=4)
@@ -1382,9 +1230,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     default_config_button.grid(row=0, column=0)
 
     self.cancelConfig() # Use this to restore the config to what it says in the file
-
-    # To default layout
-    # self.setLayoutDefault()
 
     self.setWelcomeLayout()
 
@@ -1396,5 +1241,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 # https://stackoverflow.com/questions/459083/how-do-you-run-your-own-code-alongside-tkinters-event-loop
 # Begins the loop on a separate thread
 
+# Technically can refactor to declare this in the client
 app = App()
 
