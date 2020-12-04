@@ -85,7 +85,7 @@ class App(threading.Thread):
   vals = [10, 25, 50, 75, 100]
 
   global defaultConfig
-  filename = os.getcwd() + "/config.json"
+  filename = os.getcwd() + "\\" + "config.json"
   try:
     file_json = open(filename)
     json_text = file_json.read() 
@@ -1276,7 +1276,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     # CAMERA BEARING CANVAS
     # Create Canvas to show the current bearing of the camera
     self.canvas = tk.Canvas(self.side_frame, bg="white", height=self.canvas_height, width=self.canvas_width)
-    filename = os.getcwd() + "\\RobotTopDown.png" # 300 x 400
+    imageFolderName = "\\images"
+    filename = os.getcwd() + imageFolderName + "\\RobotTopDown.png" # 300 x 400
     robotImage = Image.open(filename)
     robotImage = robotImage.resize((self.canvas_width, self.canvas_height), Image.ANTIALIAS)
     robotImagetk = ImageTk.PhotoImage(robotImage)
@@ -1297,7 +1298,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     # IMAGE FRAME
     # Capture video frames
     # Create a default image for the frame before streaming
-    defaultWallpaperFileName = os.getcwd() + "\\UCF Wallpaper.png"
+    defaultWallpaperFileName = os.getcwd() + imageFolderName + "\\defaultImage.png"
     self.defaultWallpaper = Image.open(defaultWallpaperFileName)
     self.defaultWallpaper = self.defaultWallpaper.resize((1280, 720), Image.ANTIALIAS)
     defaultWallpapertk = ImageTk.PhotoImage(self.defaultWallpaper)
@@ -1402,7 +1403,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
     # HELP
     # Grab image
-    filename = os.getcwd() + "\\controllerLayout.png" # 300 x 400
+    filename = os.getcwd() + imageFolderName + "\\controllerLayout.png" # 300 x 400
     controllerImage = Image.open(filename)
     controllerImage = controllerImage.resize((1280, 720), Image.ANTIALIAS)
     self.controllerImageTk = ImageTk.PhotoImage(controllerImage)
