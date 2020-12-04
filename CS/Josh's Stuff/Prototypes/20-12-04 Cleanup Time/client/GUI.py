@@ -358,7 +358,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
       if emergencyStopPressed:
         self.emergencyStop()
-        
+
       if showHelpMenuPressed:
         self.toggleHelpWindow()
 
@@ -377,19 +377,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       if self.isSpeedControlEnabled:
         # If it's not in the deadzone, then we'll update
         if not self.isInDeadZone(joystickLX, joystickLY):
-          # print(f"LX: {joystickLX} | LX: {joystickLY} | RX: {joystickRX} | RY: {joystickRY}")
-          # changeInSpeed = 1.0*joystickLY/self.MAX_JOYSTICK * self.SENSITIVITY
-          # motorLeftSpeed = float(self.getLeftMotorSpeed())
-          # motorLeftSpeed += changeInSpeed
-          # motorLeftSpeed = self.clampAbsolute(motorLeftSpeed, 1.0)
-          # motorRightSpeed = float(self.getRightMotorSpeed())
-          # motorRightSpeed += changeInSpeed
-          # motorRightSpeed = self.clampAbsolute(motorRightSpeed, 1.0)
-
-          # # print(f"Left: {motorLeftSpeed} | Right: {motorRightSpeed} | change{changeInSpeed}")
-
-          # self.setLeftMotor(motorLeftSpeed)
-          # self.setRightMotor(motorRightSpeed)
           # Relative LY and relative LX
           relX = 1.0*joystickLX/self.MAX_JOYSTICK
           relY = 1.0*joystickLY/self.MAX_JOYSTICK
@@ -399,16 +386,14 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
           radius = self.clamp(radius, 0, 1)
 
           angle = numpy.arctan2(relY, relX)
-          # self.setLights(angle)
 
           # If going directly up/directly down within VERTICAL_ANGLE_OFFSET in either direction
           if self.withinInterval(angle, math.pi/2, VERTICAL_ANGLE_OFFSET) or self.withinInterval(angle, -math.pi/2, VERTICAL_ANGLE_OFFSET):
             # Going straight forward/backwards
             newSpeed = relY
             newSpeed *= maxPower
-            # newSpeed = self.clampAbsolute(newSpeed, maxPower)
-            self.setLeftMotor(f"{newSpeed:.3f}")
-            self.setRightMotor(f"{newSpeed:.3f}")
+            leftSpeed = newSpeed
+            rightSpeed = newSpeed
           else:
             # We are turning
             newSpeed = radius
@@ -417,21 +402,16 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
             y = math.sin(angle)
             if y > 0:
               fullSpeed = newSpeed
-              signy = 1
             else:
               fullSpeed = -newSpeed 
-              signy = -1
 
             otherSideSpeed = abs(y)-HALFWAY_HEIGHT # Want the halfway to be the new 0
-            # otherSideSpeed *= signy # Add back signs
             otherSideSpeed /= HALFWAY_HEIGHT # Want it to be from -1 to 1
             otherSideSpeed = self.clamp(otherSideSpeed, -1, 1) 
             otherSideSpeed *= fullSpeed # Weigh it by how far from center you are
-            # self.setLights(otherSideSpeed)
 
             if x > 0:
               # Turning right
-              signx = 1
               if y > 0:
                 leftSpeed = fullSpeed
                 rightSpeed = otherSideSpeed
@@ -440,7 +420,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
                 rightSpeed = fullSpeed
             else: 
               # Turning left
-              signx = -1
               if y > 0:
                 leftSpeed = otherSideSpeed
                 rightSpeed = fullSpeed
@@ -448,9 +427,9 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
                 leftSpeed = fullSpeed
                 rightSpeed = otherSideSpeed
 
-            self.setLeftMotor(f"{leftSpeed:.3f}")
-            self.setRightMotor(f"{rightSpeed:.3f}")
 
+          self.setLeftMotor(f"{leftSpeed:.3f}")
+          self.setRightMotor(f"{rightSpeed:.3f}")
 
         else:          
           # If in the deadzone for the joysticks, we come to a stop
@@ -458,62 +437,36 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
             self.setLeftMotor(0)
             self.setRightMotor(0)
           # If cruise control is enabled, and we're in the deadzone, we won't update speed
-
       
       # If cruise control is pressed, we'll disable the input
       # if cruiseControlButtonPressed:
       #   self.setCruiseControlCheckbox(True)
 
-
       # [SERVO ANGLES]
       # <RIGHT STICK>
       if not self.isInDeadZone(joystickRX, joystickRY):
         changeInHorizontalAngle = 1.0*joystickRX/self.MAX_JOYSTICK * self.SENSITIVITY_HORIZONTAL_ANGLE
-        # servoHorizontalAngle = float(self.getServosHorizontal())
-        # servoHorizontalAngle += changeInHorizontalAngle
-        # servoHorizontalAngle = int(self.clamp(servoHorizontalAngle, 0, 180) + 0.5)
-        # horizontalAngle += changeInHorizontalAngle
-        # horizontalAngle = self.clamp(horizontalAngle, 0, 180)
-        # servoHorizontalAngle = int(horizontalAngle + 0.5)
         self.horizontalAngle += changeInHorizontalAngle
         self.horizontalAngle = self.clamp(self.horizontalAngle, 0, 180) 
         servoHorizontalAngle = int(self.horizontalAngle + 0.5)
 
         changeInVerticalAngle = 1.0*joystickRY/self.MAX_JOYSTICK * self.SENSITIVITY_VERTICAL_ANGLE
-        # servoVerticalAngle = float(self.getServosVertical())
-        # servoVerticalAngle += changeInVerticalAngle
-        # servoVerticalAngle = int(self.clamp(servoVerticalAngle, 0, 90) + 0.5)
-        # verticalAngle += changeInVerticalAngle
-        # verticalAngle = self.clamp(verticalAngle, 0, 90)
-        # servoVerticalAngle = int(verticalAngle + 0.5)
         self.verticalAngle += changeInVerticalAngle
         self.verticalAngle = self.clamp(self.verticalAngle, 0, 90) 
         servoVerticalAngle = int(self.verticalAngle + 0.5)
 
-        # print(f"rx={joystickRX} | rx={joystickRY} | changeHoriz={changeInHorizontalAngle} | changeVert={changeInVerticalAngle}")
-
         self.setServosHorizontal(servoHorizontalAngle)
         self.setServosVertical(servoVerticalAngle)
       
-      if maxSpeedDecreasePressed:
-        newMax = maxPower - INCREMENT
+      if maxSpeedIncreasePressed or maxSpeedDecreasePressed:
+        if maxSpeedIncreasePressed:
+          newMax = maxPower + INCREMENT
+        else:
+          newMax = maxPower - INCREMENT 
+        
         newMax = self.clamp(newMax, 0, 1.0)
         maxPower = newMax
         self.setJoystickMaxPower(maxPower)
-        if DEBUG:
-          print(f"Left Bumper pressed, new maxpower = {maxPower}")
-      
-      
-      if maxSpeedIncreasePressed:
-        # print(f"right bumper pressed: maxpower = {maxPower}")
-        newMax = maxPower + INCREMENT
-        # print(f"  Temp: {newMax}")
-        newMax = self.clamp(newMax, 0, 1.0)
-        maxPower = newMax 
-        self.setJoystickMaxPower(maxPower)
-        # print(f"  new max: {maxPower}")
-        if DEBUG:
-          print(f"Right bumper pressed, new maxpower = {maxPower}")
 
       if dPadX != 0:
         try: 
@@ -525,8 +478,6 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
           print("AttachmentPower invalid")
 
       if dPadY != 0:
-        if DEBUG:
-          print(f"dPadY: {dPadY}")
         try: 
           lightsPower = float(self.getLights()) 
           lightsPower += dPadY * LIGHT_INCREMENT
