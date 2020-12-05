@@ -98,6 +98,8 @@ def gstreamer_pipeline(
 # Initialize camera
 camera = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
 
+# Loop to save the video frame by frame
+# In our testing, the Jetson can save at roughly 10-12fps
 frame = None 
 stopFlag = False
 saveVideo = True
@@ -126,6 +128,9 @@ def loopToSaveVideo():
     print("[SaveVideo] Ended")
     out.release()
 
+# This is a safety loop to ensure that if the ethernet is disconnected/the laptop
+# doesn't receive any data for 10 seconds, then we will safely shut down and save
+# the video.
 sentImage = True
 def loopToCheckTimeout():
     global sentImage
@@ -142,7 +147,12 @@ def loopToCheckTimeout():
             stopFlag = True
             break 
 
-# Loop to send the video, frame by frame, and the data
+# Loop to send the data:
+#   - Video Frames
+#   - Voltage
+#   - Encoder Data
+# In the future, we can refactor to use a JSON wrapper, but there 
+# were concerns that the overhead may slow it down significantly.
 def loopToSendData():
     global frame
     global sendImage
@@ -212,6 +222,13 @@ def loopToSendData():
     time.sleep(1)
     print("[Broadcast] Ended Successfully")
 
+# Loop to receive instructions from the Laptop
+# It can either recieve instructions to:
+#   - Start run, with the format NAME|date
+#       - The date is necessary as the Jetson Nano does not have an accurate onboard clock
+#   - Set light power %, motor speed %, servo angles, and attachment power % 
+# This can be refactored to use JSON wrapper instead of the custom utils library
+# but there were concerns that the JSON overhead may slow it down.
 out = None
 def loopToReceiveData():
     global out
