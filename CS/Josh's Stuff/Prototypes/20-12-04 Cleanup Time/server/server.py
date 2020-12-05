@@ -1,36 +1,27 @@
-# ZMQ
-# https://www.pyimagesearch.com/2019/04/15/live-video-streaming-over-network-with-opencv-and-imagezmq/
+# UCF Stormwater Drain Robot 2020 - Team Black
 
-
-# Stack overflow
-# https://stackoverflow.com/questions/30988033/sending-live-video-frame-over-network-in-python-opencv
-
-
-# Lovely socket tutorial
-# https://realpython.com/python-sockets/
-
+# Server
 # This server handles sending over the video frames and data
 # And it also handles receiving instructions
 
 import cv2 
 import socket
-import pickle
 import struct
 import json 
 import base64
 import threading
-from multiprocessing import Process # Actually use multiple proccessors
-import lights
-import utils
 import time
+from queue import Queue
+import os
+
+# Custom Libraries
+import adc
+import attachment
+import lights
 import motors
 import servos
-import adc
-from queue import Queue
-from datetime import datetime
 import teensy
-import attachment
-import os
+import utils
 
 port = 5000
 ip_address = ""
@@ -47,7 +38,7 @@ class Video_Sender():
     self.Client, self.Adr = (self.s.accept())
     print(f"Got a connection from: {str(self.Client)}.")
 
-
+# At this point, all the custom libraries have been setup
 flashLights = True
 def loopToFlashLights():
     global flashLights
@@ -75,24 +66,12 @@ flashLights = False
 # Flip the image by setting the flip_method (most common values of 0 and 2)
 # display_width and display_height determine the size of the window on the screen
 
-# Adjsut display_width, display_height
+# Adjust display_width, display_height
 def gstreamer_pipeline(
-    # capture_width=1920,
-    # capture_height=1080,
-    # display_width=1920,
-    # display_height=1080,
-   capture_width=1280,
-   capture_height=720,
+    capture_width=1280,
+    capture_height=720,
     display_width=1280,
     display_height=720,
-#    framerate=60,
-#    flip_method=0,
-    # capture_width=1280,
-    # capture_height=720,
-  #  display_width=320,
-  #  display_height=180,
-    # display_width=1000,
-    # display_height=600,
     framerate=33,
     flip_method=0,
 ):
@@ -118,43 +97,10 @@ def gstreamer_pipeline(
 
 # Initialize camera
 camera = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
-# camera = cv2.VideoCapture(0)  
-# frameShared = None
-frameQueue = Queue(maxsize=100)
-stopFlag = False
+
 frame = None 
-
-# folderName = './videos/'
-# folderName = os.getcwd()
-# folderName = "/home/teamblack/Desktop/Videos"
-# date_split = str(datetime.now()).split(" ")
-# date = date_split[0]
-# timeStartedRunString = date_split[1]
-# timeStartedRunString = timeStartedRunString.replace('.', " ")
-# timeStartedRunString = timeStartedRunString.split(" ")[0]  # Throwing away the milliseconds
-# timeStartedRunString = timeStartedRunString.replace(":", "-")
-# name = date + "_" + timeStartedRunString
-# extension = '.mp4'
-# filename = folderName + "/" + name + extension 
-# fourcc = cv2.VideoWriter_fourcc(*'MP4V')
-# out = cv2.VideoWriter(filename, fourcc, 11.0, (1280, 720))
-
+stopFlag = False
 saveVideo = True
-
-# A parallel thread
-def constantlyReadVideoFeed():
-    # global frameQueue
-    # global stopFlag
-    global frame
-    print("Starting constantly reading")
-    while True:
-        if stopFlag:
-            return 
-        print("Reading frame")
-        grabbed, frame = camera.read()
-        frameQueue.put(frame)
-    print("Ending the video feed loop")
-
 saveVideoFrameQueue = Queue(maxsize=10)
 def loopToSaveVideo():
     startTimeSaved = time.time()
@@ -196,15 +142,10 @@ def loopToCheckTimeout():
             stopFlag = True
             break 
 
-# Loop to send the video, frame by frame.
-def broadcastVideo():
+# Loop to send the video, frame by frame, and the data
+def loopToSendData():
     global frame
     global sendImage
-    # global camera
-    # global frameQueue
-    # read_video = threading.Thread(target=constantlyReadVideoFeed, daemon=True)
-    # read_video = Process(target=constantlyReadVideoFeed, daemon=True)
-    # read_video.start()
 
     frameIndex = 0
     startTime = time.time()
@@ -219,28 +160,20 @@ def broadcastVideo():
                 continue
 
             # Save the frame
-            # out.write(frame)
             if not saveVideoFrameQueue.full():
                 saveVideoFrameQueue.put(frame)
-
-            # if frame == None:
-            #     continue 
-            # if frameQueue.qsize() == 0:
-            #     time.sleep(0.01)
-            #     continue 
-            # frame = frameQueue.get()
 
             # Encode the frame as a jpg
             grabbed, buffer = cv2.imencode('.jpg', frame)
 
             # Convert the image as bytes encoded as a string
-            data = base64.b64encode(buffer)  # What actually works
+            data = base64.b64encode(buffer)
 
             # Send message length first
-            message_size = struct.pack("L", len(data))
-
             # Then data
+            message_size = struct.pack("L", len(data))
             s.Client.sendall(message_size + data)
+
             
             # Let the timeout loop know we haven't timed out
             sendImage = True
@@ -262,7 +195,6 @@ def broadcastVideo():
             # Record the current time needed
             curTime = time.time()
             elapsedTime = curTime - startTime
-            dTime = curTime - prevTime 
             prevTime = curTime
             if frameIndex % 10 == 0:
                 print(f"Frame {frameIndex} | fps: {frameIndex/elapsedTime:.3f} | Voltage: {voltage:.3f}")
@@ -271,10 +203,6 @@ def broadcastVideo():
         
         except Exception as e:
             print(f"[Broadcast] Exception: {e}")
-            # s.s.close((ip_address, port))
-            # camera.release()
-            # out.release()
-            # cv2.destroyAllWindows()
             break
     
     print("[Broadcast] Ending")
@@ -282,12 +210,10 @@ def broadcastVideo():
     global saveVideo
     saveVideo = False
     time.sleep(1)
-    # out.release()
-    print("Ending")
+    print("[Broadcast] Ended Successfully")
 
 out = None
-
-def awaitInput():
+def loopToReceiveData():
     global out
     # Wait for the data, print it, and send it back
     while True:
@@ -301,7 +227,6 @@ def awaitInput():
             # Use the data received
             splitData = utils.parse(utils.cleanup(str(data)))
             if splitData is not None:
-                # print(f"Split Data: {splitData[0]} {splitData[1]} {splitData[2]} {splitData[3]} {splitData[4]}")
                 lights.setPWM(splitData[utils.LIGHTS_INDEX])
                 motors.setLeftSpeed(splitData[utils.MOTOR_LEFT_INDEX])
                 motors.setRightSpeed(splitData[utils.MOTOR_RIGHT_INDEX])
@@ -324,13 +249,6 @@ def awaitInput():
                     if not os.path.exists(folderName):
                         os.makedirs(folderName)
 
-                    # date_split = str(date_ti).split(" ")
-                    # date = date_split[0]
-                    # timeStartedRunString = date_split[1]
-                    # timeStartedRunString = timeStartedRunString.replace('.', " ")
-                    # timeStartedRunString = timeStartedRunString.split(" ")[0]  # Throwing away the milliseconds
-                    # timeStartedRunString = timeStartedRunString.replace(":", "-")
-                    # name = date + "_" + timeStartedRunString
                     extension = '.mp4'
                     filename = folderName + "/" + name + extension 
                     fourcc = cv2.VideoWriter_fourcc(*'MP4V')
@@ -342,33 +260,16 @@ def awaitInput():
                     save_video = threading.Thread(target=loopToSaveVideo, daemon=True)
                     save_video.start()
 
-        except: 
-            print("[InputLoop] Exception")
+        except Exception as e: 
+            print(f"[InputLoop] Exception {e}")
             break
     print("[InputLoop] Ended")
 
 # Trying using threading
-# read_video = Process(target=constantlyReadVideoFeed, daemon=True)
-send_video = threading.Thread(target=broadcastVideo)
-# save_video = threading.Thread(target=loopToSaveVideo, daemon=True)
-get_input = threading.Thread(target=awaitInput)
+send_data_loop = threading.Thread(target=loopToSendData)
+get_input_loop = threading.Thread(target=loopToReceiveData)
 timeout_loop = threading.Thread(target=loopToCheckTimeout, daemon=True)
 
-
-# send_video = Process(target=broadcastVideo, daemon=True)
-# get_input = Process(target=awaitInput, daemon=True)
-
-# read_video.start()
-send_video.start()
-# save_video.start()
-get_input.start()
+send_data_loop.start()
+get_input_loop.start()
 timeout_loop.start()
-
-
-# Trying using multiprocessing
-# send_video = Process(target=broadcastVideo)
-# get_input = Process(target=awaitInput)
-
-# send_video.start()
-# get_input.start()
-
