@@ -93,7 +93,7 @@ def gstreamer_pipeline(
   #  display_height=180,
     # display_width=1000,
     # display_height=600,
-    framerate=30,
+    framerate=33,
     flip_method=0,
 ):
     return (
@@ -146,7 +146,7 @@ def constantlyReadVideoFeed():
     # global frameQueue
     # global stopFlag
     global frame
-    print("Starting constantaly reading")
+    print("Starting constantly reading")
     while True:
         if stopFlag:
             return 
@@ -293,7 +293,7 @@ def awaitInput():
     while True:
         try:
             data = s.Client.recv(1024) # Recieve the data from the client
-            print(data)
+            # print(data)
 
             if not data:
                 break
