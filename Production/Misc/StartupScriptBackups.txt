@@ -1,0 +1,13 @@
+// This is for the server for motors
+#!/bin/sh
+python3 Desktop/TeamBlack/Github\ Repo/StormDrainRobot/CS/Josh\'s\ Stuff/Prototypes/20-11-03\ Motors\ And\ Voltage/server.py
+
+// This is for lighting
+python3 Desktop/TeamBlack/Github\ Repo/StormDrainRobot/CS/Josh\'s\ Stuff/Prototypes/20-11-11\ Servo/server.py
+
+// For lighting & stream
+python3 Desktop/TeamBlack/Github\ Repo/StormDrainRobot/CS/Josh\'s\ Stuff/Prototypes/20-11-11\ Tandem/server.py
+
+// This is for the Production Code
+python3 Desktop/TeamBlack/Github\ Repo/StormDrainRobot/Production/server/server.py
+
