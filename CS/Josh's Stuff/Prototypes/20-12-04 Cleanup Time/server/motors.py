@@ -1,3 +1,8 @@
+# UCF Stormwater Drain Robot 2020 - Team Black
+
+# Motors
+# This controls the pwm & dir pins of the motors
+
 from board import SCL, SDA
 import busio 
 from adafruit_pca9685 import PCA9685
@@ -62,60 +67,3 @@ def setRightSpeed(percentSpeed):
         setSpeed(i, percentSpeed)
 
 setup()
-
-def testMotors():
-    print("Beginning motor test")
-    print("Both at rest for 1 sec")
-    setLeftSpeed(0)
-    setRightSpeed(0)
-    time.sleep(1)
-
-    print()
-    print("Both forwards at 0.1 for 3 secs")
-    setLeftSpeed(0.1)
-    setRightSpeed(0.1)
-    time.sleep(3)
-
-    # print()
-    # print("Left in place at 0.1 for 3 secs")
-    # setLeftSpeed(-0.1)
-    # setRightSpeed(0.1)
-    # time.sleep(3)
-
-    # print()
-    # print("Right in place at 0.1 for 3 secs")
-    # setLeftSpeed(0.1)
-    # setRightSpeed(-0.1)
-    # time.sleep(3)
-
-    print()
-    print("Right motors only 0.1 for 3 secs")
-    setLeftSpeed(0)
-    setRightSpeed(0.1)
-    time.sleep(3)
-
-    print() 
-    print("Right motors only -0.1 for 3 secs")
-    setLeftSpeed(0)
-    setRightSpeed(-0.1)
-    time.sleep(3)
-
-    print()
-    print("Left motors only 0.1 for 3 secs")
-    setLeftSpeed(0.1)
-    setRightSpeed(0)
-    time.sleep(3)
-
-    print()
-    print("Left motors only -0.1 for 3 secs")
-    setLeftSpeed(-0.1)
-    setRightSpeed(0)
-    time.sleep(3)
-
-    print()
-    print("Ending testing.")
-    setLeftSpeed(0)
-    setRightSpeed(0)
-
-# runTest()
-

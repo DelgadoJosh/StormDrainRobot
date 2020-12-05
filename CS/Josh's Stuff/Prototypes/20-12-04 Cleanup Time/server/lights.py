@@ -1,10 +1,13 @@
+# UCF Stormwater Drain Robot 2020 - Team Black
+
+# Lights
+# This controls the PWM sent to modify the frequency of the lights
+
 # https://www.youtube.com/watch?v=8YKAtpPSEOk
 from adafruit_servokit import ServoKit 
-import time # For pausing
 from board import SCL, SDA
 import busio 
 from adafruit_pca9685 import PCA9685 
-import time
 
 DEBUG = False
 LIGHTS_PIN = 6
@@ -18,7 +21,7 @@ print("Starting up pca")
 pca = PCA9685(i2c_bus) 
 
 print("Setting frequency")
-pca.frequency = 369
+pca.frequency = 1526
 
 def setPWM(percentPower):
     power = abs(int(MAX*percentPower))

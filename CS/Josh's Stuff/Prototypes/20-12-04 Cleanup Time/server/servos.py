@@ -1,3 +1,6 @@
+# UCF Stormwater Drain Robot 2020 - Team Black
+
+# Servos
 # Custom Library to adjust the servos
 # https://www.youtube.com/watch?v=8YKAtpPSEOk
 from adafruit_servokit import ServoKit

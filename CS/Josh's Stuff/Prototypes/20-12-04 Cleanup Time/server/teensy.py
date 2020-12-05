@@ -1,3 +1,8 @@
+# UCF Stormwater Drain Robot 2020 - Team Black
+
+# Teensy
+# This controls reading the teensy for the motor encoder data
+
 from smbus import SMBus 
 import time
 
