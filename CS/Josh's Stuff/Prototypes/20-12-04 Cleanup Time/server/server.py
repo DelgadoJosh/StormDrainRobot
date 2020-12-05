@@ -103,7 +103,7 @@ camera = cv2.VideoCapture(gstreamer_pipeline(flip_method=2), cv2.CAP_GSTREAMER)
 frame = None 
 stopFlag = False
 saveVideo = True
-saveVideoFrameQueue = Queue(maxsize=10)
+saveVideoFrameQueue = Queue(maxsize=5)
 def loopToSaveVideo():
     startTimeSaved = time.time()
     numFramesSaved = 0
@@ -123,8 +123,10 @@ def loopToSaveVideo():
             else:
                 print("[SaveVideo] Out is not opened")
                 break
-        except:
-            print("[SaveVideo] Exception")
+        except Exception as e:
+            print(f"[SaveVideo] Exception {e}")
+    if not saveVideo:
+        print("[SaveVideo] saveVideo is False")
     print("[SaveVideo] Ended")
     out.release()
 
@@ -143,6 +145,7 @@ def loopToCheckTimeout():
         else:
             # We timed out as the other thread hasn't sent an image for 10 secs
             saveVideo = False 
+            print("[TimeoutLoop] Timed Out")
             time.sleep(1)
             stopFlag = True
             break 
@@ -155,11 +158,10 @@ def loopToCheckTimeout():
 # were concerns that the overhead may slow it down significantly.
 def loopToSendData():
     global frame
-    global sendImage
+    global sentImage
 
     frameIndex = 0
     startTime = time.time()
-    prevTime = time.time()
     while True: 
         try:
             # Grab the current frame
@@ -186,7 +188,7 @@ def loopToSendData():
 
             
             # Let the timeout loop know we haven't timed out
-            sendImage = True
+            sentImage = True
 
             # Grab the voltage data
             voltage = adc.getVoltage()
@@ -205,7 +207,6 @@ def loopToSendData():
             # Record the current time needed
             curTime = time.time()
             elapsedTime = curTime - startTime
-            prevTime = curTime
             if frameIndex % 10 == 0:
                 print(f"Frame {frameIndex} | fps: {frameIndex/elapsedTime:.3f} | Voltage: {voltage:.3f}")
             frameIndex += 1
