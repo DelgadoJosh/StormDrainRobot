@@ -10,7 +10,7 @@ import busio
 from adafruit_pca9685 import PCA9685 
 
 DEBUG = False
-LIGHTS_PIN = 6
+LIGHTS_PIN = 14
 MAX = 0xFFFF
 
 print("Starting up")

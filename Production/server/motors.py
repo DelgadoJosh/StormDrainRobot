@@ -26,7 +26,7 @@ pca.frequency = 1526
 GPIO.setwarnings(False)
 
 MAX = 0xFFFF
-motor_pwm_pins = [0, 1, 2, 3]
+motor_pwm_pins = [6, 7, 10, 11]
 motor_dir_pins = ["GPIO_PZ0", "GPIO_PE6", "SPI1_MISO", "SPI1_SCK"] # 31=GPIO_PZ0,  33=GPIO_PE6, SPI1_MISO=21, SPI1_SCK=23
     # GPIO.TEGRA_SOC = the mode for defining the pins
 motor_signs = [-1, -1, 1, 1] 
