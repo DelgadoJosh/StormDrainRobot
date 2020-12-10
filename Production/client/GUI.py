@@ -541,8 +541,10 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
   def centerAngle(self):
     self.setServosHorizontal(90)
     self.horizontalAngle = 90
+    self.changeInHorizontalAngle = 0
     self.setServosVertical(45)
     self.verticalAngle = 45
+    self.changeInVerticalAngle = 0
 
   servos_vertical_slider = None
   def getServosVertical(self):
