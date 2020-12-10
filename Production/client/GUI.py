@@ -542,8 +542,8 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     self.setServosHorizontal(90)
     self.horizontalAngle = 90
     self.changeInHorizontalAngle = 0
-    self.setServosVertical(45)
-    self.verticalAngle = 45
+    self.setServosVertical(85)
+    self.verticalAngle = 85
     self.changeInVerticalAngle = 0
 
   servos_vertical_slider = None
@@ -622,11 +622,11 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
   def submitData(self):
     servoHorizontal = self.getServosHorizontal()
-    # try:
-    #   servoHorizontal = 180 - float(servoHorizontal)
-    # except: 
-    #   # print("Bad horizontal")
-    #   servoHorizontal = 90
+    try:
+      servoHorizontal = 180 - float(servoHorizontal)
+    except: 
+      # print("Bad horizontal")
+      servoHorizontal = 90
     outputString = f"{self.getLights()} {self.getLeftMotorSpeed()} {self.getRightMotorSpeed()} {servoHorizontal} {self.getServosVertical()} {self.getAttachmentPower()}"
     if DEBUG:
       print(outputString)
