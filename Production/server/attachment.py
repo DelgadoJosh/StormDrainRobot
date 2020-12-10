@@ -8,7 +8,7 @@ import busio
 from adafruit_pca9685 import PCA9685 
 
 DEBUG = False
-ATTACHMENT_PIN = 7
+ATTACHMENT_PIN = 15
 MAX = 0xFFFF
 
 print("Starting up")

@@ -651,18 +651,35 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     self.fps_label["text"] = f"FPS: {fps:3.2f}"
   
   encoder_label = None
+  encoder_rotations = 0
   def setEncoder(self, numRotations):
     if self.encoder_label == None:
       return
+    self.encoder_rotations = numRotations
     self.encoder_label["text"] = f"Rotations: {numRotations}"
+  
+  inchesPerFeet = 12
+  wheel_radius_inches = 3
+  wheel_radius_feet = wheel_radius_inches / inchesPerFeet
+  def getDistanceTraveled(self):
+    distanceTraveledInFeet = self.encoder_rotations * self.wheel_radius_feet * math.pi
+    return distanceTraveledInFeet
 
+  encoder_zero = -1
   encoderQueue = Queue(maxsize=1)
   def loopToShowEncoder(self):
+    seen_encoder = False
     while True:
       time.sleep(0.01)
       if self.encoderQueue.empty():
         continue 
       numRotations = self.encoderQueue.get()
+      if not seen_encoder:
+        self.encoder_zero = numRotations 
+      seen_encoder = True 
+
+      # Re-zero about the first reading (in case encoder has read already)
+      numRotations -= self.encoder_zero 
       self.setEncoder(numRotations)
   
   joystick_max_power_label = None 
@@ -1005,13 +1022,15 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         start_latitude_text=self.start_latitude_text,
         start_longitude_text=self.start_longitude_text,
         end_latitude_text=self.end_latitude_text,
-        end_longitude_text=self.end_longitude_text:
+        end_longitude_text=self.end_longitude_text,
+        dist_in_feet=self.getDistanceTraveled():
         shapeFile_Frontend.create_shape_file_dialog(
           root=root, 
           start_latitude_text=start_latitude_text,
           start_longitude_text=start_longitude_text,
           end_latitude_text=end_latitude_text,
-          end_longitude_text=end_longitude_text          
+          end_longitude_text=end_longitude_text,
+          dist_in_feet=dist_in_feet,         
         ),
     )
     create_shapefile_button.grid(row=2, column=0, pady=2)

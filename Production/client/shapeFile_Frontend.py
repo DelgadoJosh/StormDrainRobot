@@ -29,7 +29,7 @@ def feetToLongitude(feet):
   # One degree of longitude = 288,200 feet
   return feet/288200.0
 
-def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_text=None, end_latitude_text=None, end_longitude_text=None, distInFeet=0):
+def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_text=None, end_latitude_text=None, end_longitude_text=None, dist_in_feet=0):
   def save_file():
     try:
       # Saves the current input as a new shapefile
@@ -49,8 +49,8 @@ def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_tex
       mag = math.sqrt(dx*dx + dy*dy)
       dx /= mag 
       dy /= mag 
-      distInLongitude = feetToLongitude(distInFeet)
-      distInLatitude = feetToLatitude(distInFeet)
+      distInLongitude = feetToLongitude(dist_in_feet)
+      distInLatitude = feetToLatitude(dist_in_feet)
       dx *= distInLongitude
       dy *= distInLatitude
       x = x1 + dx 
@@ -144,6 +144,14 @@ def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_tex
   ent_end_longitude.grid(row=4, column=1, sticky="ew")
 
 
+  # Creates the row for feet traveled
+  lbl_feet_traveled = tk.Label(top, text="Feet Traveled:")
+  feet_traveled_text = tk.StringVar()
+  feet_traveled_text.set(dist_in_feet)
+  ent_feet_traveled = tk.Entry(top, textvariable=feet_traveled_text)
+
+  lbl_feet_traveled.grid(row=5, column=0, padx=5, sticky="e")
+  ent_feet_traveled.grid(row=5, column=1, sticky="ew")
 
 
   # Creates the frame for date
@@ -152,8 +160,8 @@ def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_tex
                       foreground="white", borderwidth=2, firstweekday="sunday")
   
   # Places into the grid
-  lbl_date.grid(row=5, column=0, padx=5, sticky="e")
-  cal_date.grid(row=5, column=1, sticky="w")
+  lbl_date.grid(row=6, column=0, padx=5, sticky="e")
+  cal_date.grid(row=6, column=1, sticky="w")
 
 
   # Creates the final row of save as
@@ -163,7 +171,7 @@ def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_tex
   numButtons = 1
   btn_saveas.grid(row=0, column=numButtons-1, sticky="e", padx=5, pady=5)
   
-  frm_buttons.grid(row=6, column=1, sticky="ew")
+  frm_buttons.grid(row=7, column=1, sticky="ew")
 
 
 if __name__ == '__main__':
