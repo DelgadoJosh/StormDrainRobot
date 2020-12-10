@@ -651,18 +651,28 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     self.fps_label["text"] = f"FPS: {fps:3.2f}"
   
   encoder_label = None
+  encoder_rotations = 0
   def setEncoder(self, numRotations):
     if self.encoder_label == None:
       return
+    self.encoder_rotations = numRotations
     self.encoder_label["text"] = f"Rotations: {numRotations}"
 
+  encoder_zero = -1
   encoderQueue = Queue(maxsize=1)
   def loopToShowEncoder(self):
+    seen_encoder = False
     while True:
       time.sleep(0.01)
       if self.encoderQueue.empty():
         continue 
       numRotations = self.encoderQueue.get()
+      if not seen_encoder:
+        self.encoder_zero = numRotations 
+      seen_encoder = True 
+
+      # Re-zero about the first reading (in case encoder has read already)
+      numRotations -= self.encoder_zero 
       self.setEncoder(numRotations)
   
   joystick_max_power_label = None 
