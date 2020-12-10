@@ -17,8 +17,10 @@ def convertToInt(arr):
     num += arr[i] 
   return num
 
+readingsPerRotation = 960
 def readEncoder():
     data_arr = bus.read_i2c_block_data(addr, 0)
     value = convertToInt(data_arr)
+    value /= readingsPerRotation
     return value
 

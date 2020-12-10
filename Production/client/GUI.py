@@ -656,7 +656,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     if self.encoder_label == None:
       return
     self.encoder_rotations = numRotations
-    self.encoder_label["text"] = f"Rotations: {numRotations}"
+    self.encoder_label["text"] = f"Rotations: {numRotations:.2f}"
   
   inchesPerFeet = 12
   wheel_radius_inches = 3

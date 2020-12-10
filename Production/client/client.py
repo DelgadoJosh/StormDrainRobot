@@ -143,7 +143,7 @@ def loopToReceiveData():
 
       # Receive Encoder data
       encoder_data, data = retrieveData(data)
-      encoder = int.from_bytes(encoder_data, 'big')
+      encoder = int.from_bytes(encoder_data, 'big') / 1000.0
       if not encoderQueue.full():
         encoderQueue.put(encoder)
 
