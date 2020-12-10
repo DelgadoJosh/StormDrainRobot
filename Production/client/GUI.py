@@ -657,6 +657,13 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       return
     self.encoder_rotations = numRotations
     self.encoder_label["text"] = f"Rotations: {numRotations}"
+  
+  inchesPerFeet = 12
+  wheel_radius_inches = 3
+  wheel_radius_feet = wheel_radius_inches / inchesPerFeet
+  def getDistanceTraveled(self):
+    distanceTraveledInFeet = self.encoder_rotations * self.wheel_radius_feet * math.pi
+    return distanceTraveledInFeet
 
   encoder_zero = -1
   encoderQueue = Queue(maxsize=1)
@@ -1015,13 +1022,15 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
         start_latitude_text=self.start_latitude_text,
         start_longitude_text=self.start_longitude_text,
         end_latitude_text=self.end_latitude_text,
-        end_longitude_text=self.end_longitude_text:
+        end_longitude_text=self.end_longitude_text,
+        dist_in_feet=self.getDistanceTraveled():
         shapeFile_Frontend.create_shape_file_dialog(
           root=root, 
           start_latitude_text=start_latitude_text,
           start_longitude_text=start_longitude_text,
           end_latitude_text=end_latitude_text,
-          end_longitude_text=end_longitude_text          
+          end_longitude_text=end_longitude_text,
+          dist_in_feet=dist_in_feet,         
         ),
     )
     create_shapefile_button.grid(row=2, column=0, pady=2)
