@@ -279,7 +279,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
   isInCruiseControl = False
   SENSITIVITY = 0.001 * 10
   SENSITIVITY_HORIZONTAL_ANGLE = 0.001 * 750 * 1.5  # This is magic
-  SENSITIVITY_VERTICAL_ANGLE = 0.001 * 750 * 1.5
+  SENSITIVITY_VERTICAL_ANGLE = 0.001 * 750 * 1.5 * 0.5
   MAX_JOYSTICK = 32000
   horizontalAngle = 90
   verticalAngle = 45
