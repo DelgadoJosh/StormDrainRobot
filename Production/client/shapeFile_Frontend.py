@@ -23,11 +23,25 @@ def feetToLatitude(feet):
   # https://www.usgs.gov/faqs/how-much-distance-does-a-degree-minute-and-second-cover-your-maps?qt-news_science_products=0#qt-news_science_products
   # At 38 degrees North Latitude:
   # 1 degree of latitude = 364,000 feet
-  return feet/364000.0
+  # http://www.csgnetwork.com/degreelenllavcalc.html
+  # Since we're at 28.605 degrees north latitude
+  # 1 degree of latitude = 363612.32899
+  # return feet/364000.0
+  # return feet/363612.32899
+  # return feet/365228.16
+  return feet/363000
 
 def feetToLongitude(feet):
   # One degree of longitude = 288,200 feet
-  return feet/288200.0
+  # One degree of longitude = 320,888.48099
+  # https://gis.stackexchange.com/questions/142326/calculating-longitude-length-in-miles
+  # Says it's = math.cos(latitude_radians)*69.172 miles * 5280
+  # https://www.thoughtco.com/degree-of-latitude-and-longitude-distance-4070616
+  # Suggests 68.703 miles at equator
+  # return feet/288200.0
+  # return feet/320888.48099
+  # return feet/325000
+  return feet/350000
 
 def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_text=None, end_latitude_text=None, end_longitude_text=None, dist_in_feet=0):
   def save_file():
@@ -43,7 +57,13 @@ def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_tex
       x1 = float(start_longitude_text.get())
       y1 = float(start_latitude_text.get())
       x2 = float(end_longitude_text.get())
-      y2 = float(end_longitude_text.get())
+      y2 = float(end_latitude_text.get())
+      dist_in_feet = float(feet_traveled_text.get())
+      # try: 
+      #   dist_in_feet = float(dist_in_feet)
+      # except Exception as e:
+      #   print(f"[ShapeFile] Exception {e}")
+      #   dist_in_feet = 0
       dx = x2-x1 
       dy = y2-y1 
       mag = math.sqrt(dx*dx + dy*dy)
@@ -60,7 +80,11 @@ def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_tex
       date = datetime.datetime.strptime(cal_date.get(), "%m/%d/%y").date()
       dates = [date]
 
-
+      if debug:
+        print(f"x1 = {x1}, y1 = {y1}, x2 = {x2}, y2 = {y2}, dist_in_feet={dist_in_feet}")
+        print(f"dx = {dx}, dy = {dy}, mag = {mag}")
+        print(f"distInLongitude={distInLongitude}, distInLatitude={distInLatitude}")
+        print(f"final x = {x}, final y = {y}")
 
       # TODO: Add check to ensure data is good
       
@@ -79,16 +103,18 @@ def create_shape_file_dialog(root, start_latitude_text=None, start_longitude_tex
         print(f"Date: {dates}")
       
       shapeFile_Backend.create_shapefile(filepath, nameOfFile, xs, ys, dates)
-    except:
+    except Exception as e:
+      print(f"[ShapeFile] Exception: {e}")
       messagebox.showerror("Error", "Invalid input. \nMake sure all the longitudes and latitudes are numbers.")
       top.destroy()
       return
+    top.destroy() # Clean up the window once it's done
   
   top = tk.Toplevel(root)
   top.title("Creating a shape file")
 
   # Creates the frame for name of the file
-  lbl_name = tk.Label(top, text="Name:")
+  lbl_name = tk.Label(top, text="Name of point:")
   ent_name = tk.Entry(top) 
 
   # Customizes size of the columns

@@ -199,7 +199,8 @@ def loopToSendData():
 
             # Grab the rotation data
             numRotationsRaw = teensy.readEncoder()
-            data = numRotationsRaw.to_bytes(10, 'big')
+            numRotations_int = int(numRotationsRaw*1000)
+            data = numRotations_int.to_bytes(10, 'big')
             message_size = struct.pack("L", len(data))
             s.Client.sendall(message_size + data)
 

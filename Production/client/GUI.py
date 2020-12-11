@@ -279,10 +279,12 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
   isInCruiseControl = False
   SENSITIVITY = 0.001 * 10
   SENSITIVITY_HORIZONTAL_ANGLE = 0.001 * 750 * 1.5  # This is magic
-  SENSITIVITY_VERTICAL_ANGLE = 0.001 * 750 * 1.5
+  SENSITIVITY_VERTICAL_ANGLE = 0.001 * 750 * 1.5 * 0.5
   MAX_JOYSTICK = 32000
   horizontalAngle = 90
   verticalAngle = 45
+  changeInHorizontalAngle = 0
+  changeInVerticalAngle = 0
   def loopToQueryController(self):
     controller = Controller()
     inputQueryDelay = 1.0/100
@@ -291,6 +293,9 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     INCREMENT = 0.1
     LIGHT_INCREMENT = 0.05
     ATTACHMENT_INCREMENT = 0.05
+
+    loop_to_update_angle = threading.Thread(target=self.loopToUpdateAngle, daemon=True)
+    loop_to_update_angle.start()
 
     # This is the offset in a single direction, so the total is this doubled
     VERTICAL_ANGLE_OFFSET = math.radians(30)
@@ -412,19 +417,12 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
       # [SERVO ANGLES]
       # <RIGHT STICK>
       if not self.isInDeadZone(joystickRX, joystickRY):
-        changeInHorizontalAngle = 1.0*joystickRX/self.MAX_JOYSTICK * self.SENSITIVITY_HORIZONTAL_ANGLE
-        self.horizontalAngle += changeInHorizontalAngle
-        self.horizontalAngle = self.clamp(self.horizontalAngle, 0, 180) 
-        servoHorizontalAngle = int(self.horizontalAngle + 0.5)
+        self.changeInHorizontalAngle = 1.0*joystickRX/self.MAX_JOYSTICK * self.SENSITIVITY_HORIZONTAL_ANGLE
+        self.changeInVerticalAngle = 1.0*joystickRY/self.MAX_JOYSTICK * self.SENSITIVITY_VERTICAL_ANGLE
+      else:
+        self.changeInHorizontalAngle = 0
+        self.changeInVerticalAngle = 0
 
-        changeInVerticalAngle = 1.0*joystickRY/self.MAX_JOYSTICK * self.SENSITIVITY_VERTICAL_ANGLE
-        self.verticalAngle += changeInVerticalAngle
-        self.verticalAngle = self.clamp(self.verticalAngle, 0, 90) 
-        servoVerticalAngle = int(self.verticalAngle + 0.5)
-
-        self.setServosHorizontal(servoHorizontalAngle)
-        self.setServosVertical(servoVerticalAngle)
-      
       if maxSpeedIncreasePressed or maxSpeedDecreasePressed:
         if maxSpeedIncreasePressed:
           newMax = maxPower + INCREMENT
@@ -455,7 +453,20 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
       if centerAnglePressed:
         self.centerAngle()
-      
+  
+  def loopToUpdateAngle(self):
+    while True: 
+      time.sleep(0.03)
+      self.horizontalAngle += self.changeInHorizontalAngle
+      self.horizontalAngle = self.clamp(self.horizontalAngle, 0, 180) 
+      servoHorizontalAngle = int(self.horizontalAngle + 0.5)
+
+      self.verticalAngle += self.changeInVerticalAngle
+      self.verticalAngle = self.clamp(self.verticalAngle, 0, 90) 
+      servoVerticalAngle = int(self.verticalAngle + 0.5)
+
+      self.setServosHorizontal(servoHorizontalAngle)
+      self.setServosVertical(servoVerticalAngle)
 
   motors_left_entry_text = None
   def getLeftMotorSpeed(self):
@@ -530,6 +541,10 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
   def centerAngle(self):
     self.setServosHorizontal(90)
     self.horizontalAngle = 90
+    self.changeInHorizontalAngle = 0
+    self.setServosVertical(85)
+    self.verticalAngle = 85
+    self.changeInVerticalAngle = 0
 
   servos_vertical_slider = None
   def getServosVertical(self):
@@ -607,11 +622,11 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
 
   def submitData(self):
     servoHorizontal = self.getServosHorizontal()
-    # try:
-    #   servoHorizontal = 180 - float(servoHorizontal)
-    # except: 
-    #   # print("Bad horizontal")
-    #   servoHorizontal = 90
+    try:
+      servoHorizontal = 180 - float(servoHorizontal)
+    except: 
+      # print("Bad horizontal")
+      servoHorizontal = 90
     outputString = f"{self.getLights()} {self.getLeftMotorSpeed()} {self.getRightMotorSpeed()} {servoHorizontal} {self.getServosVertical()} {self.getAttachmentPower()}"
     if DEBUG:
       print(outputString)
@@ -656,7 +671,7 @@ https://github.com/DelgadoJosh/StormDrainRobot"""
     if self.encoder_label == None:
       return
     self.encoder_rotations = numRotations
-    self.encoder_label["text"] = f"Rotations: {numRotations}"
+    self.encoder_label["text"] = f"Rotations: {numRotations:.2f}"
   
   inchesPerFeet = 12
   wheel_radius_inches = 3
