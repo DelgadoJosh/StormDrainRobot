@@ -1,1 +1,0 @@
-Use SD_Robot_Model.SLDASM assembly

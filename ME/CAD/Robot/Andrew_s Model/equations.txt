@@ -1,9 +1,0 @@
-﻿"L"= 420mm
-"W"= 255mm
-"H"= 110mm
-"T"= 4.7625 * 2 / 3mm
-"Inside Fillet Radius"= 5.55625mm
-"Hole"=25mm
-"Offset"= 18mm
-"Compartment Width1"= 90mm
-"Compartment Width2"= 90mm
