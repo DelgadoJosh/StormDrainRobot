@@ -1,0 +1,26 @@
+First Time Installation:
+1. Download & Run "MobaXterm_installer_20.6.msi"
+2. Once it's running, in the top left, click the button that says "Session"
+3. In the popup "Session Settings", select "SSH" (it should be the far left option)
+4. Enter the Settings:
+       Remote Host: 10.0.0.2
+       Click the checkbox for "Specify Username"
+       Username: teamblack
+       Port: the default (22)
+5. Press ok
+6. Now you should be back on the main screen, and on the left you should see "10.0.0.2 (teamblack)" as an option, and a terminal on the right should open up saying "enter password"
+7. Optionally resize the left column where "10.0.0.2 (teamblack)" to be larger (this is the section that has the file directory)
+8. Now run steps 2+ in the "Normal Use" section
+
+
+Normal Use:
+1. Double click the "10.0.0.2 (teamblack)" on the left to open its terminal on the right
+2. Click the right hand side to focus on the terminal.
+3. Enter the password: "password"  (no caps)
+       Note that unlike most password boxes, this one won't display dots for every letter, this is normal for the terminal for security reasons. Just type the password, then press enter.
+4. Verify that on the left a directory system appears
+5. Navigate to "Desktop/Videos" to get a directory of all the video folders.
+6. Double click the directory of your pipe name
+7. Each video's title will be the date and time
+8. Right click and download a video to download it. This could take a few minutes depending on the size of the video
+       You could just double click a video to view it, but it has to download the *entire* video to view it, so at that point it's better to just download & delete afterwards.

@@ -1,0 +1,29 @@
+Quick Guide
+1. Connect laptop to the robot via ethernet
+2. Power on the robot by connecting the battery
+3. Verify that the green light on the jetson is powered on (the jetson is the computer next to the battery, and the green light is on the corner nearest the floor of the robot in the battery compartment, below the internal ethernet ports).
+       A: If the green light on the jetson is not powered on, disconnect, wait 5 seconds, then reconnect the power plug to the jetson itself. The power plug to the jetson is located near the top of the robot, next to the battery bracket. We've found that pulling on the wire of the pin is easier due to the tight space between the lid and the bracket, and that using two fingers as a sort of "chopsticks" can let you access the wire. Alternatively you could use tweezers.
+              i: This may be due to a safety feature. When plugging in the battery, the connection may be unstable as the contacts may touch and not touch rapidly. This leads to the jetson entering a sleep mode to prevent damage due to an unstable power supply. With our testing, this does not damage the jetson, it's just the jetson being safer than sorry.
+       B: If the green light is powered on, then continue to the next step
+4: Wait for the robot's LEDs to begin flashing on and off. This should take roughly 1-2 minutes as the jetson connects to the individual sensors. 
+5: Connect the controller to the laptop
+       A: Please note that the controller should be connected *before* the program is started
+6: Double click "client.exe" to begin the program
+7: On the program, verify that:
+       A: The jetson lights stop flashing
+       B: You can see a camera feed on the GUI (there may be a delay of a minute)
+
+Running the program:
+1: Press "Start Run"
+2: Enter the relevant data for the run
+       A: The only required data for a run is the pipe name. Typically, you do not need the other information unless you find an obstruction.
+       B: The entry/end longitude/latitude can be filled in later.
+3: Press "Start Run".
+       A: At this point, the robot will begin to record the camera feed.
+4: Once you want to drive the robot:
+       A: Press start on the controller (or click the checkbox on the screen) to enable the controller
+       B: Click the checkbox on the screen to "Send Instructions"
+              i: This was added to prevent accidentally driving the robot
+5: If you spot an obstruction, press the button on the right bar that says "Create Shapefile", then input the relevant information and select a directory
+6: Once you're done, press "X" on the top right to exit the program. This will lead to the server ending the video feed and saving the video to file.
+
